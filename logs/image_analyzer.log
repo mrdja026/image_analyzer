@@ -1,0 +1,435 @@
+2025-07-17 13:32:10 - ImageAnalyzer - INFO - Image Analyzer and Summarizer started
+2025-07-17 13:32:10 - ImageAnalyzer - INFO - Input image path: C:\Users\Mrdjan\Documents\ShareX\Screenshots\2025-07\firefox_LvQ4Z6P9IX.png
+2025-07-17 13:32:10 - ImageAnalyzer - INFO - Using progress style: spinner
+2025-07-17 13:32:10 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Documents\ShareX\Screenshots\2025-07\firefox_LvQ4Z6P9IX.png
+2025-07-17 13:32:10 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:32:10 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:32:57 - ImageAnalyzer - INFO - Analysis completed in 47.14 seconds
+2025-07-17 13:32:57 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1367 chars)
+2025-07-17 13:32:57 - ImageAnalyzer - INFO - Summarizing text (length: 1367 chars)
+2025-07-17 13:32:57 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:33:06 - ImageAnalyzer - INFO - Summarization completed in 8.70 seconds
+2025-07-17 13:33:06 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 598 chars)
+2025-07-17 13:33:06 - ImageAnalyzer - INFO - Starting combined analysis and summarization for: C:\Users\Mrdjan\Documents\ShareX\Screenshots\2025-07\firefox_LvQ4Z6P9IX.png
+2025-07-17 13:33:06 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Documents\ShareX\Screenshots\2025-07\firefox_LvQ4Z6P9IX.png
+2025-07-17 13:33:06 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:33:06 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:33:47 - ImageAnalyzer - INFO - Analysis completed in 41.07 seconds
+2025-07-17 13:33:47 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1230 chars)
+2025-07-17 13:33:47 - ImageAnalyzer - INFO - Proceeding to summarize the analysis result
+2025-07-17 13:33:47 - ImageAnalyzer - INFO - Summarizing text (length: 1228 chars)
+2025-07-17 13:33:47 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:33:55 - ImageAnalyzer - INFO - Summarization completed in 8.26 seconds
+2025-07-17 13:33:55 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 507 chars)
+2025-07-17 13:33:55 - ImageAnalyzer - INFO - Text summarization successful
+2025-07-17 13:33:55 - ImageAnalyzer - INFO - Process completed successfully
+2025-07-17 13:51:27 - ImageAnalyzer - INFO - Image Analyzer and Summarizer started
+2025-07-17 13:51:27 - ImageAnalyzer - INFO - Input image path: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:51:27 - ImageAnalyzer - INFO - Using progress style: spinner
+2025-07-17 13:51:27 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:51:27 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:51:27 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:52:27 - ImageAnalyzer - INFO - Analysis completed in 59.48 seconds
+2025-07-17 13:52:27 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1540 chars)
+2025-07-17 13:52:27 - ImageAnalyzer - INFO - Summarizing text (length: 1538 chars)
+2025-07-17 13:52:27 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:52:39 - ImageAnalyzer - INFO - Summarization completed in 12.23 seconds
+2025-07-17 13:52:39 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 601 chars)
+2025-07-17 13:52:39 - ImageAnalyzer - INFO - Starting combined analysis and summarization for: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:52:39 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:52:39 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:52:39 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:53:22 - ImageAnalyzer - INFO - Analysis completed in 43.16 seconds
+2025-07-17 13:53:22 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1352 chars)
+2025-07-17 13:53:22 - ImageAnalyzer - INFO - Proceeding to summarize the analysis result
+2025-07-17 13:53:22 - ImageAnalyzer - INFO - Summarizing text (length: 1352 chars)
+2025-07-17 13:53:22 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:53:31 - ImageAnalyzer - INFO - Summarization completed in 8.36 seconds
+2025-07-17 13:53:31 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 667 chars)
+2025-07-17 13:53:31 - ImageAnalyzer - INFO - Text summarization successful
+2025-07-17 13:53:31 - ImageAnalyzer - INFO - Process completed successfully
+2025-07-17 13:54:21 - ImageAnalyzer - INFO - Image Analyzer and Summarizer started
+2025-07-17 13:54:21 - ImageAnalyzer - INFO - Input image path: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:54:21 - ImageAnalyzer - INFO - Using progress style: spinner
+2025-07-17 13:54:21 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:54:21 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:54:21 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:54:39 - ImageAnalyzer - INFO - Analysis completed in 18.35 seconds
+2025-07-17 13:54:39 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 272 chars)
+2025-07-17 13:54:39 - ImageAnalyzer - INFO - Summarizing text (length: 272 chars)
+2025-07-17 13:54:39 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:54:48 - ImageAnalyzer - INFO - Summarization completed in 8.26 seconds
+2025-07-17 13:54:48 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 325 chars)
+2025-07-17 13:54:48 - ImageAnalyzer - INFO - Starting combined analysis and summarization for: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:54:48 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:54:48 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:54:48 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:55:08 - ImageAnalyzer - INFO - Analysis completed in 19.93 seconds
+2025-07-17 13:55:08 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 375 chars)
+2025-07-17 13:55:08 - ImageAnalyzer - INFO - Proceeding to summarize the analysis result
+2025-07-17 13:55:08 - ImageAnalyzer - INFO - Summarizing text (length: 375 chars)
+2025-07-17 13:55:08 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:55:15 - ImageAnalyzer - INFO - Summarization completed in 7.74 seconds
+2025-07-17 13:55:15 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 312 chars)
+2025-07-17 13:55:15 - ImageAnalyzer - INFO - Text summarization successful
+2025-07-17 13:55:15 - ImageAnalyzer - INFO - Process completed successfully
+2025-07-17 13:56:37 - ImageAnalyzer - INFO - Image Analyzer and Summarizer started
+2025-07-17 13:56:37 - ImageAnalyzer - INFO - Input image path: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:56:37 - ImageAnalyzer - INFO - Using progress style: spinner
+2025-07-17 13:56:37 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:56:37 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:56:37 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:57:32 - ImageAnalyzer - INFO - Analysis completed in 55.04 seconds
+2025-07-17 13:57:32 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1812 chars)
+2025-07-17 13:57:32 - ImageAnalyzer - INFO - Summarizing text (length: 1812 chars)
+2025-07-17 13:57:32 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:57:40 - ImageAnalyzer - INFO - Summarization completed in 8.71 seconds
+2025-07-17 13:57:40 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 785 chars)
+2025-07-17 13:57:40 - ImageAnalyzer - INFO - Starting combined analysis and summarization for: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:57:40 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 13:57:40 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 13:57:40 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 13:58:32 - ImageAnalyzer - INFO - Analysis completed in 51.97 seconds
+2025-07-17 13:58:32 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1792 chars)
+2025-07-17 13:58:32 - ImageAnalyzer - INFO - Proceeding to summarize the analysis result
+2025-07-17 13:58:32 - ImageAnalyzer - INFO - Summarizing text (length: 1792 chars)
+2025-07-17 13:58:32 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 13:58:41 - ImageAnalyzer - INFO - Summarization completed in 8.11 seconds
+2025-07-17 13:58:41 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 519 chars)
+2025-07-17 13:58:41 - ImageAnalyzer - INFO - Text summarization successful
+2025-07-17 13:58:41 - ImageAnalyzer - INFO - Process completed successfully
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Image Analyzer and Summarizer started
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Input image path: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Using progress style: bar
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Image dimensions 2560x7747 suggest chunking is needed
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Using image chunking for analysis
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Starting chunked analysis for image: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Chunking image: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Original image dimensions: 2560x7747
+2025-07-17 14:24:33 - ImageAnalyzer - INFO - Splitting image into 24 chunks
+2025-07-17 14:24:35 - ImageAnalyzer - INFO - Created 24 image chunks
+2025-07-17 14:24:36 - ImageAnalyzer - INFO - Saved 24 chunks for analysis
+2025-07-17 14:24:36 - ImageAnalyzer - INFO - Analyzing chunk 1/24
+2025-07-17 14:24:36 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_000.png
+2025-07-17 14:24:36 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:24:36 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:25:03 - ImageAnalyzer - INFO - Analysis completed in 26.98 seconds
+2025-07-17 14:25:03 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 558 chars)
+2025-07-17 14:25:03 - ImageAnalyzer - INFO - Analyzing chunk 2/24
+2025-07-17 14:25:03 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_001.png
+2025-07-17 14:25:03 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:25:03 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:25:34 - ImageAnalyzer - INFO - Analysis completed in 31.37 seconds
+2025-07-17 14:25:34 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1124 chars)
+2025-07-17 14:25:34 - ImageAnalyzer - INFO - Analyzing chunk 3/24
+2025-07-17 14:25:34 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_002.png
+2025-07-17 14:25:34 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:25:34 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:25:57 - ImageAnalyzer - INFO - Analysis completed in 22.76 seconds
+2025-07-17 14:25:57 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 806 chars)
+2025-07-17 14:25:57 - ImageAnalyzer - INFO - Analyzing chunk 4/24
+2025-07-17 14:25:57 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_003.png
+2025-07-17 14:25:57 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:25:57 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:26:05 - ImageAnalyzer - INFO - Analysis completed in 8.13 seconds
+2025-07-17 14:26:05 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 233 chars)
+2025-07-17 14:26:05 - ImageAnalyzer - INFO - Analyzing chunk 5/24
+2025-07-17 14:26:05 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_004.png
+2025-07-17 14:26:05 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:26:05 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:26:31 - ImageAnalyzer - INFO - Analysis completed in 26.33 seconds
+2025-07-17 14:26:31 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 867 chars)
+2025-07-17 14:26:31 - ImageAnalyzer - INFO - Analyzing chunk 6/24
+2025-07-17 14:26:31 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_005.png
+2025-07-17 14:26:31 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:26:31 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:27:02 - ImageAnalyzer - INFO - Analysis completed in 30.28 seconds
+2025-07-17 14:27:02 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 912 chars)
+2025-07-17 14:27:02 - ImageAnalyzer - INFO - Analyzing chunk 7/24
+2025-07-17 14:27:02 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_006.png
+2025-07-17 14:27:02 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:27:02 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:27:27 - ImageAnalyzer - INFO - Analysis completed in 25.39 seconds
+2025-07-17 14:27:27 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 968 chars)
+2025-07-17 14:27:27 - ImageAnalyzer - INFO - Analyzing chunk 8/24
+2025-07-17 14:27:27 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_007.png
+2025-07-17 14:27:27 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:27:27 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:27:48 - ImageAnalyzer - INFO - Analysis completed in 21.26 seconds
+2025-07-17 14:27:48 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 822 chars)
+2025-07-17 14:27:48 - ImageAnalyzer - INFO - Analyzing chunk 9/24
+2025-07-17 14:27:48 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_008.png
+2025-07-17 14:27:48 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:27:48 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:28:16 - ImageAnalyzer - INFO - Analysis completed in 27.82 seconds
+2025-07-17 14:28:16 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 968 chars)
+2025-07-17 14:28:16 - ImageAnalyzer - INFO - Analyzing chunk 10/24
+2025-07-17 14:28:16 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_009.png
+2025-07-17 14:28:16 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:28:16 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:29:02 - ImageAnalyzer - INFO - Analysis completed in 45.42 seconds
+2025-07-17 14:29:02 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1688 chars)
+2025-07-17 14:29:02 - ImageAnalyzer - INFO - Analyzing chunk 11/24
+2025-07-17 14:29:02 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_010.png
+2025-07-17 14:29:02 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:29:02 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:29:45 - ImageAnalyzer - INFO - Analysis completed in 43.55 seconds
+2025-07-17 14:29:45 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1403 chars)
+2025-07-17 14:29:45 - ImageAnalyzer - INFO - Analyzing chunk 12/24
+2025-07-17 14:29:45 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_011.png
+2025-07-17 14:29:45 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:29:45 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:29:53 - ImageAnalyzer - INFO - Analysis completed in 8.07 seconds
+2025-07-17 14:29:53 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 232 chars)
+2025-07-17 14:29:53 - ImageAnalyzer - INFO - Analyzing chunk 13/24
+2025-07-17 14:29:53 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_012.png
+2025-07-17 14:29:53 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:29:53 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:30:00 - ImageAnalyzer - INFO - Analysis completed in 6.39 seconds
+2025-07-17 14:30:00 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 174 chars)
+2025-07-17 14:30:00 - ImageAnalyzer - INFO - Analyzing chunk 14/24
+2025-07-17 14:30:00 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_013.png
+2025-07-17 14:30:00 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:30:00 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:30:29 - ImageAnalyzer - INFO - Analysis completed in 29.77 seconds
+2025-07-17 14:30:29 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1054 chars)
+2025-07-17 14:30:29 - ImageAnalyzer - INFO - Analyzing chunk 15/24
+2025-07-17 14:30:29 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_014.png
+2025-07-17 14:30:29 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:30:29 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:30:42 - ImageAnalyzer - INFO - Analysis completed in 12.61 seconds
+2025-07-17 14:30:42 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 437 chars)
+2025-07-17 14:30:42 - ImageAnalyzer - INFO - Analyzing chunk 16/24
+2025-07-17 14:30:42 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_015.png
+2025-07-17 14:30:42 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:30:42 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:30:53 - ImageAnalyzer - INFO - Analysis completed in 11.00 seconds
+2025-07-17 14:30:53 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 365 chars)
+2025-07-17 14:30:53 - ImageAnalyzer - INFO - Analyzing chunk 17/24
+2025-07-17 14:30:53 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_016.png
+2025-07-17 14:30:53 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:30:53 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:31:23 - ImageAnalyzer - INFO - Analysis completed in 30.09 seconds
+2025-07-17 14:31:23 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1072 chars)
+2025-07-17 14:31:23 - ImageAnalyzer - INFO - Analyzing chunk 18/24
+2025-07-17 14:31:23 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_017.png
+2025-07-17 14:31:23 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:31:23 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:31:52 - ImageAnalyzer - INFO - Analysis completed in 29.25 seconds
+2025-07-17 14:31:52 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1068 chars)
+2025-07-17 14:31:52 - ImageAnalyzer - INFO - Analyzing chunk 19/24
+2025-07-17 14:31:52 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_018.png
+2025-07-17 14:31:52 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:31:52 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:32:14 - ImageAnalyzer - INFO - Analysis completed in 21.79 seconds
+2025-07-17 14:32:14 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 839 chars)
+2025-07-17 14:32:14 - ImageAnalyzer - INFO - Analyzing chunk 20/24
+2025-07-17 14:32:14 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_019.png
+2025-07-17 14:32:14 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:32:14 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:32:46 - ImageAnalyzer - INFO - Analysis completed in 32.19 seconds
+2025-07-17 14:32:46 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1109 chars)
+2025-07-17 14:32:46 - ImageAnalyzer - INFO - Analyzing chunk 21/24
+2025-07-17 14:32:46 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_020.png
+2025-07-17 14:32:46 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:32:46 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:33:29 - ImageAnalyzer - INFO - Analysis completed in 43.00 seconds
+2025-07-17 14:33:29 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1420 chars)
+2025-07-17 14:33:29 - ImageAnalyzer - INFO - Analyzing chunk 22/24
+2025-07-17 14:33:29 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_021.png
+2025-07-17 14:33:29 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:33:29 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:34:25 - ImageAnalyzer - INFO - Analysis completed in 55.89 seconds
+2025-07-17 14:34:25 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 2057 chars)
+2025-07-17 14:34:25 - ImageAnalyzer - INFO - Analyzing chunk 23/24
+2025-07-17 14:34:25 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_022.png
+2025-07-17 14:34:25 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:34:25 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:35:05 - ImageAnalyzer - INFO - Analysis completed in 39.61 seconds
+2025-07-17 14:35:05 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1357 chars)
+2025-07-17 14:35:05 - ImageAnalyzer - INFO - Analyzing chunk 24/24
+2025-07-17 14:35:05 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_l_yg07ks\chunk_023.png
+2025-07-17 14:35:05 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 14:35:05 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 14:35:27 - ImageAnalyzer - INFO - Analysis completed in 21.82 seconds
+2025-07-17 14:35:27 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 690 chars)
+2025-07-17 14:35:27 - ImageAnalyzer - INFO - Combining 24 chunk analyses
+2025-07-17 14:35:27 - ImageAnalyzer - INFO - Generating final combined analysis
+2025-07-17 14:35:27 - ImageAnalyzer - INFO - Summarizing text (length: 26619 chars)
+2025-07-17 14:35:27 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 14:35:40 - ImageAnalyzer - INFO - Summarization completed in 13.18 seconds
+2025-07-17 14:35:40 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 1175 chars)
+2025-07-17 14:35:40 - ImageAnalyzer - INFO - Process completed successfully
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Image Analyzer and Summarizer started
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Input image path: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Using progress style: bar
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Image dimensions 2560x7747 suggest chunking is needed
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Using image chunking for analysis
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Starting chunked analysis for image: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Chunking image: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Original image dimensions: 2560x7747
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Splitting image into 24 chunks
+2025-07-17 15:11:16 - ImageAnalyzer - INFO - Process interrupted by user
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Image Analyzer and Summarizer started
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Input image path: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Using progress style: spinner
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Image dimensions 2560x7747 suggest chunking is needed
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Using image chunking for analysis
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Starting chunked analysis for image: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Chunking image: C:\Users\Mrdjan\Downloads/videobolt_blog.png
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Original image dimensions: 2560x7747
+2025-07-17 15:11:22 - ImageAnalyzer - INFO - Splitting image into 24 chunks
+2025-07-17 15:11:23 - ImageAnalyzer - INFO - Created 24 image chunks
+2025-07-17 15:11:24 - ImageAnalyzer - INFO - Saved 24 chunks for analysis
+2025-07-17 15:11:24 - ImageAnalyzer - INFO - Analyzing chunk 1/24
+2025-07-17 15:11:24 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_000.png
+2025-07-17 15:11:24 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:11:24 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:12:01 - ImageAnalyzer - INFO - Analysis completed in 37.02 seconds
+2025-07-17 15:12:01 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1009 chars)
+2025-07-17 15:12:01 - ImageAnalyzer - INFO - Analyzing chunk 2/24
+2025-07-17 15:12:01 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_001.png
+2025-07-17 15:12:01 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:12:01 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:12:30 - ImageAnalyzer - INFO - Analysis completed in 29.15 seconds
+2025-07-17 15:12:30 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1141 chars)
+2025-07-17 15:12:30 - ImageAnalyzer - INFO - Analyzing chunk 3/24
+2025-07-17 15:12:30 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_002.png
+2025-07-17 15:12:30 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:12:30 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:13:07 - ImageAnalyzer - INFO - Analysis completed in 36.40 seconds
+2025-07-17 15:13:07 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1385 chars)
+2025-07-17 15:13:07 - ImageAnalyzer - INFO - Analyzing chunk 4/24
+2025-07-17 15:13:07 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_003.png
+2025-07-17 15:13:07 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:13:07 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:13:13 - ImageAnalyzer - INFO - Analysis completed in 6.06 seconds
+2025-07-17 15:13:13 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 166 chars)
+2025-07-17 15:13:13 - ImageAnalyzer - INFO - Analyzing chunk 5/24
+2025-07-17 15:13:13 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_004.png
+2025-07-17 15:13:13 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:13:13 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:13:18 - ImageAnalyzer - INFO - Analysis completed in 5.20 seconds
+2025-07-17 15:13:18 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 113 chars)
+2025-07-17 15:13:18 - ImageAnalyzer - INFO - Analyzing chunk 6/24
+2025-07-17 15:13:18 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_005.png
+2025-07-17 15:13:18 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:13:18 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:13:28 - ImageAnalyzer - INFO - Analysis completed in 9.98 seconds
+2025-07-17 15:13:28 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 351 chars)
+2025-07-17 15:13:28 - ImageAnalyzer - INFO - Analyzing chunk 7/24
+2025-07-17 15:13:28 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_006.png
+2025-07-17 15:13:28 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:13:28 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:13:39 - ImageAnalyzer - INFO - Analysis completed in 10.48 seconds
+2025-07-17 15:13:39 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 361 chars)
+2025-07-17 15:13:39 - ImageAnalyzer - INFO - Analyzing chunk 8/24
+2025-07-17 15:13:39 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_007.png
+2025-07-17 15:13:39 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:13:39 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:13:46 - ImageAnalyzer - INFO - Analysis completed in 7.37 seconds
+2025-07-17 15:13:46 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 222 chars)
+2025-07-17 15:13:46 - ImageAnalyzer - INFO - Analyzing chunk 9/24
+2025-07-17 15:13:46 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_008.png
+2025-07-17 15:13:46 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:13:46 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:13:52 - ImageAnalyzer - INFO - Analysis completed in 6.49 seconds
+2025-07-17 15:13:52 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 213 chars)
+2025-07-17 15:13:52 - ImageAnalyzer - INFO - Analyzing chunk 10/24
+2025-07-17 15:13:52 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_009.png
+2025-07-17 15:13:52 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:13:52 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:14:10 - ImageAnalyzer - INFO - Analysis completed in 17.51 seconds
+2025-07-17 15:14:10 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 668 chars)
+2025-07-17 15:14:10 - ImageAnalyzer - INFO - Analyzing chunk 11/24
+2025-07-17 15:14:10 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_010.png
+2025-07-17 15:14:10 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:14:10 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:14:18 - ImageAnalyzer - INFO - Analysis completed in 8.47 seconds
+2025-07-17 15:14:18 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 281 chars)
+2025-07-17 15:14:18 - ImageAnalyzer - INFO - Analyzing chunk 12/24
+2025-07-17 15:14:18 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_011.png
+2025-07-17 15:14:18 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:14:18 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:14:41 - ImageAnalyzer - INFO - Analysis completed in 22.62 seconds
+2025-07-17 15:14:41 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 816 chars)
+2025-07-17 15:14:41 - ImageAnalyzer - INFO - Analyzing chunk 13/24
+2025-07-17 15:14:41 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_012.png
+2025-07-17 15:14:41 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:14:41 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:15:02 - ImageAnalyzer - INFO - Analysis completed in 21.41 seconds
+2025-07-17 15:15:02 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 691 chars)
+2025-07-17 15:15:02 - ImageAnalyzer - INFO - Analyzing chunk 14/24
+2025-07-17 15:15:02 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_013.png
+2025-07-17 15:15:03 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:15:03 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:15:10 - ImageAnalyzer - INFO - Analysis completed in 7.47 seconds
+2025-07-17 15:15:10 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 220 chars)
+2025-07-17 15:15:10 - ImageAnalyzer - INFO - Analyzing chunk 15/24
+2025-07-17 15:15:10 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_014.png
+2025-07-17 15:15:10 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:15:10 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:15:35 - ImageAnalyzer - INFO - Analysis completed in 24.72 seconds
+2025-07-17 15:15:35 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 927 chars)
+2025-07-17 15:15:35 - ImageAnalyzer - INFO - Analyzing chunk 16/24
+2025-07-17 15:15:35 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_015.png
+2025-07-17 15:15:35 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:15:35 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:16:08 - ImageAnalyzer - INFO - Analysis completed in 33.34 seconds
+2025-07-17 15:16:08 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1275 chars)
+2025-07-17 15:16:08 - ImageAnalyzer - INFO - Analyzing chunk 17/24
+2025-07-17 15:16:08 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_016.png
+2025-07-17 15:16:08 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:16:08 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:16:36 - ImageAnalyzer - INFO - Analysis completed in 27.54 seconds
+2025-07-17 15:16:36 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1002 chars)
+2025-07-17 15:16:36 - ImageAnalyzer - INFO - Analyzing chunk 18/24
+2025-07-17 15:16:36 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_017.png
+2025-07-17 15:16:36 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:16:36 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:17:05 - ImageAnalyzer - INFO - Analysis completed in 28.99 seconds
+2025-07-17 15:17:05 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1164 chars)
+2025-07-17 15:17:05 - ImageAnalyzer - INFO - Analyzing chunk 19/24
+2025-07-17 15:17:05 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_018.png
+2025-07-17 15:17:05 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:17:05 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:17:13 - ImageAnalyzer - INFO - Analysis completed in 7.95 seconds
+2025-07-17 15:17:13 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 249 chars)
+2025-07-17 15:17:13 - ImageAnalyzer - INFO - Analyzing chunk 20/24
+2025-07-17 15:17:13 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_019.png
+2025-07-17 15:17:13 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:17:13 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:17:39 - ImageAnalyzer - INFO - Analysis completed in 26.23 seconds
+2025-07-17 15:17:39 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 1016 chars)
+2025-07-17 15:17:39 - ImageAnalyzer - INFO - Analyzing chunk 21/24
+2025-07-17 15:17:39 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_020.png
+2025-07-17 15:17:39 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:17:39 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:17:51 - ImageAnalyzer - INFO - Analysis completed in 12.32 seconds
+2025-07-17 15:17:51 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 411 chars)
+2025-07-17 15:17:51 - ImageAnalyzer - INFO - Analyzing chunk 22/24
+2025-07-17 15:17:51 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_021.png
+2025-07-17 15:17:51 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:17:51 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:18:03 - ImageAnalyzer - INFO - Analysis completed in 11.48 seconds
+2025-07-17 15:18:03 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 420 chars)
+2025-07-17 15:18:03 - ImageAnalyzer - INFO - Analyzing chunk 23/24
+2025-07-17 15:18:03 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_022.png
+2025-07-17 15:18:03 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:18:03 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:18:32 - ImageAnalyzer - INFO - Analysis completed in 29.22 seconds
+2025-07-17 15:18:32 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 983 chars)
+2025-07-17 15:18:32 - ImageAnalyzer - INFO - Analyzing chunk 24/24
+2025-07-17 15:18:32 - ImageAnalyzer - INFO - Analyzing image with Ollama client: C:\Users\Mrdjan\AppData\Local\Temp\image_analysis_chunks_y59il9h1\chunk_023.png
+2025-07-17 15:18:32 - ImageAnalyzer - INFO - Using Ollama client with llava:34b model
+2025-07-17 15:18:32 - ImageAnalyzer - INFO - Starting streaming API call with progress tracking
+2025-07-17 15:18:38 - ImageAnalyzer - INFO - Analysis completed in 6.14 seconds
+2025-07-17 15:18:38 - ImageAnalyzer - INFO - Successfully analyzed image (content length: 201 chars)
+2025-07-17 15:18:38 - ImageAnalyzer - INFO - Combining 24 chunk analyses
+2025-07-17 15:18:38 - ImageAnalyzer - INFO - Generating final combined analysis
+2025-07-17 15:18:38 - ImageAnalyzer - INFO - Summarizing text (length: 19696 chars)
+2025-07-17 15:18:38 - ImageAnalyzer - INFO - Starting streaming API call for summarization with progress tracking
+2025-07-17 15:18:48 - ImageAnalyzer - INFO - Summarization completed in 10.11 seconds
+2025-07-17 15:18:48 - ImageAnalyzer - INFO - Successfully summarized text (summary length: 1088 chars)
+2025-07-17 15:18:48 - ImageAnalyzer - INFO - Successfully combined chunk analyses
+2025-07-17 15:18:48 - ImageAnalyzer - INFO - Process completed successfully

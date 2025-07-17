@@ -1,0 +1,7 @@
+# Requirements for image chunking functionality
+
+# Image manipulation
+pillow>=9.0.0  # For image processing, cropping, and saving
+
+# Core AI processing
+ollama>=0.1.26  # For interacting with local models
