@@ -152,15 +152,16 @@ Use smart chunking when:
 
 For regular photos or simple images, standard analysis is usually sufficient.
 
-TODO:
-[] refine chunking process
-[] cleanup repo
-[] test new models
-[] refactor basicly everything
-[] add REST Api on top of this
-[] Modefiles for llms
-[] check other models llama3b is weak
-[] make custom instructions "experts" SEO EXPERT | PO EXPERT | SOCIAL GUY EXPERT with prompts
-[] edge cases, when the context is full (?????)
-[] KV for context
-[] Quantitaze models a bit to see if there is any any noticable perf gains vs loss of qualit
+## TODO
+
+- [ ] Refine chunking process
+- [ ] Cleanup repo
+- [ ] Test new models
+- [ ] Refactor basically everything
+- [ ] Add REST API on top of this
+- [ ] Model files for LLMs
+- [ ] Check other models (llama3b is weak)
+- [ ] Make custom instructions "experts" (SEO EXPERT | PO EXPERT | SOCIAL GUY EXPERT) with prompts
+- [ ] Handle edge cases, when the context is full (?????)
+- [ ] KV for context
+- [ ] Quantitize models a bit to see if there is any noticeable perf gain vs loss of quality
