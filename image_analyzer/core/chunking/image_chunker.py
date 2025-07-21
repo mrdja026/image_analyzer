@@ -6,11 +6,12 @@ import tempfile
 from PIL import Image
 
 from ...utils.logging_utils import get_logger
+from ...utils.image_utils import is_image_blank
 
 logger = get_logger()
 
 def calculate_optimal_chunks(image_width: int, image_height: int, 
-                          target_aspect_ratio: float = 1.0, 
+                          target_aspect_ratio: Optional[float] = None, 
                           overlap_percent: float = 0.2, 
                           max_dim: int = 1200) -> List[Tuple[int, int, int, int]]:
     """
@@ -19,13 +20,24 @@ def calculate_optimal_chunks(image_width: int, image_height: int,
     Args:
         image_width: Width of the original image
         image_height: Height of the original image
-        target_aspect_ratio: Target width/height ratio (default: 1.0 for square)
+        target_aspect_ratio: Target width/height ratio (default: None for dynamic aspect ratio)
         overlap_percent: Percentage of overlap between chunks (default: 20%)
         max_dim: Maximum dimension for a chunk (default: 1200px)
         
     Returns:
         List of (left, top, right, bottom) coordinates for each chunk
     """
+    # If no aspect ratio is provided, calculate a dynamic one based on image width
+    if target_aspect_ratio is None:
+        # For wider images, use wider chunks (good for text/OCR)
+        # For narrower images, use more square chunks
+        if image_width > 2000:
+            target_aspect_ratio = 1.6  # Wide format, good for text
+        elif image_width > 1200:
+            target_aspect_ratio = 1.4  # Medium-wide format
+        else:
+            target_aspect_ratio = 1.2  # Closer to square for smaller images
+    
     # Adjust max_dim if needed to maintain target aspect ratio
     if target_aspect_ratio > 1:
         # Width > height
@@ -79,7 +91,7 @@ def calculate_optimal_chunks(image_width: int, image_height: int,
     return chunks
 
 def chunk_image(image_path: str, 
-              target_aspect_ratio: float = 1.0, 
+              target_aspect_ratio: Optional[float] = None, 
               overlap_percent: float = 0.2,
               max_dim: int = 1200,
               save_chunks: bool = False,
@@ -89,7 +101,8 @@ def chunk_image(image_path: str,
     
     Args:
         image_path: Path to the input image
-        target_aspect_ratio: Target width/height ratio (default: 1.0 for square)
+        target_aspect_ratio: Target width/height ratio (default: None for dynamic aspect ratio)
+                            When None, the aspect ratio will be determined based on the image width
         overlap_percent: Percentage of overlap between chunks (default: 20%)
         max_dim: Maximum dimension for a chunk (default: 1200px)
         save_chunks: Whether to save chunks to disk (default: False)
@@ -122,6 +135,11 @@ def chunk_image(image_path: str,
             for i, (left, top, right, bottom) in enumerate(chunk_coords):
                 # Crop the chunk
                 chunk = img.crop((left, top, right, bottom))
+                
+                # Check if the chunk is blank or nearly blank
+                if is_image_blank(chunk):
+                    logger.info(f"Skipping blank chunk at coordinates ({left}, {top}, {right}, {bottom})")
+                    continue
                 
                 # Save the chunk if requested
                 if save_chunks:

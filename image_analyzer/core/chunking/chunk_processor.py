@@ -7,9 +7,10 @@ import tempfile
 from PIL import Image
 
 from ..image_analyzer import analyze_image_with_ollama
-from ..text_summarizer import summarize_text
+from ..text_summarizer import summarize_text, assemble_text_chunks
 from .image_chunker import chunk_image, save_image_chunks
 from ...config.constants import DEFAULT_PROGRESS_STYLE, CHUNK_ANALYSIS_PROMPT, CHUNK_COMBINE_PROMPT
+from ...utils.image_utils import is_image_blank
 from ...utils.logging_utils import get_logger
 
 logger = get_logger()
@@ -17,7 +18,7 @@ logger = get_logger()
 def analyze_image_in_chunks(image_path: str, 
                            prompt: Optional[str] = None,
                            progress_style: str = DEFAULT_PROGRESS_STYLE,
-                           target_aspect_ratio: float = 1.0, 
+                           target_aspect_ratio: Optional[float] = None, 
                            overlap_percent: float = 0.2,
                            max_dim: int = 1200,
                            save_chunks: bool = False,
@@ -30,7 +31,7 @@ def analyze_image_in_chunks(image_path: str,
         image_path: Path to the image file
         prompt: Custom prompt for image analysis (optional)
         progress_style: Style of progress display to use
-        target_aspect_ratio: Target width/height ratio for chunks
+        target_aspect_ratio: Target width/height ratio for chunks (None for dynamic ratio)
         overlap_percent: Percentage of overlap between chunks
         max_dim: Maximum dimension for a chunk
         save_chunks: Whether to save chunks to disk
@@ -81,9 +82,35 @@ def analyze_image_in_chunks(image_path: str,
         # Analyze each chunk
         chunk_analyses = []
         chunk_prompts = []
+        valid_chunk_paths = []
+        valid_chunks_idx = []
         
+        # First, check if each chunk is valid (not blank)
         for i, chunk_path in enumerate(chunk_paths):
-            logger.info(f"Analyzing chunk {i+1}/{len(chunk_paths)}")
+            logger.info(f"Validating chunk {i+1}/{len(chunk_paths)}")
+            
+            # Check if the chunk is blank
+            try:
+                chunk_img = Image.open(chunk_path)
+                if is_image_blank(chunk_img):
+                    logger.info(f"Skipping blank chunk {i+1}")
+                    continue
+                valid_chunk_paths.append(chunk_path)
+                valid_chunks_idx.append(i)
+            except Exception as e:
+                logger.error(f"Error validating chunk {i+1}: {e}")
+                continue
+        
+        logger.info(f"Found {len(valid_chunk_paths)}/{len(chunk_paths)} valid chunks for analysis")
+        
+        if not valid_chunk_paths:
+            logger.error("No valid chunks found for analysis")
+            return None, []
+        
+        # Now analyze only the valid chunks
+        for idx, i in enumerate(valid_chunks_idx):
+            chunk_path = valid_chunk_paths[idx]
+            logger.info(f"Analyzing valid chunk {idx+1}/{len(valid_chunk_paths)} (original idx: {i+1})")
             
             # Get the coordinates for context
             _, (left, top, right, bottom) = chunks[i]
@@ -105,40 +132,52 @@ def analyze_image_in_chunks(image_path: str,
             if analysis:
                 chunk_analyses.append(analysis)
             else:
-                logger.warning(f"Failed to analyze chunk {i+1}")
+                logger.warning(f"Failed to analyze valid chunk {idx+1} (original idx: {i+1})")
         
-        if not chunk_analyses:
-            logger.error("All chunk analyses failed")
+        # Filter out any chunks that were skipped (had empty analysis)
+        final_chunk_analyses = [analysis for analysis in chunk_analyses if analysis]
+        
+        if not final_chunk_analyses:
+            logger.error("All chunk analyses failed or were blank")
             return None, []
             
         # If we only have one successful analysis, return it
-        if len(chunk_analyses) == 1:
-            return chunk_analyses[0], chunk_analyses
+        if len(final_chunk_analyses) == 1:
+            return final_chunk_analyses[0], final_chunk_analyses
             
         # Combine the analyses
-        logger.info(f"Combining {len(chunk_analyses)} chunk analyses")
+        logger.info(f"Combining {len(final_chunk_analyses)} non-blank chunk analyses")
         
         # Create a combined text with context about each chunk
-        combined_text = f"Analysis of {len(chunk_analyses)} chunks from image: {os.path.basename(image_path)}\n\n"
+        combined_text = f"Analysis of {len(final_chunk_analyses)} chunks from image: {os.path.basename(image_path)}\n\n"
         
         for i, analysis in enumerate(chunk_analyses):
+            if not analysis:  # Skip blank chunks in the final output
+                continue
             _, (left, top, right, bottom) = chunks[i]
             combined_text += f"--- CHUNK {i+1} (Coordinates: left={left}, top={top}, right={right}, bottom={bottom}) ---\n"
             combined_text += f"Prompt: {chunk_prompts[i][:100]}...\n"
             combined_text += analysis
             combined_text += "\n\n"
-            
-        # Summarize the combined analyses
-        combine_prompt = CHUNK_COMBINE_PROMPT.format(num_chunks=len(chunk_analyses))
         
-        logger.info("Generating final combined analysis")
-        combined_analysis = summarize_text(combined_text, progress_style)
+        # STEP 1: Assemble the raw OCR chunks into a coherent document
+        logger.info("STEP 1: Assembling raw OCR chunks into a coherent document")
+        assembled_document = assemble_text_chunks(combined_text, progress_style)
+        
+        if not assembled_document:
+            logger.warning("Failed to assemble text chunks, returning concatenated raw results")
+            return combined_text, final_chunk_analyses
+            
+        # STEP 2: Now summarize the assembled document using the marketing analysis prompt
+        logger.info("STEP 2: Generating final analysis from assembled document")
+        combined_analysis = summarize_text(assembled_document, progress_style)
         
         if not combined_analysis:
-            logger.warning("Failed to combine analyses, returning concatenated raw results")
-            return combined_text, chunk_analyses
-            
-        return combined_analysis, chunk_analyses
+            logger.warning("Failed to summarize assembled document, returning assembled document")
+            return assembled_document, final_chunk_analyses
+        
+        logger.info("Successfully generated combined analysis from assembled document")    
+        return combined_analysis, final_chunk_analyses
         
     finally:
         # Clean up temporary files

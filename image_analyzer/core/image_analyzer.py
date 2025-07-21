@@ -150,17 +150,26 @@ def analyze_image_with_ollama(image_path: str, prompt: Optional[str] = None, pro
                 logger.info(f"Analysis completed in {duration:.2f} seconds")
                 
                 # Check if we got a valid response
-                if full_response:
+                if full_response.strip():
                     logger.info(f"Successfully analyzed image (content length: {len(full_response)} chars)")
                     logger.debug(f"Analysis preview: {full_response[:100]}...")
                     return full_response
                 else:
-                    logger.error("Empty response from Ollama")
-                    last_exception = ValueError("Empty response")
-                    continue
+                    # Treat a blank response as a valid (but empty) analysis for a non-blank chunk
+                    logger.info("Received a blank response for a non-blank chunk, treating as empty analysis.")
+                    return ""
                 
             except Exception as e:
-                logger.error(f"Attempt {attempts} failed: {str(e)}")
+                error_msg = str(e)
+                logger.error(f"Attempt {attempts} failed: {error_msg}")
+                
+                # Check for GGML_ASSERT errors which often happen with blank or problematic image chunks
+                if "GGML_ASSERT" in error_msg:
+                    logger.warning("GGML_ASSERT error detected - likely caused by a problematic image chunk")
+                    if attempts >= 1:  # If this is at least the second attempt with a GGML error
+                        logger.warning("Multiple GGML errors - returning empty response to avoid further processing")
+                        return ""  # Return empty string to indicate empty but valid response
+                
                 last_exception = e
         
         if last_exception:

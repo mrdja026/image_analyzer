@@ -8,7 +8,9 @@ from ..config.constants import (
     DEFAULT_PROGRESS_STYLE,
     DEFAULT_CHUNK_MAX_DIM,
     DEFAULT_CHUNK_ASPECT_RATIO,
-    DEFAULT_CHUNK_OVERLAP
+    DEFAULT_CHUNK_OVERLAP,
+    ROLES,
+    DEFAULT_ROLE
 )
 
 def parse_arguments():
@@ -31,6 +33,8 @@ def parse_arguments():
     parser.add_argument("--progress", choices=PROGRESS_STYLES, default=DEFAULT_PROGRESS_STYLE,
                       help=f"Progress display style (default: {DEFAULT_PROGRESS_STYLE})")
     parser.add_argument("--no-progress", action="store_true", help="Disable progress display")
+    parser.add_argument("--role", "-r", choices=ROLES, default=DEFAULT_ROLE,
+                      help=f"Role to use for summarization (default: {DEFAULT_ROLE})")
     
     # Image chunking options
     chunking_group = parser.add_argument_group("Image Chunking Options")
