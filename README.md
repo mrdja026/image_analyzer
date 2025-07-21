@@ -1,6 +1,6 @@
 # Image Analyzer and Summarizer
 
-A powerful tool for analyzing images with AI and summarizing the results. The application uses Ollama's LLaVA for image analysis and Llama for text summarization.
+A powerful tool for analyzing images with AI and summarizing the results. The application uses Ollama's yasserrmd/Nanonets-OCR for image analysis and qwen:32b for text summarization.
 
 ## Features
 
@@ -17,7 +17,7 @@ A powerful tool for analyzing images with AI and summarizing the results. The ap
 - Python 3.8 or higher
 - [Ollama](https://ollama.ai/) installed and running locally
 - yasserrmd/Nanonets-OCR-s:latest ocr model better then llava, different use case this is purley for OCR (`yasserrmd/Nanonets-OCR-s:latest` recommended) pulled in Ollama
-- Llama model (`llama4` new) pulled in Ollama
+- Alibaba Cloud (`qwen:32b` new) pulled in Ollama
 
 ## Installation
 
@@ -216,17 +216,17 @@ python -m image_analyzer path/to/image.jpg --role po
 
 ## TODO
 
-- [] Rewrite in node.
+- [ ] Rewrite in node.!!!!! i dont know python 
 - [x] Refine chunking process
-- [x] Cleanup repo
+- [x] Cleanup repo - obsolete
 - [x] Test new models
-- [x] Refactor basically everything
+- [x] Refactor basically everything - obsolete
 - [x] Add REST API on top of this
 - [] Model files for LLMs
 - [x] Check other models (llama3b is weak)
   - yasserrmd/Nanonets-OCR-s:latest is bettter for Pure OCR
 - [x] Make custom instructions "experts" (MARKETING EXPERT | PO EXPERT) with prompts
-- [ ] Add more expert roles (SEO EXPERT | SOCIAL MEDIA EXPERT)
+- [ ] Add more expert roles (SEO EXPERT | SOCIAL MEDIA EXPERT) 
 - [ ] Handle edge cases, when the context is full (?????)
 - [ ] KV for context
 - [ ] Quantitize models a bit to see if there is any noticeable perf gain vs loss of quality
