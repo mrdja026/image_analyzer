@@ -11,7 +11,8 @@ from ..utils.logging_utils import get_logger
 logger = get_logger()
 
 def analyze_and_summarize_image(image_path: str, custom_prompt: Optional[str] = None, 
-                              progress_style: str = DEFAULT_PROGRESS_STYLE) -> Tuple[Optional[str], Optional[str]]:
+                              progress_style: str = DEFAULT_PROGRESS_STYLE,
+                              role: Optional[str] = None) -> Tuple[Optional[str], Optional[str]]:
     """
     Analyzes an image and then summarizes the extracted text.
     
@@ -19,6 +20,7 @@ def analyze_and_summarize_image(image_path: str, custom_prompt: Optional[str] = 
         image_path: Path to the image file
         custom_prompt: Custom prompt for image analysis (optional)
         progress_style: Style of progress display to use
+        role: Role to use for summarization ('po' or 'marketing')
         
     Returns:
         Tuple[Optional[str], Optional[str]]: (analysis, summary) or (None, None) if failed
@@ -36,8 +38,8 @@ def analyze_and_summarize_image(image_path: str, custom_prompt: Optional[str] = 
     print(analysis)
     
     # Then summarize the analysis
-    logger.info("Proceeding to summarize the analysis result")
-    summary = summarize_text(analysis, progress_style)
+    logger.info(f"Proceeding to summarize the analysis result (role: {role or 'default'})")
+    summary = summarize_text(analysis, progress_style, role)
     
     if summary:
         logger.info("Text summarization successful")

@@ -7,7 +7,7 @@ import tempfile
 from PIL import Image
 
 from ..image_analyzer import analyze_image_with_ollama
-from ..text_summarizer import summarize_text
+from ..text_summarizer import summarize_text, assemble_text_chunks
 from .image_chunker import chunk_image, save_image_chunks
 from ...config.constants import DEFAULT_PROGRESS_STYLE, CHUNK_ANALYSIS_PROMPT, CHUNK_COMBINE_PROMPT
 from ...utils.image_utils import is_image_blank
@@ -159,18 +159,24 @@ def analyze_image_in_chunks(image_path: str,
             combined_text += f"Prompt: {chunk_prompts[i][:100]}...\n"
             combined_text += analysis
             combined_text += "\n\n"
-            
-        # Summarize the combined analyses
-        combine_prompt = CHUNK_COMBINE_PROMPT.format(num_chunks=len(final_chunk_analyses))
         
-        logger.info("Generating final combined analysis")
-        combined_analysis = summarize_text(combined_text, progress_style)
+        # STEP 1: Assemble the raw OCR chunks into a coherent document
+        logger.info("STEP 1: Assembling raw OCR chunks into a coherent document")
+        assembled_document = assemble_text_chunks(combined_text, progress_style)
+        
+        if not assembled_document:
+            logger.warning("Failed to assemble text chunks, returning concatenated raw results")
+            return combined_text, final_chunk_analyses
+            
+        # STEP 2: Now summarize the assembled document using the marketing analysis prompt
+        logger.info("STEP 2: Generating final analysis from assembled document")
+        combined_analysis = summarize_text(assembled_document, progress_style)
         
         if not combined_analysis:
-            logger.warning("Failed to combine analyses, returning concatenated raw results")
-            return combined_text, final_chunk_analyses
+            logger.warning("Failed to summarize assembled document, returning assembled document")
+            return assembled_document, final_chunk_analyses
         
-        logger.info("Successfully generated combined analysis from chunks")    
+        logger.info("Successfully generated combined analysis from assembled document")    
         return combined_analysis, final_chunk_analyses
         
     finally:

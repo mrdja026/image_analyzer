@@ -7,6 +7,7 @@ A powerful tool for analyzing images with AI and summarizing the results. The ap
 - **Image Analysis**: Analyze images using LLaVA AI model to extract detailed descriptions
 - **Text Extraction**: Automatically extract and transcribe text from images
 - **Summarization**: Generate concise summaries of analysis results
+- **Role-Based Analysis**: Choose between different expert roles (Marketing Manager or Product Owner) for specialized summaries
 - **Smart Chunking**: Break down large images into smaller pieces for better analysis
 - **Progress Tracking**: Real-time progress indicators with multiple display styles
 - **Save Results**: Save analysis and summaries to files for later reference
@@ -52,6 +53,8 @@ Options:
   --progress {simple,bar,spinner,none}
                         Progress display style (default: bar)
   --no-progress         Disable progress display
+  --role, -r {marketing,po}
+                        Role to use for summarization (default: marketing)
 
 Image Chunking Options:
   --use-chunking        Enable smart image chunking for better analysis of large images
@@ -100,6 +103,18 @@ Save and inspect the image chunks:
 
 ```bash
 python -m image_analyzer path/to/image.jpg --use-chunking --save-chunks --output-dir "chunks"
+```
+
+Use the Marketing Manager role for summarization (analyzes blog content for improvement opportunities):
+
+```bash
+python -m image_analyzer path/to/blog_screenshot.jpg --role marketing
+```
+
+Use the Product Owner role for summarization (focuses on product requirements and market fit):
+
+```bash
+python -m image_analyzer path/to/product_doc.jpg --role po
 ```
 
 ## Progress Display Styles
@@ -152,6 +167,53 @@ Use smart chunking when:
 
 For regular photos or simple images, standard analysis is usually sufficient.
 
+## Role-Based Summarization
+
+The image analyzer provides specialized summarization based on different professional roles, allowing you to get tailored insights from the extracted text:
+
+### Available Roles
+
+- **Marketing Manager**: Analyzes blog text content to identify gaps and suggest improvements. This role provides:
+
+  - Product identity assessment
+  - Core value proposition analysis
+  - Target audience identification
+  - Key features evaluation
+  - Content improvement recommendations
+  - Final competitive assessment
+
+- **Product Owner**: Analyzes text content focusing on product requirements and market fit. This role provides:
+  - Product overview
+  - User problem identification
+  - Target user personas
+  - Core functionality assessment
+  - Development priorities
+  - Market fit evaluation
+  - Technical considerations
+
+### When to Use Different Roles
+
+- Use the **Marketing Manager** role when:
+
+  - Analyzing marketing content like blog posts
+  - Evaluating competitors' marketing materials
+  - Looking for content improvement opportunities
+  - Assessing product positioning and messaging
+
+- Use the **Product Owner** role when:
+  - Reviewing product documentation
+  - Analyzing requirements documents
+  - Prioritizing development efforts
+  - Assessing product-market fit
+
+To specify a role, use the `--role` or `-r` option followed by either `marketing` or `po`:
+
+```bash
+python -m image_analyzer path/to/image.jpg --role marketing
+# or
+python -m image_analyzer path/to/image.jpg --role po
+```
+
 ## TODO
 
 - [] Rewrite in node.
@@ -163,7 +225,8 @@ For regular photos or simple images, standard analysis is usually sufficient.
 - [] Model files for LLMs
 - [x] Check other models (llama3b is weak)
   - yasserrmd/Nanonets-OCR-s:latest is bettter for Pure OCR
-- [ ] Make custom instructions "experts" (SEO EXPERT | PO EXPERT | SOCIAL GUY EXPERT) with prompts
+- [x] Make custom instructions "experts" (MARKETING EXPERT | PO EXPERT) with prompts
+- [ ] Add more expert roles (SEO EXPERT | SOCIAL MEDIA EXPERT)
 - [ ] Handle edge cases, when the context is full (?????)
 - [ ] KV for context
 - [ ] Quantitize models a bit to see if there is any noticeable perf gain vs loss of quality

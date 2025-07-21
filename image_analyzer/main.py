@@ -142,7 +142,7 @@ def main():
             # Summarize the analysis
             # Skip if we already got a summary from the chunking process
             if not chunk_analyses:
-                summary = summarize_text(analysis, progress_style)
+                summary = summarize_text(analysis, progress_style, args.role)
             else:
                 # For chunking mode, the combined analysis is already processed and can serve as a summary
                 summary = analysis  # The combined analysis is already summarized
@@ -157,7 +157,7 @@ def main():
             if not (needs_chunking and args.use_chunking):
                 # For non-chunking mode, we need to actually run the analysis and summarization
                 # since it hasn't been done yet
-                analysis, summary = analyze_and_summarize_image(image_path, args.prompt, progress_style)
+                analysis, summary = analyze_and_summarize_image(image_path, args.prompt, progress_style, args.role)
                 # analyze_and_summarize_image already prints both analysis and summary
         
         # Save results if requested
