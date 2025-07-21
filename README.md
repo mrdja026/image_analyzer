@@ -15,8 +15,8 @@ A powerful tool for analyzing images with AI and summarizing the results. The ap
 
 - Python 3.8 or higher
 - [Ollama](https://ollama.ai/) installed and running locally
-- LLaVA model (`llava:34b` recommended) pulled in Ollama
-- Llama model (`llama3:70b` new) pulled in Ollama
+- yasserrmd/Nanonets-OCR-s:latest ocr model better then llava, different use case this is purley for OCR (`yasserrmd/Nanonets-OCR-s:latest` recommended) pulled in Ollama
+- Llama model (`llama4` new) pulled in Ollama
 
 ## Installation
 
@@ -154,13 +154,15 @@ For regular photos or simple images, standard analysis is usually sufficient.
 
 ## TODO
 
-- [ ] Refine chunking process
-- [ ] Cleanup repo
-- [ ] Test new models
-- [ ] Refactor basically everything
-- [ ] Add REST API on top of this
-- [ ] Model files for LLMs
-- [ ] Check other models (llama3b is weak)
+- [] Rewrite in node.
+- [x] Refine chunking process
+- [x] Cleanup repo
+- [x] Test new models
+- [x] Refactor basically everything
+- [x] Add REST API on top of this
+- [] Model files for LLMs
+- [x] Check other models (llama3b is weak)
+  - yasserrmd/Nanonets-OCR-s:latest is bettter for Pure OCR
 - [ ] Make custom instructions "experts" (SEO EXPERT | PO EXPERT | SOCIAL GUY EXPERT) with prompts
 - [ ] Handle edge cases, when the context is full (?????)
 - [ ] KV for context

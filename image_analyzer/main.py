@@ -18,8 +18,6 @@ from .utils import save_results, is_interactive_terminal
 from .utils.logging_utils import get_logger
 from .config.constants import (
     DEFAULT_CHUNK_MAX_DIM,
-    DEFAULT_CHUNK_ASPECT_RATIO,
-    DEFAULT_CHUNK_OVERLAP,
     VISION_MODEL as DEFAULT_VISION_MODEL,
     TEXT_MODEL as DEFAULT_TEXT_MODEL
 )
@@ -88,6 +86,7 @@ def main():
         analysis = None
         summary = None
         chunk_analyses = []
+        summary_already_printed = False
         
         if args.mode in ["analyze", "all"]:
             if needs_chunking and args.use_chunking:
@@ -104,12 +103,18 @@ def main():
                     output_dir=args.output_dir
                 )
                 
-                # In chunking mode, the analysis result is actually a summary of all chunks
+                # In chunking mode, the analysis result is already a summary of all chunks
                 if analysis:
                     logger.info("Successfully combined chunk analyses")
-                    # Set summary to the same value as analysis for now
-                    # It will be handled properly in the summarize section
+                    # Store the result as both analysis and summary to avoid reprocessing
                     summary = analysis
+                    
+                    # Print the analysis result if in "all" mode
+                    if args.mode == "all":
+                        print("\n--- Combined Analysis Result ---\n")
+                        print(analysis)
+                        # Flag that we've already printed it once
+                        summary_already_printed = True
                 else:
                     logger.error("Failed to combine chunk analyses")
             else:
@@ -142,9 +147,8 @@ def main():
                 # For chunking mode, the combined analysis is already processed and can serve as a summary
                 summary = analysis  # The combined analysis is already summarized
             
-            # Always print the summary in summarize mode
-            if args.mode == "summarize" and summary:
-                # Print only if not in "all" mode (to avoid duplicate output)
+            # Print summary for summarize mode, or for all mode if not already printed
+            if (args.mode == "summarize" or (args.mode == "all" and not summary_already_printed)) and summary:
                 print("\n--- Summary ---\n")
                 print(summary)
         
@@ -154,23 +158,7 @@ def main():
                 # For non-chunking mode, we need to actually run the analysis and summarization
                 # since it hasn't been done yet
                 analysis, summary = analyze_and_summarize_image(image_path, args.prompt, progress_style)
-            else:
-                # For chunking mode, we need to print results explicitly since 
-                # they've already been processed above
-                if analysis:
-                    print("\n--- Combined Analysis Result ---\n")
-                    print(analysis)
-                else:
-                    print("\nAnalysis failed. Check logs for details.\n")
-                
-                # Make sure we print the summary - this was missing in some cases
-                if summary and summary != analysis:
-                    print("\n--- Summary ---\n")
-                    print(summary)
-                elif analysis:  # If we have analysis but no summary
-                    # We might not have a distinct summary, just show the analysis again
-                    print("\n--- Summary ---\n")
-                    print(analysis)
+                # analyze_and_summarize_image already prints both analysis and summary
         
         # Save results if requested
         if args.save and (analysis or summary):
