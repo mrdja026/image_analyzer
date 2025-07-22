@@ -214,19 +214,3 @@ python -m image_analyzer path/to/image.jpg --role marketing
 python -m image_analyzer path/to/image.jpg --role po
 ```
 
-## TODO
-
-- [ ] Rewrite in node.!!!!! i dont know python 
-- [x] Refine chunking process
-- [x] Cleanup repo - obsolete
-- [x] Test new models
-- [x] Refactor basically everything - obsolete
-- [x] Add REST API on top of this
-- [] Model files for LLMs
-- [x] Check other models (llama3b is weak)
-  - yasserrmd/Nanonets-OCR-s:latest is bettter for Pure OCR
-- [x] Make custom instructions "experts" (MARKETING EXPERT | PO EXPERT) with prompts
-- [ ] Add more expert roles (SEO EXPERT | SOCIAL MEDIA EXPERT) 
-- [ ] Handle edge cases, when the context is full (?????)
-- [ ] KV for context
-- [ ] Quantitize models a bit to see if there is any noticeable perf gain vs loss of quality

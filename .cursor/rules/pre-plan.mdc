@@ -1,0 +1,32 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+This is for the plannning mode and creating the folder structure and discussing the architecture.
+
+IF NOT IN PLANNING MODE DO NOT USE THIS
+
+Aim of this project is to port the /image_analyzer to NodeJS with Typescript while keeping its core functionalities
+
+The comments in the /image_analyzer are very helpfull use them to the best of your abilities
+
+Output of this plan will be the PRD document that will be used to create a NEW (VERY IMPORTANT) Project
+
+use README.md to get the features of this project 
+
+Suggested changes for TS Project for libraries 
+
+| Python Functionality | Python Library     | Node.js/TypeScript Equivalent        | Why it's a Good Fit                                                                                                                                 |
+|----------------------|--------------------|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| Making API Calls     | `requests`         | `axios`                              | The industry standard for promise-based HTTP requests. Perfect for async/await, handles JSON automatically, and has excellent error handling.       |
+| Image Processing     | `Pillow (PIL)`     | `sharp`                              | Incredibly fast C++ based image processing library for Node.js. It's the best choice for resizing, cropping, and getting image metadata.            |
+| Command-Line Args    | `argparse`         | `yargs` or `commander`               | Both are excellent for creating powerful, user-friendly command-line interfaces (CLIs) with help menus, command validation, etc.                    |
+| Console UI           | `rich`             | `ora`, `cli-progress`, `chalk`       | You can combine these small, focused libraries to create a rich and informative console experience, just like with `rich`.                          |
+| File System          | `os`, `pathlib`    | `fs/promises`, `path`                | These are built-in Node.js modules. `fs/promises` provides async versions of all file system functions, which is perfect for your I/O-bound app.    |
+| Configuration        | `constants.py`     | `config.ts`                          | The exact same concept. You'll create a TypeScript file that exports all your configuration constants.                                              |
+| Logging              | `logging` (built-in) | `winston` or `pino`   
+
+
+DO NOT WRITE ANY CODE UNDER ANY CIRCUMSTANCES
