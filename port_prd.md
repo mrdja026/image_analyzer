@@ -27,6 +27,7 @@ The core functionality of the original `/image_analyzer` project will be retaine
 *   **Efficient Processing**: Utilizes asynchronous operations for non-blocking I/O, but strategically processes image chunks sequentially when making API calls to the local Ollama instance. This guarantees stable GPU performance, avoids resource contention, and provides predictable, reliable throughput.
 *   **User-Friendly Command-Line Interface (CLI)**: Offers a simple and intuitive CLI with subcommands for operations like raw OCR extraction or full analysis, including parameters (e.g., --role, --prompt, --vision-model, --text-model, --debug, --save, --progress, --no-progress, chunking options like --chunk-size, --overlap). Mirror options from the original CLI while modernizing with subcommands.
 *   **Clear Console Output**: Displays real-time progress indicators (e.g., spinners, bars) and structured, easy-to-read analysis results in the terminal. Support saving results to files in a specified output directory.
+*   **Performance Metrics**: Added CLI options to display tokens per second and time elapsed during processing (--show-tokens-per-second, --show-time-elapsed), providing users with insight into processing performance. ✅
 *   **Additional Utilities**: Image validation (e.g., size < 10MB, supported formats: jpeg/jpg/png/gif), logging, and error handling (e.g., retries for API calls).
 
 ### 3. Proposed Architecture & Tech Stack
@@ -83,20 +84,20 @@ This stack is chosen to align with modern Node.js development practices and prov
 
 The project will be developed in phases to ensure a structured and manageable workflow. Each phase includes granular tasks with dependencies, estimated effort (low: <1 hour; medium: 1-4 hours; high: >4 hours), and success criteria. Total estimated timeline: 2-4 weeks, assuming part-time development.
 
-*   **Phase 1: Project Scaffolding & Setup** (Focus: Establish foundation; Estimated: 1-2 days)
-    - **Task 1.1**: Create the project root directory ("picture-ts") and initialize a new Node.js project using npm init. Set up basic package.json with project name, version, and entry point (main.ts). (Effort: Low; Dependencies: None; Success: package.json exists and is valid.)
-    - **Task 1.2**: Install TypeScript and related dev dependencies (e.g., typescript, ts-node, @types/node) via npm. Create tsconfig.json with strict typing options, target ES2020, and module resolution for Node.js. (Effort: Low; Dependencies: Task 1.1; Success: Project compiles with tsc --noEmit.)
-    - **Task 1.3**: Set up ESLint and Prettier for code quality. Install eslint, @typescript-eslint/parser, prettier, and eslint-config-prettier. Configure .eslintrc.js with rules for TypeScript and Node.js best practices. Add a .prettierrc for formatting. (Effort: Medium; Dependencies: Task 1.2; Success: Running eslint . reports no errors on a sample file.)
-    - **Task 1.4**: Install initial runtime dependencies: axios, sharp, yargs, ora, cli-progress, chalk, winston, dotenv. (Effort: Low; Dependencies: Task 1.1; Success: Dependencies listed in package.json; npm install succeeds.)
-    - **Task 1.5**: Create the proposed folder structure (src/, tests/, etc.) and add .gitignore (ignoring node_modules, .env, logs). Create .env.example with placeholders (e.g., API_URL=http://localhost:11434/api/generate). (Effort: Low; Dependencies: Task 1.1; Success: All directories exist; git status shows clean setup.)
-    - **Task 1.6**: Implement basic logging in src/lib/logger.ts using winston, with console and file transports (e.g., to logs/image_analyzer.log), supporting debug/info/error levels. (Effort: Medium; Dependencies: Task 1.4; Success: Logger outputs to console and file in a test run.)
+*   **Phase 1: Project Scaffolding & Setup** (Focus: Establish foundation; Estimated: 1-2 days) ✅
+    - **Task 1.1**: Create the project root directory ("picture-ts") and initialize a new Node.js project using npm init. Set up basic package.json with project name, version, and entry point (main.ts). (Effort: Low; Dependencies: None; Success: package.json exists and is valid.) ✅
+    - **Task 1.2**: Install TypeScript and related dev dependencies (e.g., typescript, ts-node, @types/node) via npm. Create tsconfig.json with strict typing options, target ES2020, and module resolution for Node.js. (Effort: Low; Dependencies: Task 1.1; Success: Project compiles with tsc --noEmit.) ✅
+    - **Task 1.3**: Set up ESLint and Prettier for code quality. Install eslint, @typescript-eslint/parser, prettier, and eslint-config-prettier. Configure .eslintrc.js with rules for TypeScript and Node.js best practices. Add a .prettierrc for formatting. (Effort: Medium; Dependencies: Task 1.2; Success: Running eslint . reports no errors on a sample file.) ✅
+    - **Task 1.4**: Install initial runtime dependencies: axios, sharp, yargs, ora, cli-progress, chalk, winston, dotenv. (Effort: Low; Dependencies: Task 1.1; Success: Dependencies listed in package.json; npm install succeeds.) ✅
+    - **Task 1.5**: Create the proposed folder structure (src/, tests/, etc.) and add .gitignore (ignoring node_modules, .env, logs). Create .env.example with placeholders (e.g., API_URL=http://localhost:11434/api/generate). (Effort: Low; Dependencies: Task 1.1; Success: All directories exist; git status shows clean setup.) ✅
+    - **Task 1.6**: Implement basic logging in src/lib/logger.ts using winston, with console and file transports (e.g., to logs/image_analyzer.log), supporting debug/info/error levels. (Effort: Medium; Dependencies: Task 1.4; Success: Logger outputs to console and file in a test run.) ✅
 
-*   **Phase 2: Porting Core Utilities & Configuration** 
-    - **Task 2.1**: Port constants.py to src/config.ts, exporting constants like API_URL, DEFAULT_TIMEOUT, MAX_IMAGE_SIZE, SUPPORTED_FORMATS, VISION_MODEL, TEXT_MODEL, PROGRESS_STYLES, ESTIMATED_TOKENS, role-based prompts (MARKETING_MANAGER_PROMPT, PO_PROMPT, CHUNK_COMBINE_PROMPT), chunking defaults (DEFAULT_CHUNK_MAX_DIM=1024, DEFAULT_CHUNK_OVERLAP=0.15), and file paths. Integrate dotenv for env var loading. (Effort: Medium; Dependencies: Phase 1; Success: Config exports match originals; env vars load correctly.)
+*   **Phase 2: Porting Core Utilities & Configuration** ✅
+    - **Task 2.1**: Port constants.py to src/config.ts, exporting constants like API_URL, DEFAULT_TIMEOUT, MAX_IMAGE_SIZE, SUPPORTED_FORMATS, VISION_MODEL, TEXT_MODEL, PROGRESS_STYLES, ESTIMATED_TOKENS, role-based prompts (MARKETING_MANAGER_PROMPT, PO_PROMPT, CHUNK_COMBINE_PROMPT), chunking defaults (DEFAULT_CHUNK_MAX_DIM=1024, DEFAULT_CHUNK_OVERLAP=0.15), and file paths. Integrate dotenv for env var loading. (Effort: Medium; Dependencies: Phase 1; Success: Config exports match originals; env vars load correctly.) ✅
 
 
-*   **Phase 3: Implementing Core Analysis Logic** 
-    - **Task 3.1**: Implement src/services/image.service.ts with methods for image validation (check format/size using sharp) and chunking (slice images sequentially using sharp, respecting max dim/overlap; handle high-res/extreme ratios as per README). Port logic from chunk_processor.py, image_chunker.py, image_validator.py, and image_utils.py. (Effort: High; Dependencies: Phase 2; Success: Chunks generated correctly for test images; validation rejects invalid ones.)
+*   **Phase 3: Implementing Core Analysis Logic** ✅
+    - **Task 3.1**: Implement src/services/image.service.ts with methods for image validation (check format/size using sharp) and chunking (slice images sequentially using sharp, respecting max dim/overlap; handle high-res/extreme ratios as per README). Port logic from chunk_processor.py, image_chunker.py, image_validator.py, and image_utils.py. (Effort: High; Dependencies: Phase 2; Success: Chunks generated correctly for test images; validation rejects invalid ones.) ✅
 
     - **Task 3.2**: Implement src/services/ollama.service.ts to encapsulate all interactions with the Ollama API. This service will expose three distinct, single-responsibility methods:
 
@@ -104,7 +105,8 @@ The project will be developed in phases to ensure a structured and manageable wo
 
         combineChunks(texts: string[]): Promise<string>: Calls the TEXT_MODEL with the CHUNK_COMBINE_PROMPT to synthesize the raw texts into a single, clean document.
 
-        analyzeDocument(document: string, role: string): Promise<string>: Calls the TEXT_MODEL with a role-specific summarization prompt (DEFAULT_SUMMARIZATION_PROMPT).
+        analyzeDocument(document: string, role: string): Promise<string>: Calls the TEXT_MODEL with a role-specific summarization prompt (DEFAULT_SUMMARIZATION_PROMPT). ✅
+        
     - **Task 3.3**: Implement the main orchestrator in src/services/pipeline.service.ts. The primary method, runAnalysis(), will coordinate the workflow sequentially:
 
     - Invoke image.service to validate and chunk the image.
@@ -117,12 +119,14 @@ The project will be developed in phases to ensure a structured and manageable wo
 
     - Finally, await ollamaService.analyzeDocument().
 
-    - Return the final analysis.
+    - Return the final analysis. ✅
     
-    - **Task 3.3**: Implement src/lib/ui.ts for progress tracking (spinners with ora, bars with cli-progress, styling with chalk) based on --progress style. Port from progress_display.py and progress_tracker.py; support real-time updates and token rate estimation. (Effort: Medium; Dependencies: Task 2.1; Success: Progress displays correctly during a mock analysis.)
+    - **Task 3.4**: Implement src/lib/ui.ts for progress tracking (spinners with ora, bars with cli-progress, styling with chalk) based on --progress style. Port from progress_display.py and progress_tracker.py; support real-time updates and token rate estimation. (Effort: Medium; Dependencies: Task 2.1; Success: Progress displays correctly during a mock analysis.) ✅
+    
+    - **Task 3.5**: Add CLI options to display tokens per second and time elapsed during processing (--show-tokens-per-second, --show-time-elapsed), similar to the Python version. Update UI components to respect these options. (Effort: Medium; Dependencies: Task 3.4; Success: CLI options work correctly and display the performance metrics when enabled.) ✅
 
-   **Phase 4: Building the CLI and User Interface**
-    - **Task 4.1**:     Task 4.1: Use yargs in src/main.ts to implement a modern, subcommand-based CLI structure.
+   **Phase 4: Building the CLI and User Interface** ✅
+    - **Task 4.1**: Use yargs in src/main.ts to implement a modern, subcommand-based CLI structure.
 
         picture ocr <path>: A command that runs only the raw text extraction pipeline.
 
