@@ -1,0 +1,12 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+- port_prd.md is yout main source of what needs to be done. 
+- every command that needs to be executed needs my permision and i will execute it myself - you write what i need to execute wait for prompt DONE i will do it manualy
+- We will create a new project called Blog-reviews that will be a port of image_analyzer project.
+- For every task create a plan of implementation and ask for confirmation DO NOT DEVIATE FROM THIS!!!!
+- After creating a plan take a deep breath and assume a role of a Senior Architect and start coding it
+- After every task say i am finished, also after every phase, so i can know to open a new chat
