@@ -219,11 +219,13 @@ python -m image_analyzer path/to/image.jpg --role po
 The TypeScript version can be run using npm scripts for development and testing.
 
 ### Prerequisites for TS Version
+
 - Node.js v20+
 - npm
 - Ollama running locally with required models
 
 ### Installation
+
 ```bash
 cd picture-ts
 npm install
@@ -231,6 +233,7 @@ npm run build
 ```
 
 ### Running with npm run start
+
 To pass arguments to the script, use the `--` separator:
 
 ```bash
@@ -259,6 +262,7 @@ npm run start -- ocr "path/to/image.jpg" --progress bar --show-tokens-per-second
 ```
 
 ### Convenience Scripts
+
 Use the built-in scripts for common commands:
 
 ```bash
@@ -270,6 +274,7 @@ npm run ocr -- "path/to/image.jpg" --chunk-size 800 --overlap 0.2
 ```
 
 For development:
+
 ```bash
 npm run dev analyze "path/to/image.jpg" --role po
 ```
@@ -277,13 +282,14 @@ npm run dev analyze "path/to/image.jpg" --role po
 ### TODO
 
 - [x] Ported to NODE
+- [ ] Add Email fetcher as a desktop app
 - [ ] inconsistent results over same image vs python codebase (combining summarizing text from chunks is flaky)
 - [ ] Auto detect large image | What constitutes a large image - this makes it flaky (maybe?)
-- [ ] Add MODELFILES for easier configuration of the prompts  
+- [ ] Add MODELFILES for easier configuration of the prompts
 - [ ] Try Dense models, not MoE like qwen with diff MODE files
 - [ ] simplify build process, node & ts -.-, maybe try new node
 - [ ] Cleanup readme.md
-- [ ] Remove python code once quality of results is better  
-- [ ] Chunking is a bit clunky, better results got with Python version  
+- [ ] Remove python code once quality of results is better
+- [ ] Chunking is a bit clunky, better results got with Python version
 - [ ] Web scraping would eliminate OCR — but I like OCR; implement web scraping for better performance, no need for LLM then
 - [ ] TESTS
