@@ -24,7 +24,10 @@ export const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB limit
 export const SUPPORTED_FORMATS = ['jpeg', 'jpg', 'png', 'gif'];
 
 // Model configuration
-export const VISION_MODEL = process.env.VISION_MODEL || 'yasserrmd/Nanonets-OCR-s:latest'; // Using more powerful model for better analysis
+//tried nanonets-ocr-s:latest, but it was too slow and not as accurate
+//tried llava with temp 0 but it nonsense
+//tried moondream:latest it was just innacurate
+export const VISION_MODEL = process.env.VISION_MODEL || 'llava-temp0.4:latest'; // Using more powerful model for better analysis
 export const TEXT_MODEL = process.env.TEXT_MODEL || 'qwen:32b'; // Model for text summarization
 
 // Progress display configuration
@@ -44,6 +47,7 @@ export const ESTIMATED_TOKENS: Record<string, number> = {
     'llama3': 200,
     'llama3:8b': 200,
     'llama3:instruct': 200,
+    'llava:13b-v1.6': 800, // More powerful model for better analysis
     'mixtral': 300,
     'command-r': 300,
     'qwen:32b': 800, // Higher estimate for detailed qwen summarization output
@@ -53,14 +57,14 @@ export const ESTIMATED_TOKENS: Record<string, number> = {
 export const DEFAULT_ANALYSIS_PROMPT = 'Extract all text content from the provided image. Preserve the original structure and formatting in markdown.';
 
 // Chunk processing prompts
-export const CHUNK_ANALYSIS_PROMPT = 'Extract all visible text content from this image chunk. Provide a precise transcription in markdown format.';
+export const CHUNK_ANALYSIS_PROMPT = `Transcribe the text from the image. Preserve all original formatting including line breaks, spacing, and indentation. If the image contains code, enclose it in markdown backticks. If the image is blank or unreadable, return an empty string. Output only the transcribed text.`;
 
-export const CHUNK_COMBINE_PROMPT = `
-You are a text assembly expert. You have received multiple text chunks that were extracted in order from a single larger image.
-Your task is to synthesize these chunks into a single, coherent document.
-- Assemble all text content in the correct, logical order.
-- Intelligently merge text from overlapping areas to eliminate redundancy and create smooth transitions.
-- The final output should be a single, clean markdown document that accurately represents the entire original image.
+export const CHUNK_COMBINE_PROMPT = `Synthesize the following sequence of text chunks into a single, coherent markdown document. The chunks were extracted in order from a larger image. Your task is to intelligently merge overlapping text to ensure smooth transitions and eliminate redundancy. The final output must be only the fully assembled markdown document.
+
+TEXT CHUNKS:
+"""
+{chunks_text}
+"""
 `;
 
 // Role options for summarization
@@ -70,17 +74,29 @@ export const DEFAULT_ROLE: Role = 'marketing';
 
 // Marketing Manager prompt
 export const MARKETING_MANAGER_PROMPT = `
-You are a senior Marketing Manager that analyses blog text contents you are here to find the gaps and suggest improvements on the content. Be blunt. Based on the following document, provide a concise summary for a competitive analysis report.
-Address these specific points directly:
+ROLE: Senior Marketing Manager
+TASK: Analyze the provided document and generate a concise competitive analysis report. Be blunt and direct.
 
-1.  **Product Identity:** What is this product or service in one clear sentence?
-2.  **Core Value Proposition:** What is the main problem it solves for its users?
-3.  **Target Audience:** Who is this product designed for? (e.g., marketers, developers, small businesses)
-4.  **Key Features Mentioned:** List the 3-5 most prominent features or services advertised.
-5.  **Areas for improvement:** Does the blog post convey the message and the high value of the product? Provide a brief justification (e.g., 'High potential, strong feature set' or 'Generic offering, low threat').
-6.  **Final Recommendation:** Based on this information, is this a product a noteworthy for us? Provide a brief justification (e.g., 'High potential, strong feature set' or 'Generic offering, low threat').
+STEP 1: VALIDATION
+First, validate the document. If it is empty, less than 50 words, or clearly not a technology blog post, respond with ONLY the following error message:
+"Error: The provided document is invalid or insufficient for analysis."
 
-Present the output in a clear, structured format.
+STEP 2: ANALYSIS
+If the document is valid, generate a report using the following structure.
+
+**Analysis Report**
+
+**1. Product Identity:** What is this product or service in one clear sentence?
+**2. Core Value Proposition:** What is the main problem it solves for its users?
+**3. Target Audience:** Who is this product designed for?
+**4. Key Capabilities Mentioned:** List the 3-5 most prominent features, technologies, or services advertised.
+**5. Content Effectiveness:** Does the blog post effectively convey the value of the product? Provide a brief, blunt justification.
+**6. Final Recommendation:** Is this noteworthy for our strategy? Provide a brief justification.
+
+DOCUMENT TO ANALYZE:
+"""
+{document_text}
+"""
 `;
 
 // Product Owner prompt

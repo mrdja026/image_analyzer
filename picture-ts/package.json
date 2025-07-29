@@ -11,8 +11,8 @@
     "start": "node dist/main.js",
     "dev": "ts-node src/main.ts",
     "cli": "node dist/main.js",
-    "analyze": "node dist/main.js analyze",
-    "ocr": "node dist/main.js ocr",
+    "analyze": "npm run build && node dist/main.js analyze",
+    "ocr": "npm run build && node dist/main.js ocr",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"

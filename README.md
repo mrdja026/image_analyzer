@@ -279,14 +279,41 @@ For development:
 npm run dev analyze "path/to/image.jpg" --role po
 ```
 
+For Modelfiles its
+
+# Start from the base OCR model
+
+```
+FROM modelname
+
+# Force the model to be deterministic and not creative.
+
+# This is the single most effective way to reduce looping and hallucination.
+
+PARAMETER temperature 0.4 #find the goldilocks zone
+```
+
+Then run
+
+```bash
+ollama create modelName -f Modelfile
+```
+
+Then
+
+```bash
+ollama run modelName:latest
+```
+
 ### TODO
 
 - [x] Ported to NODE
 - [ ] Add Email fetcher as a desktop app
 - [ ] inconsistent results over same image vs python codebase (combining summarizing text from chunks is flaky)
-- [ ] Auto detect large image | What constitutes a large image - this makes it flaky (maybe?)
-- [ ] Add MODELFILES for easier configuration of the prompts
+- [x] Auto detect large image | What constitutes a large image - this makes it flaky (maybe?)
+- [x] Add MODELFILES for easier configuration of the prompts
 - [ ] Try Dense models, not MoE like qwen with diff MODE files
+  - [ ] Try different models with different prompts lower temperature needs strictrer prompts (investigate) further
 - [ ] simplify build process, node & ts -.-, maybe try new node
 - [ ] Cleanup readme.md
 - [ ] Remove python code once quality of results is better

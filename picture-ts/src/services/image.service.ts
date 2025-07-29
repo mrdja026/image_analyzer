@@ -123,13 +123,9 @@ export async function isImageBlank(imageBuffer: Buffer, threshold: number = 10):
     }
 }
 
+
 /**
- * Calculate optimal chunk coordinates for splitting an image
- * @param imageWidth Width of the original image
- * @param imageHeight Height of the original image
- * @param maxDim Maximum dimension for a chunk
- * @param overlapPercent Percentage of overlap between chunks
- * @returns Array of chunk coordinates [x, y, width, height]
+ * Calculates a simple, predictable grid of chunk coordinates.
  */
 export function calculateOptimalChunks(
     imageWidth: number,
@@ -137,104 +133,48 @@ export function calculateOptimalChunks(
     maxDim: number = DEFAULT_CHUNK_MAX_DIM,
     overlapPercent: number = DEFAULT_CHUNK_OVERLAP
 ): Array<[number, number, number, number]> {
-    // Validate inputs
-    if (imageWidth <= 0 || imageHeight <= 0) {
-        logger.error(`Invalid image dimensions: ${imageWidth}x${imageHeight}`);
-        return [];
-    }
+    // Use a fixed, square-like chunk size for simplicity and predictability.
+    // The vision model can handle this.
+    const chunkWidth = Math.min(maxDim, imageWidth);
+    const chunkHeight = Math.min(maxDim, imageHeight);
 
-    if (maxDim <= 0) {
-        logger.error(`Invalid max dimension: ${maxDim}`);
-        return [];
-    }
-
-    if (overlapPercent < 0 || overlapPercent >= 1) {
-        logger.error(`Invalid overlap percentage: ${overlapPercent}`);
-        overlapPercent = DEFAULT_CHUNK_OVERLAP;
-    }
-
-    // Calculate dynamic aspect ratio based on image width
-    let targetAspectRatio: number;
-
-    if (imageWidth > 2000) {
-        targetAspectRatio = 1.6;  // Wide format, good for text
-    } else if (imageWidth > 1200) {
-        targetAspectRatio = 1.4;  // Medium-wide format
-    } else {
-        targetAspectRatio = 1.2;  // Closer to square for smaller images
-    }
-
-    // Calculate chunk dimensions based on aspect ratio
-    let chunkWidth: number;
-    let chunkHeight: number;
-
-    if (targetAspectRatio > 1) {
-        // Width > height
-        chunkWidth = Math.min(maxDim, imageWidth);
-        chunkHeight = Math.floor(chunkWidth / targetAspectRatio);
-    } else {
-        // Height >= width
-        chunkHeight = Math.min(maxDim, imageHeight);
-        chunkWidth = Math.floor(chunkHeight * targetAspectRatio);
-    }
-
-    // Ensure chunk size doesn't exceed image dimensions
-    chunkWidth = Math.min(chunkWidth, imageWidth);
-    chunkHeight = Math.min(chunkHeight, imageHeight);
-
-    // Ensure chunk dimensions are at least 1 pixel
-    chunkWidth = Math.max(1, chunkWidth);
-    chunkHeight = Math.max(1, chunkHeight);
-
-    // Calculate step size with overlap
-    const stepX = Math.max(1, Math.floor(chunkWidth * (1 - overlapPercent)));
-    const stepY = Math.max(1, Math.floor(chunkHeight * (1 - overlapPercent)));
-
-    // Calculate number of chunks in each dimension
-    // Use max to ensure we have at least 1 chunk in each dimension
-    const numXChunks = Math.max(1, Math.ceil((imageWidth - chunkWidth) / stepX) + 1);
-    const numYChunks = Math.max(1, Math.ceil((imageHeight - chunkHeight) / stepY) + 1);
-
-    logger.debug(`Calculated ${numXChunks}x${numYChunks} chunks of size ${chunkWidth}x${chunkHeight} with step ${stepX}x${stepY}`);
+    // Calculate the step size (how far to move for the next chunk)
+    const stepX = Math.floor(chunkWidth * (1 - overlapPercent));
+    const stepY = Math.floor(chunkHeight * (1 - overlapPercent));
 
     const chunks: Array<[number, number, number, number]> = [];
-    const seenChunks = new Set<string>();
 
-    // Generate chunk coordinates - following the Python implementation more closely
-    for (let y = 0; y < numYChunks; y++) {
-        // Pre-calculate top position for end-of-loop check
-        const topY = Math.min(y * stepY, imageHeight - chunkHeight);
+    // Iterate over the image with the calculated step size
+    for (let y = 0; y < imageHeight; y += stepY) {
+        for (let x = 0; x < imageWidth; x += stepX) {
+            // Define the top-left corner of the potential chunk
+            const currentX = x;
+            const currentY = y;
 
-        for (let x = 0; x < numXChunks; x++) {
-            // Calculate top-left coordinates
-            const left = Math.min(x * stepX, imageWidth - chunkWidth);
-            const top = Math.min(y * stepY, imageHeight - chunkHeight);
-
-            // Calculate bottom-right coordinates
-            const right = left + chunkWidth;
-            const bottom = top + chunkHeight;
-
-            // Skip duplicate chunks using a string key
-            const chunkKey = `${left},${top},${right},${bottom}`;
-            if (!seenChunks.has(chunkKey)) {
-                seenChunks.add(chunkKey);
-                chunks.push([left, top, chunkWidth, chunkHeight]);
+            // Ensure the chunk does not go out of bounds
+            const extractWidth = Math.min(chunkWidth, imageWidth - currentX);
+            const extractHeight = Math.min(chunkHeight, imageHeight - currentY);
+            
+            // Only add chunks that have a meaningful size
+            if (extractWidth > 0 && extractHeight > 0) {
+                 chunks.push([currentX, currentY, extractWidth, extractHeight]);
             }
-
-            // If we've reached the edge of the image, break
-            if (left + chunkWidth >= imageWidth) {
-                break;
-            }
-        }
-
-        // If we've reached the bottom of the image, break
-        if (topY + chunkHeight >= imageHeight) {
-            break;
         }
     }
+    
+    // A simple approach to remove duplicates that can occur at the edges
+    const uniqueKeys = new Set<string>();
+    const uniqueChunks = chunks.filter(c => {
+        const key = c.join(',');
+        if (uniqueKeys.has(key)) {
+            return false;
+        }
+        uniqueKeys.add(key);
+        return true;
+    });
 
-    logger.info(`Generated ${chunks.length} unique chunks`);
-    return chunks;
+    logger.info(`Generated ${uniqueChunks.length} unique chunks`);
+    return uniqueChunks;
 }
 
 /**
