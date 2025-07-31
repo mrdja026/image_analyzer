@@ -305,10 +305,40 @@ Then
 ollama run modelName:latest
 ```
 
+### TODO - AI generated from the tasks but still true - dowloaded the whole model and used llama cpp to guff it then quantiazed it to q4_K_M method
+
+### Deconstruct the "Secret Runes" of K-Quants:
+
+- [ ] What is q4? Research the fundamental trade-offs of 4-bit quantization versus other bit-rates (q2, q3, q5, q6, q8). How does this numerically affect the model's weights and what is the direct impact on performance (VRAM usage, speed) vs. quality (perplexity)?
+
+- [ ] What is _K? This is the most important part. Investigate the "K-Quants" strategy. Understand how it intelligently uses higher precision (e.g., 6-bit or 8-bit) for the most "important" weights (like attention layers) while aggressively quantizing others. This is the key to modern quality preservation.
+
+- [ ] What are _S, _M, _L? Research the different block sizes for K-Quants. Understand what "Small," "Medium," and "Large" block sizes mean in practice and how they represent a finer-grained trade-off between quantization quality and computational overhead.
+
+---
+
+### Tune the "Creative Leash" Parameters:
+
+- [ ] top_k and top_p: Investigate these two methods for controlling the model's word choices. Understand how top_k (nucleus sampling) limits the vocabulary to the top K most likely tokens, while top_p creates a dynamic vocabulary pool. When is one better than the other?
+
+- [ ] repeat_penalty: Research how this parameter prevents models from getting stuck in repetitive loops (like the ones encountered during OCR failures). Experiment with its effect on long-form text generation.
+
+---
+
+### Revisit the Vision Model Heist:
+
+- [ ] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2.
+
+- [ ] Re-attempt the LLaVA-NeXT conversion: My previous attempt failed due to a simple command error. The plan to convert llava-hf/llava-v1.6-mistral-7b-hf is still viable and represents the next major skill-up: handling models with a separate "vision projector."
+
+- [ ] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF.
+
+
 ### TODO
 
 - [x] Ported to NODE
 - [ ] Add Email fetcher as a desktop app
+- [ ] Read the perplexity space how to make the qwen VL a vision model via API and llama server 
 - [ ] inconsistent results over same image vs python codebase (combining summarizing text from chunks is flaky)
 - [x] Auto detect large image | What constitutes a large image - this makes it flaky (maybe?)
 - [x] Add MODELFILES for easier configuration of the prompts

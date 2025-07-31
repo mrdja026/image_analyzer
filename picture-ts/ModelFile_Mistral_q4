@@ -1,0 +1,12 @@
+FROM ./Mistral-7B-Instruct-v0.2-Q4_K_M.gguf
+
+# Set the context window size. 4096 is a safe and effective default for this model.
+PARAMETER num_ctx 4096
+
+# CRITICAL: This is the official instruction template for Mistral Instruct v0.2.
+# It tells Ollama how to format the prompt for the best possible results.
+TEMPLATE """[INST] {{ .Prompt }} [/INST]"""
+
+# A simple, direct system message that sets the model's persona.
+SYSTEM """You are a helpful and concise AI assistant.
+"""
