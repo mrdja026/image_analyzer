@@ -214,19 +214,139 @@ python -m image_analyzer path/to/image.jpg --role marketing
 python -m image_analyzer path/to/image.jpg --role po
 ```
 
-## TODO
+## TypeScript Version Usage
 
-- [ ] Rewrite in node.!!!!! i dont know python 
-- [x] Refine chunking process
-- [x] Cleanup repo - obsolete
-- [x] Test new models
-- [x] Refactor basically everything - obsolete
-- [x] Add REST API on top of this
-- [] Model files for LLMs
-- [x] Check other models (llama3b is weak)
-  - yasserrmd/Nanonets-OCR-s:latest is bettter for Pure OCR
-- [x] Make custom instructions "experts" (MARKETING EXPERT | PO EXPERT) with prompts
-- [ ] Add more expert roles (SEO EXPERT | SOCIAL MEDIA EXPERT) 
-- [ ] Handle edge cases, when the context is full (?????)
-- [ ] KV for context
-- [ ] Quantitize models a bit to see if there is any noticeable perf gain vs loss of quality
+The TypeScript version can be run using npm scripts for development and testing.
+
+### Prerequisites for TS Version
+
+- Node.js v20+
+- npm
+- Ollama running locally with required models
+
+### Installation
+
+```bash
+cd picture-ts
+npm install
+npm run build
+```
+
+### Running with npm run start
+
+To pass arguments to the script, use the `--` separator:
+
+```bash
+npm run start -- analyze "path/to/image.jpg" --role marketing --progress spinner --large-image-mode
+```
+
+This runs the analyze command with marketing role and spinner progress.
+
+### Performance Metrics Options
+
+The TypeScript version includes options to display performance metrics during processing:
+
+- `--show-tokens-per-second`: Display the token generation rate in tokens per second
+- `--show-time-elapsed`: Display the elapsed time during processing
+
+Example usage:
+
+```bash
+npm run start -- analyze "path/to/image.jpg" --show-tokens-per-second --show-time-elapsed
+```
+
+These options work with all progress styles and can be combined with other options:
+
+```bash
+npm run start -- ocr "path/to/image.jpg" --progress bar --show-tokens-per-second --show-time-elapsed
+```
+
+### Convenience Scripts
+
+Use the built-in scripts for common commands:
+
+```bash
+npm run analyze -- "path/to/image.jpg" --role marketing --progress spinner
+```
+
+```bash
+npm run ocr -- "path/to/image.jpg" --chunk-size 800 --overlap 0.2
+```
+
+For development:
+
+```bash
+npm run dev analyze "path/to/image.jpg" --role po
+```
+
+For Modelfiles its
+
+# Start from the base OCR model
+
+```
+FROM modelname
+
+# Force the model to be deterministic and not creative.
+
+# This is the single most effective way to reduce looping and hallucination.
+
+PARAMETER temperature 0.4 #find the goldilocks zone
+```
+
+Then run
+
+```bash
+ollama create modelName -f Modelfile
+```
+
+Then
+
+```bash
+ollama run modelName:latest
+```
+
+### TODO - AI generated from the tasks but still true - dowloaded the whole model and used llama cpp to guff it then quantiazed it to q4_K_M method
+
+### Deconstruct the "Secret Runes" of K-Quants:
+
+- [ ] What is q4? Research the fundamental trade-offs of 4-bit quantization versus other bit-rates (q2, q3, q5, q6, q8). How does this numerically affect the model's weights and what is the direct impact on performance (VRAM usage, speed) vs. quality (perplexity)?
+
+- [ ] What is _K? This is the most important part. Investigate the "K-Quants" strategy. Understand how it intelligently uses higher precision (e.g., 6-bit or 8-bit) for the most "important" weights (like attention layers) while aggressively quantizing others. This is the key to modern quality preservation.
+
+- [ ] What are _S, _M, _L? Research the different block sizes for K-Quants. Understand what "Small," "Medium," and "Large" block sizes mean in practice and how they represent a finer-grained trade-off between quantization quality and computational overhead.
+
+---
+
+### Tune the "Creative Leash" Parameters:
+
+- [ ] top_k and top_p: Investigate these two methods for controlling the model's word choices. Understand how top_k (nucleus sampling) limits the vocabulary to the top K most likely tokens, while top_p creates a dynamic vocabulary pool. When is one better than the other?
+
+- [ ] repeat_penalty: Research how this parameter prevents models from getting stuck in repetitive loops (like the ones encountered during OCR failures). Experiment with its effect on long-form text generation.
+
+---
+
+### Revisit the Vision Model Heist:
+
+- [ ] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2.
+
+- [ ] Re-attempt the LLaVA-NeXT conversion: My previous attempt failed due to a simple command error. The plan to convert llava-hf/llava-v1.6-mistral-7b-hf is still viable and represents the next major skill-up: handling models with a separate "vision projector."
+
+- [ ] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF.
+
+
+### TODO
+
+- [x] Ported to NODE
+- [ ] Add Email fetcher as a desktop app
+- [ ] Read the perplexity space how to make the qwen VL a vision model via API and llama server 
+- [ ] inconsistent results over same image vs python codebase (combining summarizing text from chunks is flaky)
+- [x] Auto detect large image | What constitutes a large image - this makes it flaky (maybe?)
+- [x] Add MODELFILES for easier configuration of the prompts
+- [ ] Try Dense models, not MoE like qwen with diff MODE files
+  - [ ] Try different models with different prompts lower temperature needs strictrer prompts (investigate) further
+- [ ] simplify build process, node & ts -.-, maybe try new node
+- [ ] Cleanup readme.md
+- [ ] Remove python code once quality of results is better
+- [ ] Chunking is a bit clunky, better results got with Python version
+- [ ] Web scraping would eliminate OCR — but I like OCR; implement web scraping for better performance, no need for LLM then
+- [ ] TESTS

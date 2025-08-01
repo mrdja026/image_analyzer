@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gmail Fetcher POC</title>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: #f7f9fa;
+        font-family: 'Segoe UI', Arial, sans-serif;
+      }
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #4285f4;
+        color: #fff;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        padding: 18px 0 12px 0;
+        box-shadow: 0 2px 8px rgba(66,133,244,0.08);
+        z-index: 100;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding-top: 80px;
+        width: 100vw;
+      }
+      .card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(66,133,244,0.13);
+        padding: 48px 40px 40px 40px;
+        min-width: 340px;
+        max-width: 400px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        gap: 18px;
+      }
+      .card p {
+        font-size: 1.3rem;
+        margin-bottom: 18px;
+        color: #222;
+        font-weight: 600;
+        text-align: center;
+        letter-spacing: 0.5px;
+      }
+      .button-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      button {
+        margin: 0;
+        padding: 12px 32px;
+        border: none;
+        border-radius: 8px;
+        background: #4285f4;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(66,133,244,0.08);
+        transition: background 0.2s, box-shadow 0.2s;
+        outline: none;
+        min-width: 120px;
+      }
+      button#signout_button {
+        background: #ea4335;
+      }
+      button:hover {
+        background: #3367d6;
+        box-shadow: 0 4px 16px rgba(66,133,244,0.15);
+      }
+      button#signout_button:hover {
+        background: #c5221f;
+      }
+      pre#content {
+        margin-top: 16px;
+        background: #f1f3f4;
+        border-radius: 10px;
+        padding: 18px 16px;
+        font-size: 1rem;
+        color: #222;
+        min-width: 260px;
+        max-width: 340px;
+        width: 100%;
+        box-shadow: 0 1px 8px rgba(60,64,67,0.10);
+        word-break: break-word;
+        text-align: left;
+      }
+      @media (max-width: 500px) {
+        .card {
+          min-width: 90vw;
+          max-width: 98vw;
+          padding: 24px 8px 16px 8px;
+        }
+        pre#content {
+          min-width: 0;
+          max-width: 95vw;
+        }
+        .button-row {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">GMAIL FETCHER POC</div>
+    <div class="container">
+      <div class="card">
+        <p>Gmail API Quickstart</p>
+        <div class="button-row">
+          <button id="authorize_button">Authorize</button>
+          <button id="signout_button">Sign Out</button>
+        </div>
+        <pre id="content" style="white-space: pre-wrap;"></pre>
+        <button id="list_emails_button" style="display:none; margin-top:18px; min-width:160px; background:#34a853; color:#fff; font-weight:600; font-size:1rem; border-radius:8px; padding:12px 32px; border:none; box-shadow:0 2px 8px rgba(52,168,83,0.08); cursor:pointer; transition:background 0.2s, box-shadow 0.2s;">List Discovery Emails</button>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      // Create a dedicated module/namespace using a proper module pattern
+      const GmailApp = (function() {
+        // Private variables not accessible from console
+        let _CLIENT_ID = '';
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+        
+        // Discovery doc URL for APIs used by the quickstart
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest';
+
+        // Authorization scopes required by the API; multiple scopes can be
+        // included, separated by spaces.
+        const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly';
+
+        // Fetch auth config from server
+        async function fetchAuthConfig() {
+          try {
+            const response = await fetch('/api/auth-config');
+            if (!response.ok) {
+              throw new Error('Failed to fetch auth config');
+            }
+            const config = await response.json();
+            _CLIENT_ID = config.clientId;
+          } catch (error) {
+            console.error('Error fetching auth config');
+            document.getElementById('content').innerText = 'Error loading authentication configuration.';
+          }
+        }
+
+        /**
+         * Callback after the API client is loaded. Loads the
+         * discovery doc to initialize the API.
+         */
+        async function initializeGapiClient() {
+          await gapi.client.init({
+            discoveryDocs: [DISCOVERY_DOC],
+          });
+          gapiInited = true;
+          maybeEnableButtons();
+        }
+
+        /**
+         * Enables user interaction after all libraries are loaded.
+         */
+        function maybeEnableButtons() {
+          if (gapiInited && gisInited) {
+            document.getElementById('authorize_button').style.visibility = 'visible';
+          }
+        }
+
+        /**
+         * Print all Labels in the authorized user's inbox. If no labels
+         * are found an appropriate message is printed.
+         */
+        async function listLabels() {
+          let response;
+          try {
+            // Get the current access token
+            const token = gapi.client.getToken();
+            if (!token) {
+              throw new Error('Not authenticated');
+            }
+            
+            // Use our secure server-side API proxy instead of direct API call
+            response = await fetch('/api/gmail/labels', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token.access_token}`
+              }
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Server responded with status ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            const labels = data.labels;
+            if (!labels || labels.length == 0) {
+              document.getElementById('content').innerText = 'No labels found.';
+              return;
+            }
+            // Flatten to string to display
+            const output = labels.reduce(
+                (str, label) => `${str}${label.name}\n`,
+                'Labels:\n');
+            document.getElementById('content').innerText = output;
+          } catch (err) {
+            document.getElementById('content').innerText = err.message;
+            return;
+          }
+        }
+
+        /**
+         * Fetch emails with the 'Discovery' label and display their subjects
+         */
+        async function listDiscoveryEmails() {
+          try {
+            document.getElementById('content').innerText = 'Loading emails...';
+            
+            // Get the current access token
+            const token = gapi.client.getToken();
+            if (!token) {
+              throw new Error('Not authenticated');
+            }
+            
+            // Use our secure server-side API proxy to fetch emails
+            const response = await fetch('/api/gmail/emails', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token.access_token}`
+              }
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Server responded with status ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.emails || data.emails.length === 0) {
+              document.getElementById('content').innerText = 'No emails found with the Discovery label.';
+              return;
+            }
+            
+            // Display email subjects
+            const output = data.emails.reduce(
+              (str, email) => `${str}${email.subject}\n`,
+              'Labels:\n' + document.getElementById('content').innerText.split('\n').filter(line => line.startsWith('Labels:')).join('\n') + '\n\nEmails with Discovery label:\n');
+            
+            document.getElementById('content').innerText = output;
+          } catch (err) {
+            document.getElementById('content').innerText = err.message;
+          }
+        }
+
+        /**
+         *  Sign in the user upon button click.
+         */
+        function handleAuthClick() {
+          tokenClient.callback = async (resp) => {
+            if (resp.error !== undefined) {
+              throw (resp);
+            }
+            document.getElementById('signout_button').style.visibility = 'visible';
+            document.getElementById('authorize_button').innerText = 'Refresh';
+            document.getElementById('list_emails_button').style.display = 'block';
+            await listLabels();
+          };
+
+          if (gapi.client.getToken() === null) {
+            // Prompt the user to select a Google Account and ask for consent to share their data
+            // when establishing a new session.
+            tokenClient.requestAccessToken({prompt: 'consent'});
+          } else {
+            // Skip display of account chooser and consent dialog for an existing session.
+            tokenClient.requestAccessToken({prompt: ''});
+          }
+        }
+
+        /**
+         *  Sign out the user upon button click.
+         */
+        function handleSignoutClick() {
+          const token = gapi.client.getToken();
+          if (token !== null) {
+            google.accounts.oauth2.revoke(token.access_token);
+            gapi.client.setToken('');
+            document.getElementById('content').innerText = '';
+            document.getElementById('authorize_button').innerText = 'Authorize';
+            document.getElementById('signout_button').style.visibility = 'hidden';
+          }
+          document.getElementById('list_emails_button').style.display = 'none';
+        }
+
+        // Public API
+        return {
+          init: function() {
+            // Initially hide buttons
+            document.getElementById('authorize_button').style.visibility = 'hidden';
+            document.getElementById('signout_button').style.visibility = 'hidden';
+            
+            // Immediately fetch auth config
+            fetchAuthConfig();
+            
+            // Set up button event listeners
+            document.getElementById('authorize_button').addEventListener('click', handleAuthClick);
+            document.getElementById('signout_button').addEventListener('click', handleSignoutClick);
+            document.getElementById('list_emails_button').addEventListener('click', listDiscoveryEmails);
+          },
+          
+          // External script callbacks - must be exposed, but we can avoid putting them directly on window
+          handleGapiLoaded: function() {
+            gapi.load('client', initializeGapiClient);
+          },
+          
+          handleGisLoaded: function() {
+            // Check if CLIENT_ID has been loaded, if not wait for it
+            if (!_CLIENT_ID) {
+              setTimeout(() => {
+                GmailApp.handleGisLoaded();
+              }, 100);
+              return;
+            }
+            
+            tokenClient = google.accounts.oauth2.initTokenClient({
+              client_id: _CLIENT_ID,
+              scope: SCOPES,
+              callback: '', // defined later
+            });
+            gisInited = true;
+            maybeEnableButtons();
+          }
+        };
+      })(); // End of module definition - create the module
+
+      // Initialize the application when DOM is fully loaded
+      document.addEventListener('DOMContentLoaded', GmailApp.init);
+      
+      // Required callback functions for external scripts - minimal window exposure
+      function gapiLoaded() { GmailApp.handleGapiLoaded(); }
+      function gisLoaded() { GmailApp.handleGisLoaded(); }
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  </body>
+</html>
