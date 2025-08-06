@@ -305,15 +305,15 @@ Then
 ollama run modelName:latest
 ```
 
-### TODO - AI generated from the tasks but still true - dowloaded the whole model and used llama cpp to guff it then quantiazed it to q4_K_M method
+# TODO - AI generated from the tasks but still true - dowloaded the whole model and used llama cpp to guff it then quantiazed it to q4_K_M method
 
 ### Deconstruct the "Secret Runes" of K-Quants:
 
 - [ ] What is q4? Research the fundamental trade-offs of 4-bit quantization versus other bit-rates (q2, q3, q5, q6, q8). How does this numerically affect the model's weights and what is the direct impact on performance (VRAM usage, speed) vs. quality (perplexity)?
 
-- [ ] What is _K? This is the most important part. Investigate the "K-Quants" strategy. Understand how it intelligently uses higher precision (e.g., 6-bit or 8-bit) for the most "important" weights (like attention layers) while aggressively quantizing others. This is the key to modern quality preservation.
+- [ ] What is \_K? This is the most important part. Investigate the "K-Quants" strategy. Understand how it intelligently uses higher precision (e.g., 6-bit or 8-bit) for the most "important" weights (like attention layers) while aggressively quantizing others. This is the key to modern quality preservation.
 
-- [ ] What are _S, _M, _L? Research the different block sizes for K-Quants. Understand what "Small," "Medium," and "Large" block sizes mean in practice and how they represent a finer-grained trade-off between quantization quality and computational overhead.
+- [ ] What are \_S, \_M, \_L? Research the different block sizes for K-Quants. Understand what "Small," "Medium," and "Large" block sizes mean in practice and how they represent a finer-grained trade-off between quantization quality and computational overhead.
 
 ---
 
@@ -327,26 +327,27 @@ ollama run modelName:latest
 
 ### Revisit the Vision Model Heist:
 
-- [ ] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2.
+- [ ] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2. there are multiple versions of llama.cpp, like unsloth llama.cpp, gerganov something llama.cpp llama server, investigate ghat
 
 - [ ] Re-attempt the LLaVA-NeXT conversion: My previous attempt failed due to a simple command error. The plan to convert llava-hf/llava-v1.6-mistral-7b-hf is still viable and represents the next major skill-up: handling models with a separate "vision projector."
 
-- [ ] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF.
-
+- [ ] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF. (unsloth heros)
 
 ### TODO
 
 - [x] Ported to NODE
 - [ ] Add Email fetcher as a desktop app
-- [ ] Read the perplexity space how to make the qwen VL a vision model via API and llama server 
-- [ ] inconsistent results over same image vs python codebase (combining summarizing text from chunks is flaky)
+- [x] Read the perplexity space how to make the qwen VL a vision model via API and llama server - deprecated
+- [x] inconsistent results over same image vs python codebase (combining summarizing text from chunks is flaky)
+  - models will halucinate thats the one true truth
 - [x] Auto detect large image | What constitutes a large image - this makes it flaky (maybe?)
 - [x] Add MODELFILES for easier configuration of the prompts
 - [ ] Try Dense models, not MoE like qwen with diff MODE files
   - [ ] Try different models with different prompts lower temperature needs strictrer prompts (investigate) further
-- [ ] simplify build process, node & ts -.-, maybe try new node
+- [x] simplify build process, node & ts -.-, maybe try new node
 - [ ] Cleanup readme.md
 - [ ] Remove python code once quality of results is better
-- [ ] Chunking is a bit clunky, better results got with Python version
+- [x] Chunking is a bit clunky, better results got with Python version
+  - improved with the vision library
 - [ ] Web scraping would eliminate OCR — but I like OCR; implement web scraping for better performance, no need for LLM then
 - [ ] TESTS

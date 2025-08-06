@@ -59,7 +59,7 @@ export const ESTIMATED_TOKENS: Record<string, number> = {
 export const DEFAULT_ANALYSIS_PROMPT = 'Extract all text content from the provided image. Preserve the original structure and formatting in markdown.';
 
 // Chunk processing prompts
-export const CHUNK_ANALYSIS_PROMPT = `Transcribe the text from the image. Preserve all original formatting including line breaks, spacing, and indentation. If the image contains code, enclose it in markdown backticks. If the image is blank or unreadable, return an empty string. Output only the transcribed text.`;
+export const CHUNK_ANALYSIS_PROMPT = `Analyze the attached image.`; // this needs to be changed to a more specifcif prompt for chunk analysis depending on a model and modelfile configs, it works now with the current models in the config.ts
 
 export const CHUNK_COMBINE_PROMPT = `Synthesize the following sequence of text chunks into a single, coherent markdown document. The chunks were extracted in order from a larger image. Your task is to intelligently merge overlapping text to ensure smooth transitions and eliminate redundancy. The final output must be only the fully assembled markdown document.
 
@@ -102,20 +102,47 @@ DOCUMENT TO ANALYZE:
 `;
 
 // Product Owner prompt
+      
 export const PO_PROMPT = `
-You are a Product Owner analyzing extracted text content from a document. Based on the following text, provide a structured analysis focusing on product requirements and market fit.
-Address these specific points directly:
+ROLE: You are a pragmatic, data-driven senior Product Owner.
+TASK: Analyze the following document and distill it into a concise, actionable "Product Opportunity Brief." Your analysis must be grounded in the provided text, but you are expected to make logical inferences about strategy and risk.
 
-1.  **Product Overview:** What is this product or service in one clear sentence?
-2.  **User Problem:** What specific user problems does this product aim to solve?
-3.  **Target Users:** Who are the primary and secondary user personas for this product?
-4.  **Core Functionality:** List the 3-5 most essential features or capabilities required.
-5.  **Development Priorities:** What features should be prioritized in the next development cycle?
-6.  **Market Fit Assessment:** How well does this product align with market needs? Provide a brief assessment.
-7.  **Technical Considerations:** Are there any specific technical requirements or constraints mentioned?
+**Product Opportunity Brief: [Infer the Product/Feature Name from the text]**
 
-Present your analysis in a clear, actionable format suitable for a product backlog discussion.
+---
+
+### 1. The Elevator Pitch (Product Vision)
+*   **What is it?** In one clear, compelling sentence, what is this product, and what is its core mission?
+*   **For Whom?** Who is the primary target user persona? (e.g., "For enterprise software developers...")
+*   **What is the Key Value?** What is the single most important benefit it provides? (...who need to improve software reliability.")
+
+---
+
+### 2. The Core Loop (Problem & Solution)
+*   **User Problem:** What specific, painful user problem does this product solve? Be precise.
+*   **Proposed Solution:** How does this product's approach or key feature directly solve that problem?
+
+---
+
+### 3. Core Epics & Capabilities
+*   List the 3-5 most essential product features described in the text. Frame them as high-level "Epics" that a development team could understand (e.g., "Epic: Automated Code Refactoring," "Epic: Real-time Translation Engine").
+
+---
+
+### 4. Strategic Analysis
+*   **Evidence of Priority:** Based on the emphasis and detail in the text, which of the epics listed above seems to be the most critical or central to the product's strategy? *This is an inference, not a final decision.*
+*   **Market Differentiation:** Does the document suggest how this product is different from or better than existing solutions?
+*   **Key Risks & Unanswered Questions:** What critical information is MISSING? What are the biggest risks or unanswered questions a product team would have before starting development? (e.g., "Scalability is not addressed," "No mention of the underlying data source," "The business model is unclear").
+
+---
+
+**DOCUMENT TO ANALYZE:**
+"""
+{document_text}
+"""
 `;
+
+    
 
 // Default prompt - will be selected based on role argument
 export const DEFAULT_SUMMARIZATION_PROMPT = MARKETING_MANAGER_PROMPT;
