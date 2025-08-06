@@ -27,9 +27,9 @@ export const SUPPORTED_FORMATS = ['jpeg', 'jpg', 'png', 'gif'];
 //tried nanonets-ocr-s:latest, but it was too slow and not as accurate
 //tried llava with temp 0 but it nonsense
 //tried moondream:latest it was just innacurate
-export const VISION_MODEL = process.env.VISION_MODEL || 'qwen2.5VL:latest'; // Using more powerful model for better analysis
+export const VISION_MODEL = process.env.VISION_MODEL || 'qwen2-ocr2-2b:latest'; // Using more powerful model for better analysis
 //using mistral for text summarization since i quantitazed it and compiled the weights via lama.cpp
-export const TEXT_MODEL = process.env.TEXT_MODEL || 'my-mistral-instruct:latest'; // Model for text summarization
+export const TEXT_MODEL = process.env.TEXT_MODEL || 'Mistral-7B-Instruct-v0.2-Q4_K_M:latest'; // Model for text summarization
 
 // Progress display configuration
 export const PROGRESS_STYLES = ['simple', 'bar', 'spinner', 'none'] as const;
