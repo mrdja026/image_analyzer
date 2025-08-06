@@ -1,0 +1,14 @@
+FROM ./qwen2-vl-ocr2-2b-Q6_K.gguf
+
+PARAMETER temperature 0.0
+PARAMETER num_ctx 4096
+
+SYSTEM You are an OCR assistant. Extract text from images.
+
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ .Response }}<|im_end|>
+"""

@@ -1,7 +1,0 @@
-# Start from the base OCR model
-FROM llava:34b
-
-# Force the model to be deterministic and not creative.
-# This is the single most effective way to reduce looping and hallucination.
-PARAMETER temperature 0.4
-    
