@@ -1,7 +1,7 @@
 # Image Analyzer and Summarizer
 
 A powerful tool for analyzing images with AI and summarizing the results. The application uses Ollama's yasserrmd/Nanonets-OCR for image analysis and qwen:32b for text summarization.
-
+# RESEARCH DO I NEED ROLES IF USIN MOE
 ## Features
 
 - **Image Analysis**: Analyze images using LLaVA AI model to extract detailed descriptions
