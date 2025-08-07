@@ -8,10 +8,12 @@ import fs from 'fs/promises';
 import { pipelineService, ollamaService } from '@blog-reviews/picture';
 import { jobManager } from './jobManager';
 import { createSseTracker } from './sseTracker';
-import type { Role } from '@blog-reviews/picture';
+import type { Role, OcrCommandArgs } from '@blog-reviews/picture';
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3001;
+// Always use grid-based chunking, environment variable no longer needed
+const forceGridChunking = true;
 
 // Simple server logger
 function log(message: string, meta?: Record<string, unknown>) {
@@ -56,7 +58,10 @@ const upload = multer({
 // Health
 app.get('/api/health', (_req: Request, res: Response) => {
     log('Health check');
-    res.json({ ok: true });
+    res.json({
+        ok: true,
+        gridChunking: forceGridChunking ? 'enabled' : 'disabled'
+    });
 });
 
 // SSE stream
@@ -102,14 +107,19 @@ app.post('/api/upload', upload.single('image'), async (req: Request, res: Respon
                 // Run OCR pipeline only
                 jobManager.setStage(job.id, 'ocr');
                 log('OCR started', { jobId: job.id });
-                const combinedText = await pipelineService.runOcrPipeline({
+                // Create OCR pipeline options with grid chunking flag
+                const ocrOptions = {
                     path: req.file!.path,
                     progress: 'spinner',
                     noProgress: false,
                     save: false,
                     showTimeElapsed: true,
-                    showTokensPerSecond: true
-                });
+                    showTokensPerSecond: true,
+                    // Force grid chunking if environment variable is set
+                    useGridChunking: forceGridChunking
+                };
+                // Use type assertion to avoid type checking issues
+                const combinedText = await pipelineService.runOcrPipeline(ocrOptions as any);
 
                 jobManager.updateJob(job.id, { combinedText });
                 jobManager.setStage(job.id, 'combining');
@@ -185,8 +195,15 @@ process.on('unhandledRejection', (reason) => {
     log('unhandledRejection', { error: String((reason as any)?.stack || reason) });
 });
 
-app.listen(port, () => {
-    log(`API listening on http://localhost:${port}`);
-});
+async function start() {
+    // No OpenCV initialization - always using grid-based chunking
+    log('Using grid-based chunking for all image processing');
+
+    app.listen(port, () => {
+        log(`API listening on http://localhost:${port}`);
+    });
+}
+
+start();
 
 

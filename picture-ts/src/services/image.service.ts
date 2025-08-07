@@ -6,7 +6,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import sharp from 'sharp';
-import cv from '@techstark/opencv-js';
+// OpenCV removed - using only grid-based chunking
 import logger from '../lib/logger';
 import { ImageChunk, SupportedImageFormat } from '../types';
 import {
@@ -16,52 +16,8 @@ import {
     DEFAULT_CHUNK_OVERLAP
 } from '../config';
 
-export async function detectContentBlocks(
-    imageBuffer: Buffer,
-    metadata: sharp.Metadata
-): Promise<{ x: number, y: number, width: number, height: number }[]> {
-
-    // ------------ START OF THE CRITICAL FIX ------------
-    // In this WASM version, we must manually create a Mat and load the data.
-    // We assume the sharp buffer is RGBA (4 channels).
-    const mat = new cv.Mat(metadata.height, metadata.width, cv.CV_8UC4);
-    mat.data.set(imageBuffer);
-    // ------------  END OF THE CRITICAL FIX  ------------
-
-    // 1. Pre-processing: Convert to grayscale and apply a binary threshold
-    const gray = new cv.Mat();
-    cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY, 0);
-
-    const thresh = new cv.Mat();
-    cv.threshold(gray, thresh, 0, 255, cv.THRESH_BINARY_INV | cv.THRESH_OTSU);
-
-    // 2. Contour Detection: Find the "blobs" of content by connecting nearby text.
-    const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(40, 5));
-    const morph = new cv.Mat();
-    cv.morphologyEx(thresh, morph, cv.MORPH_CLOSE, kernel);
-
-    const contours = new cv.MatVector();
-    const hierarchy = new cv.Mat();
-    cv.findContours(morph, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-    // 3. Filter and Extract Bounding Boxes
-    const contentBlocks: { x: number, y: number, width: number, height: number }[] = [];
-    for (let i = 0; i < contours.size(); ++i) {
-        const contour = contours.get(i);
-        const rect = cv.boundingRect(contour);
-
-        if (rect.width > 50 && rect.height > 20 && rect.width < metadata.width * 0.98) {
-            contentBlocks.push({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
-        }
-        contour.delete();
-    }
-
-    // Clean up OpenCV memory
-    mat.delete(); gray.delete(); thresh.delete(); morph.delete(); contours.delete(); hierarchy.delete();
-
-    // Sort blocks by their top-to-bottom reading order
-    return contentBlocks.sort((a, b) => a.y - b.y);
-}
+// OpenCV-based content block detection removed
+// We now only use grid-based chunking for all images
 
 /**
  * Validates if the file is an image and checks its size
@@ -186,78 +142,50 @@ export async function chunkImage(
     imagePath: string,
     maxDim: number = DEFAULT_CHUNK_MAX_DIM,
     overlapPercent: number = DEFAULT_CHUNK_OVERLAP
-    // Note: saveChunks and outputDir logic can be added back here if needed
 ): Promise<ImageChunk[]> {
-    logger.info(`Chunking image with content-aware strategy: ${imagePath}`);
+    logger.info(`Chunking image with grid-based strategy: ${imagePath}`);
 
-    // --- STEP 1: EFFICIENT DATA LOADING ---
-    // We read the file and get its metadata and raw pixel buffer ONCE.
-    // This is far more efficient than passing file paths around.
+    // Load the image and get metadata
     const image = sharp(imagePath);
     const metadata = await image.metadata();
-
-    // CRITICAL for OpenCV: Ensure we have a raw, 4-channel (RGBA) pixel buffer.
-    const rawImageBuffer = await image.ensureAlpha().raw().toBuffer();
 
     if (!metadata.width || !metadata.height) {
         throw new Error('Could not determine image dimensions');
     }
 
-    // --- STEP 2: CONTENT DETECTION ---
-    // We call our new function with the CORRECT arguments: the buffer and metadata.
-    const contentBlocks = await detectContentBlocks(rawImageBuffer, metadata);
-    logger.info(`Detected ${contentBlocks.length} potential content blocks.`);
+    // Calculate grid-based chunks
+    const gridCoords = calculateOptimalChunks(
+        metadata.width,
+        metadata.height,
+        maxDim,
+        overlapPercent
+    );
 
-    // --- STEP 3: FALLBACK and CHUNKING LOGIC ---
-    // If our smart detector finds nothing, we fall back to the old, simple grid.
-    if (contentBlocks.length === 0) {
-        logger.warn("No content blocks detected. Falling back to simple grid chunking.");
-        const chunkCoords = calculateOptimalChunks(metadata.width, metadata.height, maxDim, overlapPercent);
-        // This part of the logic can reuse your previous loop that extracts based on coordinates.
-        // For now, we focus on the successful path.
-        // ... (insert fallback logic here) ...
-        return [];
-    }
-
-    const result: ImageChunk[] = [];
+    // Create chunks from the grid coordinates
+    const chunks: ImageChunk[] = [];
     let chunkIndex = 0;
 
-    // --- STEP 4: INTELLIGENT CHUNKING ---
-    // We now loop through the logical blocks we detected, NOT a blind grid.
-    for (const block of contentBlocks) {
-        // A large content block might still need to be subdivided.
-        // We use our simple grid chunker, but now it's working on a clean, pre-filtered area.
-        const blockChunks = calculateOptimalChunks(block.width, block.height, maxDim, overlapPercent);
+    for (const [x, y, w, h] of gridCoords) {
+        try {
+            const chunkBuffer = await image.clone().extract({
+                left: x,
+                top: y,
+                width: w,
+                height: h
+            }).toBuffer();
 
-        for (const [cx, cy, cw, ch] of blockChunks) {
-            // Calculate the chunk's absolute position on the original image
-            const absoluteX = block.x + cx;
-            const absoluteY = block.y + cy;
-
-            try {
-                // Extract the final chunk buffer from the original image instance.
-                const chunkBuffer = await image.clone().extract({
-                    left: absoluteX,
-                    top: absoluteY,
-                    width: cw,
-                    height: ch
-                }).toBuffer();
-
-                // We no longer need isImageBlank because we started from verified content!
-                result.push({
-                    data: chunkBuffer,
-                    index: chunkIndex++,
-                    position: { x: absoluteX, y: absoluteY, width: cw, height: ch }
-                });
-
-            } catch (error) {
-                logger.error(`Error extracting sub-chunk at (${absoluteX}, ${absoluteY}): ${error}`);
-            }
+            chunks.push({
+                data: chunkBuffer,
+                index: chunkIndex++,
+                position: { x, y, width: w, height: h }
+            });
+        } catch (error) {
+            logger.error(`Error extracting grid chunk at (${x}, ${y}): ${error}`);
         }
     }
 
-    logger.info(`Successfully created ${result.length} content-aware chunks.`);
-    return result;
+    logger.info(`Created ${chunks.length} grid-based chunks`);
+    return chunks;
 }
 
 /**

@@ -14,7 +14,7 @@ async function runBuild() {
             await mkdir('./dist', { recursive: true });
         }
 
-        // Build the application
+        // Build the CLI application
         await build({
             entryPoints: ['./src/main.ts'],
             bundle: true,
@@ -26,6 +26,19 @@ async function runBuild() {
             external: ['sharp', 'ora', 'cli-progress', 'chalk', 'winston', 'axios', 'yargs'], // External dependencies
             minify: false,
             // No banner/shebang for Windows compatibility
+        });
+
+        // Build the library (services, types, etc.)
+        await build({
+            entryPoints: ['./src/index.ts'],
+            bundle: true,
+            platform: 'node',
+            target: 'node20',
+            outfile: './dist/index.js',
+            format: 'cjs',
+            sourcemap: true,
+            external: ['sharp', 'ora', 'cli-progress', 'chalk', 'winston', 'axios', 'yargs'], // External dependencies
+            minify: false,
         });
 
         console.log('✅ Build completed successfully!');

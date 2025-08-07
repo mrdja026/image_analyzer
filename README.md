@@ -351,3 +351,5 @@ ollama run modelName:latest
   - improved with the vision library
 - [ ] Web scraping would eliminate OCR — but I like OCR; implement web scraping for better performance, no need for LLM then
 - [ ] TESTS
+
+OPEN CV IS REMOVED FOR LOCAL DEPLOYMENT> DO NOT MERGE INTO MAIN WITHOUT BACKUP

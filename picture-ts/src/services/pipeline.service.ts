@@ -11,6 +11,8 @@ import ollamaService from './ollama.service';
 import { AnalyzeCommandArgs, OcrCommandArgs, Role, ProgressTracker } from '../types';
 import { DEFAULT_OUTPUT_DIR } from '../config';
 import { createProgressTracker } from '../lib/ui';
+import sharp from 'sharp';
+import { calculateOptimalChunks } from './image.service';
 
 // Constants for warning thresholds
 const LARGE_IMAGE_WARNING_DIM = 5000; // Dimensions above which to warn about large images
@@ -50,7 +52,8 @@ export class PipelineService {
             chunkSize,
             overlap,
             forceChunk,
-            saveChunks
+            saveChunks,
+            useGridChunking
         } = args;
 
         logger.info(`Starting OCR pipeline for image: ${imagePath}`);
@@ -71,31 +74,28 @@ export class PipelineService {
                 }
             }
 
-            // Chunk the image
+            // Chunk the image using grid-based chunking only
             logger.info(`Chunking image with max dimension ${chunkSize || 'default'} and overlap ${overlap || 'default'}`);
 
             let chunks;
             try {
+                // All chunking is now grid-based using the chunkImage function which has been simplified
                 chunks = await chunkImage(
                     imagePath,
                     chunkSize,
-                    overlap,
-                    saveChunks || false,
-                    (saveChunks || save) ? this.getOutputDir(output) : undefined,
-                    forceChunk || false
+                    overlap
                 );
             } catch (chunkError) {
                 logger.error(`Failed to chunk image: ${chunkError}`);
                 // Try again with smaller chunk size if the original failed
                 if (!chunkSize || chunkSize > 800) {
                     logger.info('Trying again with smaller chunk size (800px)');
+
+                    // Use a smaller chunk size
                     chunks = await chunkImage(
                         imagePath,
                         800, // Smaller chunk size
-                        overlap,
-                        saveChunks || false,
-                        (saveChunks || save) ? this.getOutputDir(output) : undefined,
-                        forceChunk || false
+                        overlap
                     );
                 } else {
                     throw chunkError;

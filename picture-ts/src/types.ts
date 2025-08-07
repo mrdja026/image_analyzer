@@ -76,6 +76,7 @@ export interface AnalyzeCommandArgs {
     saveChunks?: boolean;
     showTokensPerSecond?: boolean;
     showTimeElapsed?: boolean;
+    useGridChunking?: boolean;
 }
 
 export interface OcrCommandArgs {
@@ -92,6 +93,7 @@ export interface OcrCommandArgs {
     saveChunks?: boolean;
     showTokensPerSecond?: boolean;
     showTimeElapsed?: boolean;
+    useGridChunking?: boolean;
 }
 
 // Progress tracking types
