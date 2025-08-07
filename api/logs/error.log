@@ -1,0 +1,2 @@
+2025-08-07 23:25:19 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
+2025-08-07 23:25:19 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 

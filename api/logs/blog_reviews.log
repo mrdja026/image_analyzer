@@ -1,0 +1,8 @@
+2025-08-07 23:21:40 [INFO]: Initialized OllamaService with API URL: http://localhost:11434/api/generate 
+2025-08-07 23:25:19 [INFO]: Starting OCR pipeline for image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754601919820_Cursor_OYKH04vWSI.png 
+2025-08-07 23:25:19 [INFO]: Chunking image with max dimension default and overlap default 
+2025-08-07 23:25:19 [INFO]: Chunking image with content-aware strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754601919820_Cursor_OYKH04vWSI.png 
+2025-08-07 23:25:19 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
+2025-08-07 23:25:19 [INFO]: Trying again with smaller chunk size (800px) 
+2025-08-07 23:25:19 [INFO]: Chunking image with content-aware strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754601919820_Cursor_OYKH04vWSI.png 
+2025-08-07 23:25:19 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
