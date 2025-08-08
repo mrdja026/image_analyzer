@@ -821,3 +821,118 @@
 2025-08-08 07:39:21 [INFO]: Combining extracted text from all chunks 
 2025-08-08 07:39:21 [INFO]: Combining 4 text chunks 
 2025-08-08 07:39:32 [INFO]: Analyzing document with a custom prompt 
+2025-08-08 07:56:46 [INFO]: Starting OCR pipeline for image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754632606392_firefox_L0xVtoxN9g.png (mode: all) 
+2025-08-08 07:56:46 [INFO]: Chunking image with max dimension default and overlap default, mode all 
+2025-08-08 07:56:46 [INFO]: Chunking image with grid-based strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754632606392_firefox_L0xVtoxN9g.png 
+2025-08-08 07:56:46 [INFO]: Generated 4 unique chunks 
+2025-08-08 07:56:46 [INFO]: Created 4 grid-based chunks 
+2025-08-08 07:56:46 [INFO]: Successfully generated 4 chunks for processing 
+2025-08-08 07:56:46 [INFO]: Processing chunk 1/4 
+2025-08-08 07:56:46 [INFO]: Extracting text from image chunk 
+2025-08-08 07:56:50 [INFO]: Processing chunk 2/4 
+2025-08-08 07:56:50 [INFO]: Extracting text from image chunk 
+2025-08-08 07:56:52 [INFO]: Processing chunk 3/4 
+2025-08-08 07:56:52 [INFO]: Extracting text from image chunk 
+2025-08-08 07:56:53 [INFO]: Processing chunk 4/4 
+2025-08-08 07:56:53 [INFO]: Extracting text from image chunk 
+2025-08-08 07:56:54 [INFO]: Successfully extracted text from 4/4 chunks 
+2025-08-08 07:56:54 [INFO]: Combining extracted text from all chunks 
+2025-08-08 07:56:54 [INFO]: Combining 4 text chunks 
+2025-08-08 07:57:00 [INFO]: Analyzing document with a custom prompt 
+2025-08-08 08:09:15 [INFO]: Starting OCR pipeline for image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754633355882_firefox_L0xVtoxN9g.png (mode: all) 
+2025-08-08 08:09:15 [INFO]: Chunking image with max dimension default and overlap default, mode all 
+2025-08-08 08:09:15 [INFO]: Chunking image with grid-based strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754633355882_firefox_L0xVtoxN9g.png 
+2025-08-08 08:09:15 [INFO]: Generated 4 unique chunks 
+2025-08-08 08:09:15 [INFO]: Created 4 grid-based chunks 
+2025-08-08 08:09:15 [INFO]: Successfully generated 4 chunks for processing 
+2025-08-08 08:09:15 [INFO]: Processing chunk 1/4 
+2025-08-08 08:09:15 [INFO]: Extracting text from image chunk 
+2025-08-08 08:09:24 [INFO]: Processing chunk 2/4 
+2025-08-08 08:09:24 [INFO]: Extracting text from image chunk 
+2025-08-08 08:09:25 [INFO]: Processing chunk 3/4 
+2025-08-08 08:09:25 [INFO]: Extracting text from image chunk 
+2025-08-08 08:09:27 [INFO]: Processing chunk 4/4 
+2025-08-08 08:09:27 [INFO]: Extracting text from image chunk 
+2025-08-08 08:09:28 [INFO]: Successfully extracted text from 4/4 chunks 
+2025-08-08 08:09:28 [INFO]: Combining extracted text from all chunks 
+2025-08-08 08:09:28 [INFO]: Combining 4 text chunks 
+2025-08-08 08:09:36 [INFO]: Analyzing document with a custom prompt 
+2025-08-08 08:10:15 [INFO]: Starting OCR pipeline for image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754633415655_5TWoIGnl4k.png (mode: all) 
+2025-08-08 08:10:15 [INFO]: Chunking image with max dimension default and overlap default, mode all 
+2025-08-08 08:10:15 [INFO]: Chunking image with grid-based strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754633415655_5TWoIGnl4k.png 
+2025-08-08 08:10:15 [INFO]: Generated 4 unique chunks 
+2025-08-08 08:10:15 [INFO]: Created 4 grid-based chunks 
+2025-08-08 08:10:15 [INFO]: Successfully generated 4 chunks for processing 
+2025-08-08 08:10:15 [INFO]: Processing chunk 1/4 
+2025-08-08 08:10:15 [INFO]: Extracting text from image chunk 
+2025-08-08 08:10:55 [INFO]: Processing chunk 2/4 
+2025-08-08 08:10:55 [INFO]: Extracting text from image chunk 
+2025-08-08 08:11:03 [INFO]: Processing chunk 3/4 
+2025-08-08 08:11:03 [INFO]: Extracting text from image chunk 
+2025-08-08 08:11:04 [INFO]: Processing chunk 4/4 
+2025-08-08 08:11:04 [INFO]: Extracting text from image chunk 
+2025-08-08 08:11:05 [INFO]: Successfully extracted text from 4/4 chunks 
+2025-08-08 08:11:05 [INFO]: Combining extracted text from all chunks 
+2025-08-08 08:11:05 [INFO]: Combining 4 text chunks 
+2025-08-08 08:11:12 [INFO]: Analyzing document with a custom prompt 
+2025-08-08 08:11:49 [INFO]: Starting OCR pipeline for image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754633509819_5TWoIGnl4k.png (mode: all) 
+2025-08-08 08:11:49 [INFO]: Chunking image with max dimension default and overlap default, mode all 
+2025-08-08 08:11:49 [INFO]: Chunking image with grid-based strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754633509819_5TWoIGnl4k.png 
+2025-08-08 08:11:49 [INFO]: Generated 4 unique chunks 
+2025-08-08 08:11:49 [INFO]: Created 4 grid-based chunks 
+2025-08-08 08:11:49 [INFO]: Successfully generated 4 chunks for processing 
+2025-08-08 08:11:49 [INFO]: Processing chunk 1/4 
+2025-08-08 08:11:49 [INFO]: Extracting text from image chunk 
+2025-08-08 08:12:18 [INFO]: Processing chunk 2/4 
+2025-08-08 08:12:18 [INFO]: Extracting text from image chunk 
+2025-08-08 08:12:19 [INFO]: Processing chunk 3/4 
+2025-08-08 08:12:19 [INFO]: Extracting text from image chunk 
+2025-08-08 08:12:20 [INFO]: Processing chunk 4/4 
+2025-08-08 08:12:20 [INFO]: Extracting text from image chunk 
+2025-08-08 08:12:22 [INFO]: Successfully extracted text from 4/4 chunks 
+2025-08-08 08:12:22 [INFO]: Combining extracted text from all chunks 
+2025-08-08 08:12:22 [INFO]: Combining 4 text chunks 
+2025-08-08 08:12:29 [INFO]: Analyzing document with role: free 
+2025-08-08 08:24:06 [INFO]: Initialized OllamaService with API URL: http://localhost:11434/api/generate 
+2025-08-08 08:24:30 [INFO]: Starting OCR pipeline for image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754634270685_firefox_L0xVtoxN9g.png (mode: all) 
+2025-08-08 08:24:30 [INFO]: Chunking image with max dimension default and overlap default, mode all 
+2025-08-08 08:24:30 [INFO]: Chunking image with grid-based strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754634270685_firefox_L0xVtoxN9g.png 
+2025-08-08 08:24:30 [INFO]: Generated 4 unique chunks 
+2025-08-08 08:24:30 [INFO]: Created 4 grid-based chunks 
+2025-08-08 08:24:30 [INFO]: Successfully generated 4 chunks for processing 
+2025-08-08 08:24:30 [INFO]: Processing chunk 1/4 
+2025-08-08 08:24:30 [INFO]: Extracting text from image chunk 
+2025-08-08 08:24:53 [INFO]: Processing chunk 2/4 
+2025-08-08 08:24:53 [INFO]: Extracting text from image chunk 
+2025-08-08 08:24:55 [INFO]: Processing chunk 3/4 
+2025-08-08 08:24:55 [INFO]: Extracting text from image chunk 
+2025-08-08 08:24:56 [INFO]: Processing chunk 4/4 
+2025-08-08 08:24:56 [INFO]: Extracting text from image chunk 
+2025-08-08 08:24:57 [INFO]: Successfully extracted text from 4/4 chunks 
+2025-08-08 08:24:57 [INFO]: Combining extracted text from all chunks 
+2025-08-08 08:24:57 [INFO]: Combining 4 text chunks 
+2025-08-08 08:25:21 [INFO]: Analyzing document with role: free 
+2025-08-08 08:26:07 [INFO]: Starting OCR pipeline for image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754634367228_Screenshot 2025-08-08 071723.png (mode: describe) 
+2025-08-08 08:26:07 [INFO]: Chunking image with max dimension default and overlap default, mode describe 
+2025-08-08 08:26:07 [INFO]: Chunking image with grid-based strategy: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754634367228_Screenshot 2025-08-08 071723.png 
+2025-08-08 08:26:07 [INFO]: Generated 6 unique chunks 
+2025-08-08 08:26:07 [INFO]: Created 6 grid-based chunks 
+2025-08-08 08:26:07 [INFO]: Successfully generated 6 chunks for processing 
+2025-08-08 08:26:07 [INFO]: Processing chunk 1/6 
+2025-08-08 08:26:07 [INFO]: Extracting text from image chunk 
+2025-08-08 08:26:49 [INFO]: Processing chunk 2/6 
+2025-08-08 08:26:49 [INFO]: Extracting text from image chunk 
+2025-08-08 08:26:55 [WARN]: Chunk 2 produced empty text result 
+2025-08-08 08:26:55 [INFO]: Processing chunk 3/6 
+2025-08-08 08:26:55 [INFO]: Extracting text from image chunk 
+2025-08-08 08:26:57 [INFO]: Processing chunk 4/6 
+2025-08-08 08:26:57 [INFO]: Extracting text from image chunk 
+2025-08-08 08:26:59 [INFO]: Processing chunk 5/6 
+2025-08-08 08:26:59 [INFO]: Extracting text from image chunk 
+2025-08-08 08:27:00 [WARN]: Chunk 5 produced empty text result 
+2025-08-08 08:27:00 [INFO]: Processing chunk 6/6 
+2025-08-08 08:27:00 [INFO]: Extracting text from image chunk 
+2025-08-08 08:27:03 [INFO]: Successfully extracted text from 4/6 chunks 
+2025-08-08 08:27:03 [INFO]: Combining extracted text from all chunks 
+2025-08-08 08:27:03 [INFO]: Combining 4 text chunks 
+2025-08-08 08:27:17 [INFO]: Analyzing document with a custom prompt 

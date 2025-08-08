@@ -24,7 +24,8 @@ export class SseProgressTracker implements ProgressTracker {
     }
 
     updateTokens(tokens: number): void {
-        jobManager.emit(this.jobId, { type: 'tokens', tokens });
+        // Accumulate tokens to be emitted at a fixed cadence by the JobManager timer
+        jobManager.incrementTokens(this.jobId, tokens);
     }
 
     finish(message?: string | undefined): void {

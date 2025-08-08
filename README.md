@@ -279,6 +279,69 @@ For development:
 npm run dev analyze "path/to/image.jpg" --role po
 ```
 
+## Local environment notes (this branch)
+
+- Grid-based chunking is now always enabled and OpenCV.js is disabled. This makes the pipeline simpler and more portable, but recognition quality can regress on dense screenshots and UI images. Expect more hallucinations and inconsistencies versus the previous OpenCV-based slicer, especially when text is tiny or heavily compressed.
+- Vision and text models are intentionally hard-coded in `picture-ts/src/config.ts` to keep local runs predictable. The UI can still pass a custom prompt and role (including the new `free` role), and a `mode` value is threaded through for telemetry.
+- Summary of behavior:
+  - If a custom prompt is provided, it is used directly.
+  - If not, the role prompt is used. New role `free` defaults to: “Give me the transcribed text.”
+  - `mode` (`analyze | summarize | describe | all`) is accepted and logged, but does not change pipeline behavior in this branch.
+
+### OpenCV.js removal — impact and next steps
+
+- **Impact**: Turning off OpenCV.js led to noticeable OCR quality drops on dense UI screenshots and small-text images. You may see more hallucinations, missed characters, and higher output variance compared to the Python/OpenCV slicer.
+- **Why**: We lost classical pre/post‑processing and smarter tiling/cropping heuristics that OpenCV provided, especially for denoising, thresholding, and adaptive slicing.
+- **Short‑term mitigations**:
+  - Reduce chunk size (e.g., 600–800px) and increase overlap (e.g., 0.25–0.35).
+  - Optional prefilters: lightweight sharpen/contrast before sending chunks.
+  - Multi‑scale tiling fallback for very dense text (process at 1.0x and 1.5x, merge).
+- **Medium‑term plan**:
+  - Re‑enable OpenCV.js via WASM behind a feature flag.
+  - Support `OPENCV_WASM_PATH` to locate `.wasm` at runtime (already supported in build tooling).
+  - Add a benchmark suite (accuracy/latency) to gate rollouts.
+- **Actions**:
+  - Add feature flag in config to toggle OpenCV.js slicer vs. grid slicer.
+  - Provide config surface for chunk size/overlap presets.
+  - Establish quality gates with representative test images.
+
+## Production deployment options for quantized GGUF models
+
+Your models are GGUF and quantized (e.g., Q4_K_M). The two most operationally friendly runtimes are Ollama and llama.cpp; both work well with GGUF and containerize cleanly. With `config.ts` hard-coding model names, prefer images that either bake models into the container or fetch them on boot to a persistent volume.
+
+Below are five pragmatic, cost-aware options—from simplest to most robust. All options keep our current code structure: `api/` (HTTP + SSE) calls into `picture-ts` which talks to Ollama/llama.cpp.
+
+1) RunPod Serverless or On‑Demand Pod (Ollama)
+- What: Ship a single Docker image containing: Ollama + our `api/` server + the `picture-ts` package. Mount a persistent volume at `/models` and `ollama pull` or copy GGUFs at boot.
+- Why: Lowest friction, pay-per-minute, scale to zero. Great for demos and spiky workloads.
+- Notes: Choose GPUs like T4/A10/L4 for best $/token. Expose port 3001 (API) and keep Ollama internal.
+
+2) Vast.ai spot GPU instance (llama.cpp or Ollama)
+- What: Rent the cheapest marketplace GPU, run our Docker image, and pin a storage volume for models.
+- Why: Often the lowest raw cost per hour; good for batch or ad-hoc processing.
+- Notes: Expect variability in providers; add a startup script to verify models and warm caches.
+
+3) Lambda Cloud dedicated GPU (Ollama + Docker Compose)
+- What: A stable L4/A10G instance running Docker Compose: `ollama` + `api` services with a shared model volume.
+- Why: Predictable performance and cost; better for steady daily traffic without orchestration overhead.
+- Notes: Pre-bake GGUFs into an image or sync from object storage (S3-compatible) on boot.
+
+4) AWS EC2 G5/G6 + Spot with Auto‑Recovery (Ollama behind ALB)
+- What: AMI with NVIDIA drivers + Docker. User data boots `ollama serve` and our `api` service; ALB fronts `/api/*`.
+- Why: Enterprise controls, IAM, VPC, alarms. Use Spot for 50–70% savings and fall back to on‑demand on interruption.
+- Notes: Store GGUFs on EBS or S3; warm on boot. Add autoscaling by CPU/GPU utilization and health checks.
+
+5) Hugging Face Spaces (demo) or Modal (serverless containers)
+- What: For public demos, use Spaces with a GPU runner to host the same Docker image; for bursty workloads, Modal can spin up containers on demand.
+- Why: Fast to share / demo; minimal infra management.
+- Notes: Not ideal for sustained heavy traffic; ensure your container pulls or bundles the GGUFs.
+
+Operational tips
+- Bundle or fetch models: Bake GGUFs into the image for the fastest cold start, or download from a private bucket to a mounted volume on container start.
+- Set deterministic parameters: Keep temperature low (e.g., 0.2–0.4) for OCR/summarization stability with quantized models.
+- Telemetry: Keep `mode`, `role`, and `hasCustomPrompt` logs; they’re already recorded by the API for observability.
+- Concurrency: For small GPUs, throttle concurrent chunk requests; our pipeline already processes chunks sequentially to reduce VRAM spikes.
+
 For Modelfiles its
 
 # Start from the base OCR model
@@ -397,7 +460,7 @@ Common `type` values your UI should handle:
 
 - **stage**: `{ type: "stage", stage: "chunking" | "ocr" | "combining" | "analyzing" | "finished" | "error" }`
 - **progress**: `{ type: "progress", current: number, total: number, message?: string }`
-- **tokens**: `{ type: "tokens", tokens: number }` (rate/throughput indicators)
+ - **tokens**: `{ type: "tokens", rate: number, total?: number }` (emitted every 500–1000ms; `rate` is tokens/sec over the last interval, `total` is cumulative)
 - **message**: `{ type: "message", message: string }`
 - **error**: `{ type: "error", error: string }`
 - **done**:
@@ -441,7 +504,7 @@ async function uploadImage(file: File): Promise<string> {
 type SseEvent =
   | { type: "stage"; stage: string }
   | { type: "progress"; current: number; total: number; message?: string }
-  | { type: "tokens"; tokens: number }
+  | { type: "tokens"; rate: number; total?: number }
   | { type: "message"; message: string }
   | { type: "error"; error: string }
   | { type: "done"; result?: string };
