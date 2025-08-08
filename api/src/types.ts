@@ -4,6 +4,7 @@ export interface JobState {
     id: string;
     stage: JobStage;
     imagePath?: string;
+    mode?: string; // threaded from UI for logging/visibility
     combinedText?: string;
     result?: string;
     error?: string;

@@ -8,7 +8,7 @@ import fs from 'fs/promises';
 import { pipelineService, ollamaService } from '@blog-reviews/picture';
 import { jobManager } from './jobManager';
 import { createSseTracker } from './sseTracker';
-import type { Role, OcrCommandArgs } from '@blog-reviews/picture';
+import type { Role, OcrCommandArgs, Mode } from '@blog-reviews/picture';
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3001;
@@ -91,9 +91,10 @@ app.post('/api/upload', upload.single('image'), async (req: Request, res: Respon
             log('Upload missing file');
             return res.status(400).json({ error: 'image file is required' });
         }
+        const mode = (req.body?.mode as Mode | undefined) || undefined;
         const job = jobManager.createJob();
-        jobManager.updateJob(job.id, { imagePath: req.file.path });
-        log('Upload accepted', { jobId: job.id, file: req.file.path, size: req.file.size });
+        jobManager.updateJob(job.id, { imagePath: req.file.path, mode });
+        log('Upload accepted', { jobId: job.id, file: req.file.path, size: req.file.size, mode: mode || null });
         res.status(202).json({ jobId: job.id });
 
         // Kick off async processing
@@ -110,9 +111,10 @@ app.post('/api/upload', upload.single('image'), async (req: Request, res: Respon
                 // Create OCR pipeline options with grid chunking flag
                 const ocrOptions = {
                     path: req.file!.path,
+                    mode,
                     progress: 'spinner',
                     noProgress: false,
-                    save: false,
+                    save: true,
                     showTimeElapsed: true,
                     showTokensPerSecond: true,
                     // Force grid chunking if environment variable is set
@@ -142,7 +144,7 @@ app.post('/api/upload', upload.single('image'), async (req: Request, res: Respon
 // Analyze using role or custom prompt
 app.post('/api/analyze', async (req: Request, res: Response) => {
     try {
-        const { jobId, role, prompt } = req.body as { jobId: string; role?: Role; prompt?: string };
+        const { jobId, role, prompt, mode } = req.body as { jobId: string; role?: Role; prompt?: string; mode?: Mode };
         if (!jobId) {
             log('Analyze missing jobId');
             return res.status(400).json({ error: 'jobId is required' });
@@ -164,7 +166,7 @@ app.post('/api/analyze', async (req: Request, res: Response) => {
                 const tracker = createSseTracker(jobId);
                 pipelineService.setProgressTracker(tracker);
                 jobManager.setStage(jobId, 'analyzing');
-                log('Analyze started', { jobId, role: role || null, hasCustomPrompt: Boolean(prompt) });
+                log('Analyze started', { jobId, role: role || null, hasCustomPrompt: Boolean(prompt), mode: mode || job.mode || null });
                 let result: string;
                 if (prompt && prompt.trim().length > 0) {
                     result = await ollamaService.analyzeWithPrompt(job.combinedText!, prompt);

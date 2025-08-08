@@ -47,6 +47,7 @@ export class PipelineService {
     async runOcrPipeline(args: OcrCommandArgs): Promise<string> {
         const {
             path: imagePath,
+            mode,
             save,
             output,
             chunkSize,
@@ -56,7 +57,7 @@ export class PipelineService {
             useGridChunking
         } = args;
 
-        logger.info(`Starting OCR pipeline for image: ${imagePath}`);
+        logger.info(`Starting OCR pipeline for image: ${imagePath}${mode ? ` (mode: ${mode})` : ''}`);
 
         try {
             // Validate the image
@@ -75,7 +76,7 @@ export class PipelineService {
             }
 
             // Chunk the image using grid-based chunking only
-            logger.info(`Chunking image with max dimension ${chunkSize || 'default'} and overlap ${overlap || 'default'}`);
+            logger.info(`Chunking image with max dimension ${chunkSize || 'default'} and overlap ${overlap || 'default'}${mode ? `, mode ${mode}` : ''}`);
 
             let chunks;
             try {
@@ -118,7 +119,7 @@ export class PipelineService {
                 this.progressTracker.start({
                     style: args.noProgress ? 'none' : args.progress || 'spinner',
                     total: chunks.length,
-                    title: 'Overall chunk processing progress',
+                    title: `Overall chunk processing progress${mode ? ` (${mode})` : ''}`,
                     showTokensPerSecond: false, // This is just for overall progress
                     showTimeElapsed: args.showTimeElapsed
                 });
@@ -137,7 +138,7 @@ export class PipelineService {
                     if (this.progressTracker) {
                         this.progressTracker.start({
                             style: args.noProgress ? 'none' : args.progress || 'spinner',
-                            title: `Extracting text from chunk ${i + 1}/${chunks.length}`,
+                            title: `Extracting text from chunk ${i + 1}/${chunks.length}${mode ? ` (${mode})` : ''}`,
                             showTokensPerSecond: true,
                             showTimeElapsed: args.showTimeElapsed
                         });
@@ -186,10 +187,10 @@ export class PipelineService {
             // Combine all chunks into a single document
             logger.info('Combining extracted text from all chunks');
             if (this.progressTracker) {
-                this.progressTracker.finish('Text extraction complete');
+                this.progressTracker.finish(`Text extraction complete${mode ? ` (${mode})` : ''}`);
                 this.progressTracker.start({
                     style: args.noProgress ? 'none' : args.progress || 'spinner',
-                    title: 'Combining text chunks',
+                    title: `Combining text chunks${mode ? ` (${mode})` : ''}`,
                     // Always show tokens per second for LLM operations
                     showTokensPerSecond: true,
                     showTimeElapsed: args.showTimeElapsed
@@ -232,9 +233,9 @@ export class PipelineService {
      * @returns Promise resolving to the analysis result
      */
     async runAnalysisPipeline(args: AnalyzeCommandArgs): Promise<string> {
-        const { path: imagePath, role = 'marketing', save, output } = args;
+        const { path: imagePath, role = 'marketing', save, output, mode } = args;
 
-        logger.info(`Starting analysis pipeline for image: ${imagePath} with role: ${role}`);
+        logger.info(`Starting analysis pipeline for image: ${imagePath} with role: ${role}${mode ? ` (mode: ${mode})` : ''}`);
 
         try {
             // First run the OCR pipeline to get the combined text
@@ -248,14 +249,14 @@ export class PipelineService {
             if (this.progressTracker) {
                 this.progressTracker.start({
                     style: args.noProgress ? 'none' : args.progress || 'spinner',
-                    title: `Analyzing document with ${role} role`,
+                    title: `Analyzing document with ${role} role${mode ? ` (${mode})` : ''}`,
                     // Always show tokens per second for LLM operations
                     showTokensPerSecond: true,
                     showTimeElapsed: args.showTimeElapsed
                 });
             }
 
-            logger.info(`Analyzing document with role: ${role}`);
+            logger.info(`Analyzing document with role: ${role}${mode ? ` (mode: ${mode})` : ''}`);
             const analysisResult = await ollamaService.analyzeDocument(combinedText, role);
 
             if (this.progressTracker) {

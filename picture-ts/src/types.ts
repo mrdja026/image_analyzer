@@ -3,7 +3,10 @@
  */
 
 // Role types
-export type Role = 'marketing' | 'po';
+export type Role = 'marketing' | 'po' | 'free';
+
+// Processing mode types (threaded from UI; currently informational only)
+export type Mode = 'analyze' | 'describe' | 'summarize' | 'all';
 
 // Progress style types
 export type ProgressStyle = 'simple' | 'bar' | 'spinner' | 'none';
@@ -63,6 +66,7 @@ export interface AnalyzeCommandArgs {
     path: string;
     role?: Role;
     prompt?: string;
+    mode?: Mode; // threaded from UI; behavior may be customized by callers
     visionModel?: string;
     textModel?: string;
     debug?: boolean;
@@ -81,6 +85,7 @@ export interface AnalyzeCommandArgs {
 
 export interface OcrCommandArgs {
     path: string;
+    mode?: Mode; // threaded from UI; behavior may be customized by callers
     visionModel?: string;
     debug?: boolean;
     save?: boolean;

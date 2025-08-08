@@ -1,16 +1,4 @@
-2025-08-07 23:25:19 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-07 23:25:19 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-07 23:29:15 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-07 23:29:15 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:12:07 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:12:07 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:13:40 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:13:40 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:16:16 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:16:16 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:23:26 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:23:26 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:26:10 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:26:10 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:33:03 [ERROR]: Failed to chunk image: TypeError: opencv_js_1.default.Mat is not a constructor 
-2025-08-08 00:33:03 [ERROR]: Error in OCR pipeline: TypeError: opencv_js_1.default.Mat is not a constructor 
+2025-08-08 07:19:36 [ERROR]: File is not a supported image format: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754630376022_shart_disgusting.webp 
+2025-08-08 07:19:36 [ERROR]: Detected format: webp 
+2025-08-08 07:19:36 [ERROR]: Supported formats: jpeg, jpg, png, gif 
+2025-08-08 07:19:36 [ERROR]: Error in OCR pipeline: Error: Invalid image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754630376022_shart_disgusting.webp 

@@ -27,7 +27,7 @@ export const SUPPORTED_FORMATS = ['jpeg', 'jpg', 'png', 'gif'];
 //tried nanonets-ocr-s:latest, but it was too slow and not as accurate
 //tried llava with temp 0 but it nonsense
 //tried moondream:latest it was just innacurate
-export const VISION_MODEL = process.env.VISION_MODEL || 'qwen2-ocr2-2b:latest'; // Using more powerful model for better analysis
+export const VISION_MODEL = process.env.VISION_MODEL || 'nanosets-ocr-temp-0:latest'; // Using more powerful model for better analysis
 //using mistral for text summarization since i quantitazed it and compiled the weights via lama.cpp
 export const TEXT_MODEL = process.env.TEXT_MODEL || 'Mistral-7B-Instruct-v0.2-Q4_K_M:latest'; // Model for text summarization
 
@@ -70,7 +70,7 @@ TEXT CHUNKS:
 `;
 
 // Role options for summarization
-export const ROLES = ['marketing', 'po'] as const;
+export const ROLES = ['marketing', 'po', 'free'] as const;
 export type Role = typeof ROLES[number];
 export const DEFAULT_ROLE: Role = 'marketing';
 
@@ -102,7 +102,7 @@ DOCUMENT TO ANALYZE:
 `;
 
 // Product Owner prompt
-      
+
 export const PO_PROMPT = `
 ROLE: You are a pragmatic, data-driven senior Product Owner.
 TASK: Analyze the following document and distill it into a concise, actionable "Product Opportunity Brief." Your analysis must be grounded in the provided text, but you are expected to make logical inferences about strategy and risk.
@@ -142,7 +142,10 @@ TASK: Analyze the following document and distill it into a concise, actionable "
 """
 `;
 
-    
+// Free-form role default prompt (UI can override via custom prompt)
+export const FREEFORM_PROMPT = `Give me the transcribed text.`;
+
+
 
 // Default prompt - will be selected based on role argument
 export const DEFAULT_SUMMARIZATION_PROMPT = MARKETING_MANAGER_PROMPT;
@@ -160,6 +163,7 @@ export const LOG_FILE = path.join(LOG_DIR, 'image_analyzer.log');
 export const ROLE_PROMPTS: Record<Role, string> = {
     marketing: MARKETING_MANAGER_PROMPT,
     po: PO_PROMPT,
+    free: FREEFORM_PROMPT,
 };
 
 // Helper function to get prompt by role

@@ -126,3 +126,16 @@ Body: {
 - If you see `OpenCV failed to initialize` errors, use the `FORCE_GRID_CHUNKING=true` environment variable to bypass OpenCV.
 - If the API server crashes on startup, check that Ollama is running and accessible.
 - For image processing errors, try using smaller images or setting `FORCE_GRID_CHUNKING=true`.
+
+IT KINDA WORKS, CANNOT test 
+2025-08-08 00:39:37 [INFO]: Processing chunk 1/4 
+2025-08-08 00:39:37 [INFO]: Extracting text from image chunk 
+2025-08-08 00:39:41 [INFO]: Processing chunk 2/4 
+2025-08-08 00:39:41 [INFO]: Extracting text from image chunk 
+2025-08-08 00:39:42 [INFO]: Processing chunk 3/4 
+2025-08-08 00:39:42 [INFO]: Extracting text from image chunk 
+2025-08-08 00:39:43 [INFO]: Processing chunk 4/4 
+2025-08-08 00:39:43 [INFO]: Extracting text from image chunk 
+2025-08-08 00:39:45 [INFO]: Successfully extracted text from 4/4 chunks 
+2025-08-08 00:39:45 [INFO]: Combining extracted text from all chunks 
+2025-08-08 00:39:45 [INFO]: Combining 4 text chunks
