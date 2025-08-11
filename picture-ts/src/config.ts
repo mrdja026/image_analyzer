@@ -181,13 +181,8 @@ export const OPENCV_WASM_PATH = process.env.OPENCV_WASM_PATH || '';
 export const DETECT_SCALE = Math.max(0.1, Math.min(1.0, Number(process.env.DETECT_SCALE || 1.0)));
 
 // OpenCV detector tuning
-export const OPENCV_EDGE_INSET = Math.max(0, Number(process.env.OPENCV_EDGE_INSET || 3));
-export const OPENCV_KERNEL_BASE_W = Math.max(1, Number(process.env.OPENCV_KERNEL_BASE_W || 40));
-export const OPENCV_KERNEL_BASE_H = Math.max(1, Number(process.env.OPENCV_KERNEL_BASE_H || 5));
-export const OPENCV_KERNEL_MIN_W = Math.max(1, Number(process.env.OPENCV_KERNEL_MIN_W || 20));
-export const OPENCV_KERNEL_MAX_W = Math.max(OPENCV_KERNEL_MIN_W, Number(process.env.OPENCV_KERNEL_MAX_W || 80));
-export const OPENCV_MIN_BLOCK_W = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_W || 50));
-export const OPENCV_MIN_BLOCK_H = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_H || 20));
+export const OPENCV_MIN_BLOCK_W = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_W || 200));
+export const OPENCV_MIN_BLOCK_H = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_H || 100));
 export const OPENCV_MAX_WIDTH_FRAC = Math.max(0, Math.min(1, Number(process.env.OPENCV_MAX_WIDTH_FRAC || 0.98)));
 export const OPENCV_MAX_HEIGHT_FRAC = Math.max(0, Math.min(1, Number(process.env.OPENCV_MAX_HEIGHT_FRAC || 0.98)));
 export const OPENCV_TALL_ASPECT_RATIO = Math.max(1, Number(process.env.OPENCV_TALL_ASPECT_RATIO || 2.2));
@@ -199,8 +194,8 @@ export const DISABLE_BLOCK_MERGE = process.env.DISABLE_BLOCK_MERGE !== '0'; // d
 export const PROJECTION_SPLIT_MIN_GAP = Math.max(4, Number(process.env.PROJECTION_SPLIT_MIN_GAP || 14));
 
 // OCR pre-processing behavior
-export const ENABLE_CHUNK_PREPROCESS = process.env.ENABLE_CHUNK_PREPROCESS === '1';
-export const ENABLE_DUAL_PASS_OCR = process.env.ENABLE_DUAL_PASS_OCR === '1';
+export const ENABLE_CHUNK_PREPROCESS = '1';
+export const ENABLE_DUAL_PASS_OCR = '1';
 
 // Chunk budgeting and subdivision tuning
 export const MAX_TOTAL_CHUNKS = Number(process.env.MAX_TOTAL_CHUNKS || 80);
@@ -213,6 +208,9 @@ export const COARSE_GRID_MAX_DIM = Number(process.env.COARSE_GRID_MAX_DIM || 120
 export const COARSE_GRID_OVERLAP = Number(process.env.COARSE_GRID_OVERLAP || 0.1);
 
 // Text-density filtering to prioritize text-heavy regions
-export const MIN_INK_FRACTION = Math.max(0, Math.min(1, Number(process.env.MIN_INK_FRACTION || 0.04)));
+export const MIN_INK_FRACTION = Math.max(0, Math.min(1, Number(process.env.MIN_INK_FRACTION || 0.08)));
 export const BLOCK_INK_MULTIPLIER = Math.max(1, Number(process.env.BLOCK_INK_MULTIPLIER || 1.5));
-export const MAX_CHUNKS_PER_BLOCK = Math.max(0, Number(process.env.MAX_CHUNKS_PER_BLOCK || 6));
+export const MAX_CHUNKS_PER_BLOCK = Math.max(0, Number(process.env.MAX_CHUNKS_PER_BLOCK || 4));
+
+export const IMAGE_OPERATION_TIMEOUT = 60; // 60 seconds for image operations
+export const TEXT_OPERATION_TIMEOUT = 300; // 300 seconds for text operations

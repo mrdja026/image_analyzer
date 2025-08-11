@@ -23,26 +23,45 @@ export interface ImageChunk {
     };
 }
 
-// Ollama API request types
+
+
+
+
+
 export interface OllamaRequestBase {
     model: string;
-    stream: boolean;
+    prompt: string;
+    stream?: boolean;
     options?: {
         temperature?: number;
-        top_p?: number;
-        top_k?: number;
+        // Add other valid Ollama options here as needed
     };
 }
 
-export interface OllamaTextRequest extends OllamaRequestBase {
-    prompt: string;
-}
-
+/**
+ * A request that includes image data.
+ */
 export interface OllamaImageRequest extends OllamaRequestBase {
-    prompt: string;
-    images: string[]; // Base64 encoded images
+    images: string[];
 }
 
+/**
+ * A request that is for text only (no image data).
+ */
+export interface OllamaTextRequest extends OllamaRequestBase {
+    images?: never; // Explicitly forbid the 'images' property
+}
+
+/**
+ * A unified type that can be EITHER a text request OR an image request.
+ * This is the type our unified `makeRequest` function will use.
+ */
+export type OllamaRequest = OllamaImageRequest | OllamaTextRequest;
+
+
+/**
+ * The structure of a single chunk of a streamed response from Ollama.
+ */
 // Ollama API response types
 export interface OllamaResponse {
     model: string;
@@ -57,6 +76,7 @@ export interface OllamaResponse {
     eval_count?: number;
     eval_duration?: number;
 }
+
 
 // CLI argument types
 export interface AnalyzeCommandArgs {
