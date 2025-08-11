@@ -15,7 +15,7 @@ import {
     DEFAULT_CHUNK_OVERLAP
 } from '../config';
 
-import { ENABLE_OPENCV, DETECT_SCALE, MAX_TOTAL_CHUNKS, BLOCK_SINGLETON_DIM_FACTOR, INBLOCK_OVERLAP, COARSE_GRID_MAX_DIM, COARSE_GRID_OVERLAP, MIN_INK_FRACTION, BLOCK_INK_MULTIPLIER, MAX_CHUNKS_PER_BLOCK, PHOTO_VARIANCE_THRESHOLD } from '../config';
+import { ENABLE_OPENCV, DETECT_SCALE, MAX_TOTAL_CHUNKS, BLOCK_SINGLETON_DIM_FACTOR, INBLOCK_OVERLAP, COARSE_GRID_MAX_DIM, COARSE_GRID_OVERLAP, MIN_INK_FRACTION, BLOCK_INK_MULTIPLIER, MAX_CHUNKS_PER_BLOCK } from '../config';
 import { getOpenCV } from '../lib/opencv';
 
 async function loadOpenCV(): Promise<any> { return getOpenCV(); }
@@ -85,12 +85,7 @@ export async function detectContentBlocks(
             // Create source RGBA mat
             const matRGBA = new cv.Mat(origHeight, origWidth, cv.CV_8UC4);
             matRGBA.data.set(imageBuffer);
-            try {
-                const r = (matRGBA as any).rows ?? origHeight;
-                const c = (matRGBA as any).cols ?? origWidth;
-                const ch = typeof (matRGBA as any).channels === 'function' ? (matRGBA as any).channels() : 4;
-                logger.info(`OpenCV processAtScale start: scale=${scale}, rows=${r}, cols=${c}, channels=${ch}`);
-            } catch { }
+
             // Resize
             let mat: any = matRGBA;
             if (scale !== 1.0) {
@@ -142,10 +137,7 @@ export async function detectContentBlocks(
                     const y = Math.round(rect.y * inv);
                     const w = Math.round(rect.width * inv);
                     const h = Math.round(rect.height * inv);
-                    // Relative min-size thresholds to avoid over-tight crops
-                    const minW = Math.max(40, Math.floor((origWidth as number) * 0.03));
-                    const minH = Math.max(20, Math.floor((origHeight as number) * 0.02));
-                    if (w >= minW && h >= minH && w < origWidth * 0.99 && h < origHeight * 0.99) {
+                    if (w > 40 && h > 20 && w < origWidth * 0.99 && h < origHeight * 0.99) {
                         blocks.push({ x, y, width: w, height: h });
                     }
                 }
@@ -165,8 +157,7 @@ export async function detectContentBlocks(
             // Cleanup mats
             if (scale !== 1.0) mat.delete();
             gray.delete(); blurred.delete(); matRGBA.delete();
-            const sample = contentBlocksAll.slice(0, 5).map(b => `${b.x},${b.y},${b.width}x${b.height}`).join(' | ');
-            logger.info(`OpenCV blocks at scale=${scale}: count=${contentBlocksAll.length}, sample=[${sample}]`);
+
             return { blocks: contentBlocksAll, kernel: selectedKernel, type: usedType };
         };
 
@@ -318,8 +309,8 @@ export async function chunkImage(
     overlapPercent: number = DEFAULT_CHUNK_OVERLAP
     // Note: saveChunks and outputDir logic can be added back here if needed
 ): Promise<ImageChunk[]> {
-    // Prefer OpenCV content-aware chunking when enabled; avoid defaulting to grid.
-    logger.info(`Chunking image (OpenCV-first strategy): ${imagePath}`);
+    // If OpenCV is disabled, we rely on grid-based chunking per reason.md.
+    logger.info(`Chunking image with content-aware strategy: ${imagePath}`);
 
     // --- STEP 1: EFFICIENT DATA LOADING ---
     // We read the file and get its metadata and raw pixel buffer ONCE.
@@ -340,31 +331,40 @@ export async function chunkImage(
     if (contentBlocks.length > 0) {
         logger.info(`Detected ${contentBlocks.length} potential content blocks.`);
     } else {
-        if (!ENABLE_OPENCV) {
-            logger.warn('OpenCV disabled; using grid-based chunking.');
-            const chunkCoords = calculateOptimalChunks(
-                metadata.width as number,
-                metadata.height as number,
-                maxDim,
-                overlapPercent
-            );
-            const gridChunks: ImageChunk[] = [];
-            let gIndex = 0;
-            for (const [cx, cy, cw, ch] of chunkCoords) {
-                try {
-                    const buf = await image.clone().extract({ left: cx, top: cy, width: cw, height: ch }).toBuffer();
-                    gridChunks.push({ data: buf, index: gIndex++, position: { x: cx, y: cy, width: cw, height: ch } });
-                } catch (e) {
-                    logger.error(`Error extracting grid chunk at (${cx}, ${cy}): ${e}`);
-                }
+        logger.warn('No content blocks detected or OpenCV disabled; falling back to grid-based chunking.');
+    }
+
+    // --- STEP 3: FALLBACK and CHUNKING LOGIC ---
+    // If our smart detector finds nothing, we fall back to the old, simple grid.
+    if (contentBlocks.length === 0) {
+        const chunkCoords = calculateOptimalChunks(
+            metadata.width as number,
+            metadata.height as number,
+            maxDim,
+            overlapPercent
+        );
+        const result: ImageChunk[] = [];
+        let chunkIndex = 0;
+        for (const [cx, cy, cw, ch] of chunkCoords) {
+            try {
+                const chunkBuffer = await image.clone().extract({
+                    left: cx,
+                    top: cy,
+                    width: cw,
+                    height: ch
+                }).toBuffer();
+
+                result.push({
+                    data: chunkBuffer,
+                    index: chunkIndex++,
+                    position: { x: cx, y: cy, width: cw, height: ch }
+                });
+            } catch (error) {
+                logger.error(`Error extracting grid chunk at (${cx}, ${cy}): ${error}`);
             }
-            logger.info(`Generated ${gridChunks.length} grid chunks.`);
-            return gridChunks;
         }
-        // OpenCV enabled but detected zero blocks: use a single full-image chunk to preserve context
-        logger.warn('OpenCV detected zero blocks; using a single full-image chunk.');
-        const fullBuf = await image.clone().toBuffer();
-        return [{ data: fullBuf, index: 0, position: { x: 0, y: 0, width: metadata.width as number, height: metadata.height as number } }];
+        logger.info(`Generated ${result.length} grid chunks.`);
+        return result;
     }
 
     // Merge overlapping/adjacent blocks to reduce fragmentation
@@ -434,10 +434,7 @@ export async function chunkImage(
         return coarse;
     }
 
-    // Global candidate collection for text-first ranking
-    type Candidate = { score: number, x: number, y: number, w: number, h: number };
-    const candidates: Candidate[] = [];
-
+    // Proceed with block-aware extraction
     for (const block of mergedBlocks) {
         // Skip blocks with very low text density
         const blockInk = await estimateInkFraction(image, block.x, block.y, block.width, block.height);
@@ -448,54 +445,38 @@ export async function chunkImage(
 
         const isSingleton = block.width <= singletonThresholdW && block.height <= singletonThresholdH;
         if (isSingleton) {
-            candidates.push({ score: blockInk, x: block.x, y: block.y, w: block.width, h: block.height });
+            try {
+                const chunkBuffer = await image.clone().extract({ left: block.x, top: block.y, width: block.width, height: block.height }).toBuffer();
+                result.push({ data: chunkBuffer, index: chunkIndex++, position: { x: block.x, y: block.y, width: block.width, height: block.height } });
+            } catch (e) {
+                logger.error(`Error extracting singleton block at (${block.x}, ${block.y}): ${e}`);
+            }
             continue;
         }
 
         const blockChunks = calculateOptimalChunks(block.width, block.height, innerMaxDim, innerOverlap);
-        const ranked: Array<{ score: number, x: number, y: number, w: number, h: number }> = [];
+        // Rank chunks by ink density and cap per-block
+        const ranked: Array<{ score: number, cx: number, cy: number, cw: number, ch: number }> = [];
         for (const [cx, cy, cw, ch] of blockChunks) {
             const absX = block.x + cx, absY = block.y + cy;
             const score = await estimateInkFraction(image, absX, absY, cw, ch);
             if (score >= MIN_INK_FRACTION) {
-                ranked.push({ score, x: absX, y: absY, w: cw, h: ch });
+                ranked.push({ score, cx, cy, cw, ch });
             }
         }
+
         ranked.sort((a, b) => b.score - a.score);
         const limited = MAX_CHUNKS_PER_BLOCK > 0 ? ranked.slice(0, MAX_CHUNKS_PER_BLOCK) : ranked;
-        for (const r of limited) {
-            candidates.push(r);
-        }
-    }
 
-    // Global photo suppression and budgeted extraction
-    candidates.sort((a, b) => b.score - a.score);
-    const budgeted = candidates.slice(0, MAX_TOTAL_CHUNKS);
-
-    for (const c of budgeted) {
-        // Optional: fast photo suppression by variance (skip very uniform or very saturated regions)
-        const varianceOk = await passesVarianceCheck(image, c.x, c.y, c.w, c.h);
-        if (!varianceOk) continue;
-        try {
-            // Add small padding around each crop to provide OCR with additional context
-            const PAD = Number(process.env.CROP_PAD_PX || 8);
-            const imgW = metadata.width as number;
-            const imgH = metadata.height as number;
-            const left = Math.max(0, c.x - PAD);
-            const top = Math.max(0, c.y - PAD);
-            const width = Math.min(c.w + PAD * 2, imgW - left);
-            const height = Math.min(c.h + PAD * 2, imgH - top);
-            // Flatten transparency onto white background before OCR to avoid "empty" results
-            const chunkBuffer = await image
-                .clone()
-                .extract({ left, top, width, height })
-                .flatten({ background: { r: 255, g: 255, b: 255 } })
-                .png()
-                .toBuffer();
-            logger.info(`Chunk ${chunkIndex} dims ${width}x${height} bytes=${chunkBuffer.length}`);
-            result.push({ data: chunkBuffer, index: chunkIndex++, position: { x: left, y: top, width, height } });
-        } catch (e) {
-            logger.error(`Error extracting candidate at (${c.x}, ${c.y}): ${e}`);
+        for (const { cx, cy, cw, ch } of limited) {
+            const absoluteX = block.x + cx;
+            const absoluteY = block.y + cy;
+            try {
+                const chunkBuffer = await image.clone().extract({ left: absoluteX, top: absoluteY, width: cw, height: ch }).toBuffer();
+                result.push({ data: chunkBuffer, index: chunkIndex++, position: { x: absoluteX, y: absoluteY, width: cw, height: ch } });
+            } catch (error) {
+                logger.error(`Error extracting sub-chunk at (${absoluteX}, ${absoluteY}): ${error}`);
+            }
         }
     }
 
@@ -527,30 +508,6 @@ async function estimateInkFraction(
         return dark / buf.length;
     } catch {
         return 1.0; // be permissive on failure
-    }
-}
-
-// Simple variance check to filter out photo-like or uniform regions
-async function passesVarianceCheck(
-    image: sharp.Sharp,
-    left: number,
-    top: number,
-    width: number,
-    height: number
-): Promise<boolean> {
-    try {
-        const tW = 48, tH = 48;
-        const buf = await image.clone().extract({ left, top, width, height }).grayscale().resize({ width: tW, height: tH, fit: 'fill' }).raw().toBuffer();
-        // Compute normalized variance
-        let sum = 0, sum2 = 0;
-        for (let i = 0; i < buf.length; i++) { sum += buf[i]; sum2 += buf[i] * buf[i]; }
-        const n = buf.length;
-        const mean = sum / n / 255;
-        const varN = (sum2 / n - (sum / n) * (sum / n)) / (255 * 255);
-        // Very low variance likely blank; extremely high variance + high saturation would be photo, but we only test variance here
-        return varN >= PHOTO_VARIANCE_THRESHOLD;
-    } catch {
-        return true;
     }
 }
 

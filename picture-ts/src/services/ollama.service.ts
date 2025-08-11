@@ -15,10 +15,7 @@ import {
     TEXT_MODEL,
     CHUNK_ANALYSIS_PROMPT,
     CHUNK_COMBINE_PROMPT,
-    getPromptByRole,
-    OCR_STRICT_MODE,
-    OCR_STRICT_PROMPT,
-    OCR_COMBINE_STRICT_PROMPT,
+    getPromptByRole
 } from '../config';
 
 // Define operation-specific timeouts
@@ -78,13 +75,17 @@ export class OllamaService {
      * @param isLongOperation Whether this is a long operation (chunk combining or document analysis)
      * @returns Promise resolving to the model's response
      */
-    private async makeTextRequest(model: string, prompt: string, isLongOperation: boolean = false, stream: boolean = false): Promise<string> {
+    private async makeTextRequest(model: string, prompt: string, isLongOperation: boolean = false): Promise<string> {
         const payload: OllamaTextRequest = {
             model,
             prompt,
-            stream,
+            stream: false,
+            options: {
+                temperature: 0.1 // Low temperature for more deterministic outputs
+            }
         };
 
+        // Use longer timeout for chunk combining and document analysis
         const timeout = isLongOperation ? TEXT_OPERATION_TIMEOUT : this.defaultTimeout;
         return this.makeRequest(payload, timeout);
     }
@@ -96,12 +97,15 @@ export class OllamaService {
      * @param imageBase64 Base64-encoded image
      * @returns Promise resolving to the model's response
      */
-    private async makeImageRequest(model: string, prompt: string, imageBase64: string, stream: boolean = false): Promise<string> {
+    private async makeImageRequest(model: string, prompt: string, imageBase64: string): Promise<string> {
         const payload: OllamaImageRequest = {
             model,
             prompt,
-            stream,
+            stream: false,
             images: [imageBase64],
+            options: {
+                temperature: 0.1 // Low temperature for more deterministic outputs
+            }
         };
 
         return this.makeRequest(payload, IMAGE_OPERATION_TIMEOUT);
@@ -117,6 +121,12 @@ export class OllamaService {
         let attempts = 0;
         let lastError: Error | null = null;
 
+        // Enable streaming for better token rate tracking
+        const useStreaming = true;
+        if (useStreaming) {
+            payload.stream = true;
+        }
+
         while (attempts < this.maxRetries) {
             try {
                 // If this is a retry, wait before making the request
@@ -128,7 +138,7 @@ export class OllamaService {
 
                 logger.debug(`Making request to ${this.apiUrl} with model ${payload.model} (timeout: ${timeoutSeconds}s)`);
 
-                if (payload.stream) {
+                if (useStreaming) {
                     // Handle streaming response
                     const response = await axios.post(
                         this.apiUrl,
@@ -224,9 +234,19 @@ export class OllamaService {
             // Convert image buffer to base64
             const base64Image = chunk.toString('base64');
 
-            const prompt = OCR_STRICT_MODE ? OCR_STRICT_PROMPT : CHUNK_ANALYSIS_PROMPT;
-            // OCR should be non-streaming for stable ordering and simpler UI feedback
-            const result = await this.makeImageRequest(VISION_MODEL, prompt, base64Image, false);
+            // Create a payload that includes the image
+            const payload: OllamaImageRequest = {
+                model: VISION_MODEL,
+                prompt: CHUNK_ANALYSIS_PROMPT,
+                stream: false,
+                images: [base64Image],
+                options: {
+                    temperature: 0.1 // Low temperature for more deterministic outputs
+                }
+            };
+
+            // Make the request directly to ensure token rate reporting
+            const result = await this.makeRequest(payload, IMAGE_OPERATION_TIMEOUT);
 
             logger.debug('Successfully extracted text from image chunk');
             return result;
@@ -257,11 +277,14 @@ export class OllamaService {
 
             // Build the prompt with all text chunks
             const combinedTexts = texts.map((text, i) => `CHUNK ${i + 1}:\n${text}`).join('\n\n');
-            const combinePromptBase = OCR_STRICT_MODE ? OCR_COMBINE_STRICT_PROMPT : CHUNK_COMBINE_PROMPT;
-            const prompt = `${combinePromptBase}\n\nHere are the text chunks extracted from the image:\n\n${combinedTexts}`;
+            const prompt = `${CHUNK_COMBINE_PROMPT}\n\nHere are the text chunks extracted from the image:\n\n${combinedTexts}`;
 
             // Make the request to the text model with longer timeout
-            const result = await this.makeTextRequest(TEXT_MODEL, prompt, true, true);
+            const result = await this.makeTextRequest(
+                TEXT_MODEL,
+                prompt,
+                true // This is a long operation
+            );
 
             logger.debug('Successfully combined text chunks');
             return result;
@@ -291,8 +314,7 @@ export class OllamaService {
             const result = await this.makeTextRequest(
                 TEXT_MODEL,
                 fullPrompt,
-                true, // This is a long operation
-                true  // Stream for analysis to show TPS
+                true // This is a long operation
             );
 
             logger.debug('Successfully analyzed document');
