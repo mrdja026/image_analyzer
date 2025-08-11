@@ -10,3 +10,6 @@ alwaysApply: true
 - For every task create a plan of implementation and ask for confirmation DO NOT DEVIATE FROM THIS!!!!
 - After creating a plan take a deep breath and assume a role of a Senior Architect and start coding it
 - After every task say i am finished, also after every phase, so i can know to open a new chat
+- VISION_MODEL and TEXT_MODEL ARE HARDCODED IN picture/ts/src/config.ts and the models are built via model files
+- Only prompts that are related to vision model picture/ts/src/config.ts are passed via ollama server
+- App must use OpenCV to preprocess the image before sending them to ocr model

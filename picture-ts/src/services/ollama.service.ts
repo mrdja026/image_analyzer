@@ -103,9 +103,7 @@ export class OllamaService {
             prompt,
             stream: false,
             images: [imageBase64],
-            options: {
-                temperature: 0.1 // Low temperature for more deterministic outputs
-            }
+            options: {}
         };
 
         return this.makeRequest(payload, IMAGE_OPERATION_TIMEOUT);
@@ -240,9 +238,7 @@ export class OllamaService {
                 prompt: CHUNK_ANALYSIS_PROMPT,
                 stream: false,
                 images: [base64Image],
-                options: {
-                    temperature: 0.1 // Low temperature for more deterministic outputs
-                }
+                options: {}
             };
 
             // Make the request directly to ensure token rate reporting

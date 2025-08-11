@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import sharp from 'sharp';
 import logger from '../lib/logger';
-import { validateImage, chunkImage, saveImageChunks, getImageDimensions } from './image.service';
+import { validateImage, chunkImage, saveImageChunks, getImageDimensions, preprocessChunkForOcr } from './image.service';
 import ollamaService from './ollama.service';
 import { AnalyzeCommandArgs, OcrCommandArgs, Role, ProgressTracker } from '../types';
 import { DEFAULT_OUTPUT_DIR } from '../config';
@@ -139,8 +139,23 @@ export class PipelineService {
                         });
                     }
 
-                    // Extract text from the chunk
-                    const extractedText = await ollamaService.extractTextFromChunk(chunk.data);
+                    // Optional dual-pass OCR: original vs. preprocessed
+                    let extractedText = '';
+                    if (process.env.ENABLE_DUAL_PASS_OCR === '1') {
+                        const [origText, preBuf] = await Promise.all([
+                            ollamaService.extractTextFromChunk(chunk.data),
+                            preprocessChunkForOcr(chunk.data)
+                        ]);
+                        const preText = await ollamaService.extractTextFromChunk(preBuf);
+                        const score = (s: string) => {
+                            const letters = (s.match(/[A-Za-z0-9]/g) || []).length;
+                            return letters / Math.max(1, s.length);
+                        };
+                        extractedText = score(preText) >= score(origText) ? preText : origText;
+                    } else {
+                        const preprocessed = await preprocessChunkForOcr(chunk.data);
+                        extractedText = await ollamaService.extractTextFromChunk(preprocessed);
+                    }
 
                     // Finish the progress tracker for this chunk
                     if (this.progressTracker) {
@@ -212,7 +227,23 @@ export class PipelineService {
                         .flatten({ background: { r: 255, g: 255, b: 255 } })
                         .png()
                         .toBuffer();
-                    const text = await ollamaService.extractTextFromChunk(buf);
+                    const dual = process.env.ENABLE_DUAL_PASS_OCR === '1';
+                    let text: string;
+                    if (dual) {
+                        const [origText, preBuf] = await Promise.all([
+                            ollamaService.extractTextFromChunk(buf),
+                            preprocessChunkForOcr(buf)
+                        ]);
+                        const preText = await ollamaService.extractTextFromChunk(preBuf);
+                        const score = (s: string) => {
+                            const letters = (s.match(/[A-Za-z0-9]/g) || []).length;
+                            return letters / Math.max(1, s.length);
+                        };
+                        text = score(preText) >= score(origText) ? preText : origText;
+                    } else {
+                        const preBuf = await preprocessChunkForOcr(buf);
+                        text = await ollamaService.extractTextFromChunk(preBuf);
+                    }
                     const ok = text && !PLACEHOLDER_RE.test(text.trim()) && alnumRatio(text) >= PREFILTER_MIN_ALNUM;
                     if (ok) {
                         fallbackText = text.trimEnd();

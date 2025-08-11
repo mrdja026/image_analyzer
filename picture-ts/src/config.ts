@@ -180,6 +180,28 @@ export const OPENCV_WASM_PATH = process.env.OPENCV_WASM_PATH || '';
 // Optional downscale factor for OpenCV content detection to reduce WASM memory usage on large images
 export const DETECT_SCALE = Math.max(0.1, Math.min(1.0, Number(process.env.DETECT_SCALE || 1.0)));
 
+// OpenCV detector tuning
+export const OPENCV_EDGE_INSET = Math.max(0, Number(process.env.OPENCV_EDGE_INSET || 3));
+export const OPENCV_KERNEL_BASE_W = Math.max(1, Number(process.env.OPENCV_KERNEL_BASE_W || 40));
+export const OPENCV_KERNEL_BASE_H = Math.max(1, Number(process.env.OPENCV_KERNEL_BASE_H || 5));
+export const OPENCV_KERNEL_MIN_W = Math.max(1, Number(process.env.OPENCV_KERNEL_MIN_W || 20));
+export const OPENCV_KERNEL_MAX_W = Math.max(OPENCV_KERNEL_MIN_W, Number(process.env.OPENCV_KERNEL_MAX_W || 80));
+export const OPENCV_MIN_BLOCK_W = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_W || 50));
+export const OPENCV_MIN_BLOCK_H = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_H || 20));
+export const OPENCV_MAX_WIDTH_FRAC = Math.max(0, Math.min(1, Number(process.env.OPENCV_MAX_WIDTH_FRAC || 0.98)));
+export const OPENCV_MAX_HEIGHT_FRAC = Math.max(0, Math.min(1, Number(process.env.OPENCV_MAX_HEIGHT_FRAC || 0.98)));
+export const OPENCV_TALL_ASPECT_RATIO = Math.max(1, Number(process.env.OPENCV_TALL_ASPECT_RATIO || 2.2));
+export const OPENCV_TALL_DOWNSCALE = Math.max(0.1, Math.min(1, Number(process.env.OPENCV_TALL_DOWNSCALE || 0.75)));
+export const OPENCV_DEBUG_EXPORT = process.env.OPENCV_DEBUG_EXPORT === '1';
+
+// Block merge and whitespace splitting controls
+export const DISABLE_BLOCK_MERGE = process.env.DISABLE_BLOCK_MERGE !== '0'; // default: true
+export const PROJECTION_SPLIT_MIN_GAP = Math.max(4, Number(process.env.PROJECTION_SPLIT_MIN_GAP || 14));
+
+// OCR pre-processing behavior
+export const ENABLE_CHUNK_PREPROCESS = process.env.ENABLE_CHUNK_PREPROCESS === '1';
+export const ENABLE_DUAL_PASS_OCR = process.env.ENABLE_DUAL_PASS_OCR === '1';
+
 // Chunk budgeting and subdivision tuning
 export const MAX_TOTAL_CHUNKS = Number(process.env.MAX_TOTAL_CHUNKS || 80);
 // Treat blocks with both dimensions <= CHUNK_MAX_DIM * FACTOR as single-chunk

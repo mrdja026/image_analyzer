@@ -15,14 +15,14 @@ import {
     DEFAULT_CHUNK_OVERLAP
 } from '../config';
 
-import { ENABLE_OPENCV, DETECT_SCALE, MAX_TOTAL_CHUNKS, BLOCK_SINGLETON_DIM_FACTOR, INBLOCK_OVERLAP, COARSE_GRID_MAX_DIM, COARSE_GRID_OVERLAP, MIN_INK_FRACTION, BLOCK_INK_MULTIPLIER, MAX_CHUNKS_PER_BLOCK } from '../config';
+import { ENABLE_OPENCV, DETECT_SCALE, MAX_TOTAL_CHUNKS, BLOCK_SINGLETON_DIM_FACTOR, INBLOCK_OVERLAP, COARSE_GRID_MAX_DIM, COARSE_GRID_OVERLAP, MIN_INK_FRACTION, BLOCK_INK_MULTIPLIER, MAX_CHUNKS_PER_BLOCK, OPENCV_EDGE_INSET, OPENCV_KERNEL_BASE_W, OPENCV_KERNEL_BASE_H, OPENCV_KERNEL_MIN_W, OPENCV_KERNEL_MAX_W, OPENCV_MIN_BLOCK_W, OPENCV_MIN_BLOCK_H, OPENCV_MAX_WIDTH_FRAC, OPENCV_MAX_HEIGHT_FRAC, OPENCV_TALL_ASPECT_RATIO, OPENCV_TALL_DOWNSCALE, OPENCV_DEBUG_EXPORT, DISABLE_BLOCK_MERGE, PROJECTION_SPLIT_MIN_GAP, ENABLE_CHUNK_PREPROCESS, ENABLE_DUAL_PASS_OCR } from '../config';
 import { getOpenCV } from '../lib/opencv';
 
 async function loadOpenCV(): Promise<any> { return getOpenCV(); }
 
 // Merge overlapping or adjacent content blocks to reduce fragmentation
 export function mergeBlocks(blocks: { x: number, y: number, width: number, height: number }[]): { x: number, y: number, width: number, height: number }[] {
-    if (blocks.length <= 1) return blocks;
+    if (DISABLE_BLOCK_MERGE || blocks.length <= 1) return blocks;
     // Sort by top-left
     const sorted = blocks.slice().sort((a, b) => (a.y - b.y) || (a.x - b.x));
     const merged: { x: number, y: number, width: number, height: number }[] = [];
@@ -73,114 +73,168 @@ export async function detectContentBlocks(
         return [];
     }
 
-
     try {
         const cv = await loadOpenCV();
 
         const origWidth = metadata.width as number;
         const origHeight = metadata.height as number;
+        if (!origWidth || !origHeight) return [];
 
-        // Helper to process at a given scale with different thresholding strategies
-        const processAtScale = (scale: number) => {
-            // Create source RGBA mat
-            const matRGBA = new cv.Mat(origHeight, origWidth, cv.CV_8UC4);
-            matRGBA.data.set(imageBuffer);
+        // Determine processing scale for very tall images
+        const aspectRatio = origHeight / Math.max(1, origWidth);
+        const scale = aspectRatio >= OPENCV_TALL_ASPECT_RATIO ? OPENCV_TALL_DOWNSCALE : (DETECT_SCALE > 0 ? DETECT_SCALE : 1.0);
 
-            // Resize
-            let mat: any = matRGBA;
-            if (scale !== 1.0) {
-                const resized = new cv.Mat();
-                const newSize = new cv.Size(
-                    Math.max(1, Math.round(origWidth * scale)),
-                    Math.max(1, Math.round(origHeight * scale))
-                );
-                cv.resize(matRGBA, resized, newSize, 0, 0, scale < 1.0 ? cv.INTER_AREA : cv.INTER_LINEAR);
-                mat = resized;
-            }
+        // Source RGBA Mat
+        const srcRGBA = new cv.Mat(origHeight, origWidth, cv.CV_8UC4);
+        srcRGBA.data.set(imageBuffer);
 
-            const gray = new cv.Mat();
-            cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY, 0);
-
-            // Light blur to reduce noise
-            const blurred = new cv.Mat();
-            const ksize = new cv.Size(3, 3);
-            cv.GaussianBlur(gray, blurred, ksize, 0, 0, cv.BORDER_DEFAULT);
-
-            const tryThresholds = [
-                { type: 'otsu_inv', fn: () => { const m = new cv.Mat(); cv.threshold(blurred, m, 0, 255, cv.THRESH_BINARY_INV | cv.THRESH_OTSU); return m; } },
-                { type: 'otsu', fn: () => { const m = new cv.Mat(); cv.threshold(blurred, m, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU); return m; } },
-                { type: 'adaptive_mean', fn: () => { const m = new cv.Mat(); cv.adaptiveThreshold(blurred, m, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 35, 10); return m; } },
-            ];
-
-            const contentBlocksAll: { x: number, y: number, width: number, height: number }[] = [];
-            let selectedKernel: [number, number] = [0, 0];
-            let usedType = '';
-
-            for (const t of tryThresholds) {
-                const bin = t.fn();
-                // Morphology: wider horizontal kernel, modest vertical to connect text lines into blocks
-                const kx = Math.max(20, Math.floor(mat.cols / 40));
-                const ky = Math.max(3, Math.floor(mat.rows / 300));
-                const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(kx, ky));
-                const morph = new cv.Mat();
-                cv.morphologyEx(bin, morph, cv.MORPH_CLOSE, kernel);
-
-                const contours = new cv.MatVector();
-                const hierarchy = new cv.Mat();
-                cv.findContours(morph, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-                const blocks: { x: number, y: number, width: number, height: number }[] = [];
-                const inv = 1 / scale;
-                for (let i = 0; i < contours.size(); ++i) {
-                    const rect = cv.boundingRect(contours.get(i));
-                    const x = Math.round(rect.x * inv);
-                    const y = Math.round(rect.y * inv);
-                    const w = Math.round(rect.width * inv);
-                    const h = Math.round(rect.height * inv);
-                    if (w > 40 && h > 20 && w < origWidth * 0.99 && h < origHeight * 0.99) {
-                        blocks.push({ x, y, width: w, height: h });
-                    }
-                }
-
-                // Cleanup per iteration
-                bin.delete(); morph.delete(); kernel.delete?.(); contours.delete(); hierarchy.delete();
-
-                if (blocks.length > 0) {
-                    contentBlocksAll.push(...blocks);
-                    selectedKernel = [kx, ky];
-                    usedType = t.type;
-                    // Prefer first successful method
-                    break;
-                }
-            }
-
-            // Cleanup mats
-            if (scale !== 1.0) mat.delete();
-            gray.delete(); blurred.delete(); matRGBA.delete();
-
-            return { blocks: contentBlocksAll, kernel: selectedKernel, type: usedType };
-        };
-
-        // Try multiple scales: configured, 1.0, and 1.5 upscale
-        const scales = Array.from(new Set([
-            (DETECT_SCALE > 0 ? DETECT_SCALE : 1.0),
-            1.0,
-            1.5,
-        ])).filter(s => s > 0.2 && s <= 2.0);
-
-        for (const s of scales) {
-            const { blocks, kernel, type } = processAtScale(s);
-            logger.info(`OpenCV detection at scale=${s} using ${type} produced ${blocks.length} blocks (kernel=${kernel[0]}x${kernel[1]}).`);
-            if (blocks.length > 0) {
-                return blocks.sort((a, b) => a.y - b.y);
-            }
+        // Resize for processing if needed
+        let proc = srcRGBA;
+        if (scale !== 1.0) {
+            const resized = new cv.Mat();
+            const newSize = new cv.Size(
+                Math.max(1, Math.round(origWidth * scale)),
+                Math.max(1, Math.round(origHeight * scale))
+            );
+            cv.resize(srcRGBA, resized, newSize, 0, 0, scale < 1.0 ? cv.INTER_AREA : cv.INTER_LINEAR);
+            proc = resized;
         }
 
-        // No blocks found at any scale
-        return [];
+        // Add a small border to mitigate right/east edge artifacts
+        const inset = OPENCV_EDGE_INSET;
+        const bordered = new cv.Mat();
+        const white = new cv.Scalar(255, 255, 255, 255);
+        cv.copyMakeBorder(proc, bordered, inset, inset, inset, inset, cv.BORDER_CONSTANT, white);
+
+        // Grayscale and Otsu inverted binary
+        const gray = new cv.Mat();
+        cv.cvtColor(bordered, gray, cv.COLOR_RGBA2GRAY, 0);
+        const blurred = new cv.Mat();
+        const blurK = new cv.Size(3, 3);
+        cv.GaussianBlur(gray, blurred, blurK, 0, 0, cv.BORDER_DEFAULT);
+        const bin = new cv.Mat();
+        cv.threshold(blurred, bin, 0, 255, cv.THRESH_BINARY_INV | cv.THRESH_OTSU);
+
+        // Morphological closing with wide-short kernel derived from width
+        // Kernel from processed width directly
+        const kernelW = Math.max(OPENCV_KERNEL_MIN_W, Math.min(OPENCV_KERNEL_MAX_W, Math.floor(proc.cols / 40)));
+        const kernelH = OPENCV_KERNEL_BASE_H;
+        const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(kernelW, kernelH));
+        const morph = new cv.Mat();
+        cv.morphologyEx(bin, morph, cv.MORPH_CLOSE, kernel);
+
+        // Contours and filtering
+        const contours = new cv.MatVector();
+        const hierarchy = new cv.Mat();
+        cv.findContours(morph, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+        const inv = 1 / scale;
+        const blocks: { x: number, y: number, width: number, height: number }[] = [];
+        for (let i = 0; i < contours.size(); ++i) {
+            const rect = cv.boundingRect(contours.get(i));
+            // Map back to original coordinates and remove padding
+            const x = Math.max(0, Math.round((rect.x - inset) * inv));
+            const y = Math.max(0, Math.round((rect.y - inset) * inv));
+            const w = Math.round(rect.width * inv);
+            const h = Math.round(rect.height * inv);
+
+            // Clamp to image bounds
+            const cx = Math.min(Math.max(0, x), origWidth - 1);
+            const cy = Math.min(Math.max(0, y), origHeight - 1);
+            const cw = Math.max(0, Math.min(w, origWidth - cx));
+            const ch = Math.max(0, Math.min(h, origHeight - cy));
+
+            if (cw < OPENCV_MIN_BLOCK_W || ch < OPENCV_MIN_BLOCK_H) continue; // tiny noise
+            if (cw >= Math.floor(origWidth * OPENCV_MAX_WIDTH_FRAC) && ch >= Math.floor(origHeight * OPENCV_MAX_HEIGHT_FRAC)) continue; // page-sized
+            blocks.push({ x: cx, y: cy, width: cw, height: ch });
+        }
+
+        // Cleanup mats
+        contours.delete(); hierarchy.delete(); morph.delete(); kernel.delete?.(); bin.delete(); blurred.delete(); gray.delete(); bordered.delete();
+        if (proc !== srcRGBA) proc.delete();
+        srcRGBA.delete();
+
+        logger.info(`OpenCV detection: blocks=${blocks.length} kernel=${kernelW}x${kernelH} scale=${scale.toFixed(2)} aspect=${aspectRatio.toFixed(2)}`);
+        return blocks.sort((a, b) => a.y - b.y);
     } catch (error) {
-        // Any OpenCV failure should force grid fallback.
         return [];
+    }
+}
+
+/**
+ * Preprocess an image chunk for OCR using OpenCV (grayscale + denoise + Otsu threshold).
+ * Falls back to the original chunk on any failure or when OpenCV is disabled.
+ */
+export async function preprocessChunkForOcr(chunk: Buffer): Promise<Buffer> {
+    try {
+        if (!ENABLE_OPENCV || !ENABLE_CHUNK_PREPROCESS) {
+            return chunk;
+        }
+
+        const cv = await loadOpenCV();
+
+        // Decode with sharp to get raw pixels
+        const img = sharp(chunk);
+        const metadata = await img.metadata();
+        if (!metadata.width || !metadata.height) {
+            return chunk;
+        }
+
+        const width = metadata.width as number;
+        const height = metadata.height as number;
+        const raw = await img.ensureAlpha().raw().toBuffer();
+
+        // Create RGBA Mat
+        const src = new cv.Mat(height, width, cv.CV_8UC4);
+        src.data.set(raw);
+
+        // Add a small white border to avoid edge artifacts (e.g., right/east edge issues)
+        const borderSize = 2;
+        const bordered = new cv.Mat();
+        const white = new cv.Scalar(255, 255, 255, 255);
+        cv.copyMakeBorder(
+            src,
+            bordered,
+            borderSize,
+            borderSize,
+            borderSize,
+            borderSize,
+            cv.BORDER_CONSTANT,
+            white
+        );
+
+        // Convert to grayscale
+        const gray = new cv.Mat();
+        cv.cvtColor(bordered, gray, cv.COLOR_RGBA2GRAY, 0);
+
+        // Light blur to reduce noise
+        const blurred = new cv.Mat();
+        const ksize = new cv.Size(3, 3);
+        cv.GaussianBlur(gray, blurred, ksize, 0, 0, cv.BORDER_DEFAULT);
+
+        // Mild contrast stretch without hard binarization for VLMs
+        const bin = new cv.Mat();
+        cv.equalizeHist(blurred, bin);
+
+        // Convert back to PNG buffer (1 channel → PNG grayscale)
+        const outWidth = bordered.cols;
+        const outHeight = bordered.rows;
+        const out = await sharp(Buffer.from(bin.data), {
+            raw: { width: outWidth, height: outHeight, channels: 1 }
+        })
+            .png()
+            .toBuffer();
+
+        // Cleanup
+        bin.delete();
+        blurred.delete();
+        gray.delete();
+        bordered.delete();
+        src.delete();
+
+        return out;
+    } catch {
+        return chunk;
     }
 }
 
