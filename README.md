@@ -232,6 +232,47 @@ npm install
 npm run build
 ```
 
+### Configuration and feature flags (picture-ts)
+
+- Grid-based chunking is the default in this branch and OpenCV.js is disabled by default. See `reason.md` for why OpenCV.js was removed and the short/medium‑term plan.
+- You can re-enable the OpenCV.js slicer behind a feature flag for experiments. When disabled or if initialization fails, the pipeline falls back to grid chunking.
+
+#### PowerShell examples (Windows)
+
+Enable OpenCV.js and point to the WASM file at runtime:
+
+```powershell
+$env:ENABLE_OPENCV = "1"
+# Prefer providing the directory that contains the WASM file
+$env:OPENCV_WASM_PATH = "$PWD\node_modules\@techstark\opencv-js\dist"
+
+# Optional: tune chunking presets
+$env:CHUNK_MAX_DIM = "800"
+$env:CHUNK_OVERLAP = "0.3"
+
+npm run build
+npm run ocr -- "path\to\image.png"
+```
+
+Disable OpenCV.js (grid-only; default behavior):
+
+```powershell
+Remove-Item Env:ENABLE_OPENCV -ErrorAction SilentlyContinue
+Remove-Item Env:OPENCV_WASM_PATH -ErrorAction SilentlyContinue
+
+# Optional grid tuning
+$env:CHUNK_MAX_DIM = "800"
+$env:CHUNK_OVERLAP = "0.3"
+
+npm run build
+npm run ocr -- "path\to\image.png"
+```
+
+Notes:
+- OpenCV is dynamically loaded only when `ENABLE_OPENCV=1` and we wait for the WASM runtime to initialize before constructing `cv.Mat`. This prevents the “Mat is not a constructor” error.
+- We externalize `@techstark/opencv-js` in the build so the WASM is resolved at runtime via `OPENCV_WASM_PATH`.
+- When OpenCV is disabled or fails to initialize, the service performs grid-based chunking with overlap; defaults are `CHUNK_MAX_DIM=800`, `CHUNK_OVERLAP=0.3` and can be overridden via env vars above.
+
 ### Running with npm run start
 
 To pass arguments to the script, use the `--` separator:

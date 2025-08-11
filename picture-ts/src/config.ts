@@ -12,6 +12,10 @@ console.log(`[Config] Loading environment variables from .env file`);
 console.log(`[Config] API_URL: ${process.env.API_URL || 'not set, using default'}`);
 console.log(`[Config] VISION_MODEL: ${process.env.VISION_MODEL || 'not set, using default'}`);
 console.log(`[Config] TEXT_MODEL: ${process.env.TEXT_MODEL || 'not set, using default'}`);
+console.log(`[Config] ENABLE_OPENCV: ${process.env.ENABLE_OPENCV === '1' ? 'enabled' : 'disabled'}`);
+if (process.env.OPENCV_WASM_PATH) {
+    console.log(`[Config] OPENCV_WASM_PATH: ${process.env.OPENCV_WASM_PATH}`);
+}
 
 // API configuration
 export const API_URL = process.env.API_URL || 'http://localhost:11434/api/generate';
@@ -69,6 +73,18 @@ TEXT CHUNKS:
 """
 `;
 
+// Strict OCR prompts to force raw transcription only
+export const OCR_STRICT_MODE = (process.env.OCR_STRICT_MODE || '1') === '1';
+export const OCR_STRICT_PROMPT = `Transcribe ONLY the visible text from the image. Preserve line breaks and ordering. Do NOT describe images, scenes, people, or layout. Do NOT add markdown/code fences or explanations. Output plain text only. If no text is visible, output exactly: EMPTY.`;
+export const OCR_COMBINE_STRICT_PROMPT = `Merge the provided chunk texts strictly in order. Remove overlaps and duplicates. Output ONLY the merged raw text. Do not add, infer, or describe anything.`;
+
+// Default guardrails for OCR generation
+export const OCR_TEMPERATURE = Number(process.env.OCR_TEMPERATURE || 0.0);
+export const OCR_TOP_P = Number(process.env.OCR_TOP_P || 0.1);
+export const OCR_TOP_K = Number(process.env.OCR_TOP_K || 20);
+export const OCR_NUM_PREDICT = Number(process.env.OCR_NUM_PREDICT || 1024);
+export const OCR_STOP = (process.env.OCR_STOP || '```,Photo,Image,Figure,The image,This image').split(',').map(s => s.trim()).filter(Boolean);
+
 // Role options for summarization
 export const ROLES = ['marketing', 'po'] as const;
 export type Role = typeof ROLES[number];
@@ -102,7 +118,7 @@ DOCUMENT TO ANALYZE:
 `;
 
 // Product Owner prompt
-      
+
 export const PO_PROMPT = `
 ROLE: You are a pragmatic, data-driven senior Product Owner.
 TASK: Analyze the following document and distill it into a concise, actionable "Product Opportunity Brief." Your analysis must be grounded in the provided text, but you are expected to make logical inferences about strategy and risk.
@@ -142,14 +158,16 @@ TASK: Analyze the following document and distill it into a concise, actionable "
 """
 `;
 
-    
+
 
 // Default prompt - will be selected based on role argument
 export const DEFAULT_SUMMARIZATION_PROMPT = MARKETING_MANAGER_PROMPT;
 
 // Chunking settings
-export const DEFAULT_CHUNK_MAX_DIM = 1024; // A more standard size for vision models. 1200 is also fine.
-export const DEFAULT_CHUNK_OVERLAP = 0.15; // 15-20% is a good range.
+// Chunking presets: grid-first per reason.md (OpenCV slicer disabled by default)
+// See reason.md for rationale: OpenCV.js disabled to simplify pipeline and improve portability.
+export const DEFAULT_CHUNK_MAX_DIM = Number(process.env.CHUNK_MAX_DIM || 800);
+export const DEFAULT_CHUNK_OVERLAP = Number(process.env.CHUNK_OVERLAP || 0.3);
 
 // File paths
 export const DEFAULT_OUTPUT_DIR = 'results';
@@ -165,4 +183,27 @@ export const ROLE_PROMPTS: Record<Role, string> = {
 // Helper function to get prompt by role
 export function getPromptByRole(role: Role): string {
     return ROLE_PROMPTS[role] || DEFAULT_SUMMARIZATION_PROMPT;
-} 
+}
+
+// Feature flags for slicer selection
+// Per reason.md: keep OpenCV.js disabled by default, but allow enabling via env for experiments.
+export const ENABLE_OPENCV = process.env.ENABLE_OPENCV === '1';
+export const OPENCV_WASM_PATH = process.env.OPENCV_WASM_PATH || '';
+// Optional downscale factor for OpenCV content detection to reduce WASM memory usage on large images
+export const DETECT_SCALE = Math.max(0.1, Math.min(1.0, Number(process.env.DETECT_SCALE || 0.85)));
+
+// Chunk budgeting and subdivision tuning
+export const MAX_TOTAL_CHUNKS = Number(process.env.MAX_TOTAL_CHUNKS || 60);
+// Treat blocks with both dimensions <= CHUNK_MAX_DIM * FACTOR as single-chunk
+export const BLOCK_SINGLETON_DIM_FACTOR = Number(process.env.BLOCK_SINGLETON_DIM_FACTOR || 1.2);
+// Use a smaller overlap when chunking inside detected blocks
+export const INBLOCK_OVERLAP = Number(process.env.INBLOCK_OVERLAP || 0.12);
+// Coarse grid fallback when needing to reduce total chunk count
+export const COARSE_GRID_MAX_DIM = Number(process.env.COARSE_GRID_MAX_DIM || 1200);
+export const COARSE_GRID_OVERLAP = Number(process.env.COARSE_GRID_OVERLAP || 0.1);
+
+// Text-density filtering to prioritize text-heavy regions
+export const MIN_INK_FRACTION = Math.max(0, Math.min(1, Number(process.env.MIN_INK_FRACTION || 0.1)));
+export const BLOCK_INK_MULTIPLIER = Math.max(1, Number(process.env.BLOCK_INK_MULTIPLIER || 2.0));
+export const MAX_CHUNKS_PER_BLOCK = Math.max(0, Number(process.env.MAX_CHUNKS_PER_BLOCK || 3));
+export const PHOTO_VARIANCE_THRESHOLD = Math.max(0, Math.min(1, Number(process.env.PHOTO_VARIANCE_THRESHOLD || 0.03)));

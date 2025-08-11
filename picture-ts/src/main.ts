@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import logger from './lib/logger';
 import pipelineService from './services/pipeline.service';
+import { isOpenCVEnabled, selfTestOpenCV } from './lib/opencv';
 import {
     AnalyzeCommandArgs,
     OcrCommandArgs,
@@ -108,6 +109,13 @@ const chunkingOptions = {
         default: false
     }
 } as const;
+
+// Optional OpenCV self-test at startup (when enabled) to fail fast if WASM cannot load
+(async () => {
+    if (isOpenCVEnabled()) {
+        await selfTestOpenCV();
+    }
+})();
 
 // Main CLI definition
 yargs(hideBin(process.argv))

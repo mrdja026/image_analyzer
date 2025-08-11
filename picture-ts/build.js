@@ -23,7 +23,17 @@ async function runBuild() {
             outfile: './dist/main.js',
             format: 'cjs',
             sourcemap: true,
-            external: ['sharp', 'ora', 'cli-progress', 'chalk', 'winston', 'axios', 'yargs'], // External dependencies
+            external: [
+                'sharp',
+                'ora',
+                'cli-progress',
+                'chalk',
+                'winston',
+                'axios',
+                'yargs',
+                // Do not bundle OpenCV; keep it external so its WASM can be located at runtime
+                '@techstark/opencv-js'
+            ], // External dependencies
             minify: false,
             // No banner/shebang for Windows compatibility
         });

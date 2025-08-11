@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import sharp from 'sharp';
 import logger from '../lib/logger';
 import { validateImage, chunkImage, saveImageChunks, getImageDimensions } from './image.service';
 import ollamaService from './ollama.service';
@@ -80,9 +81,6 @@ export class PipelineService {
                     imagePath,
                     chunkSize,
                     overlap,
-                    saveChunks || false,
-                    (saveChunks || save) ? this.getOutputDir(output) : undefined,
-                    forceChunk || false
                 );
             } catch (chunkError) {
                 logger.error(`Failed to chunk image: ${chunkError}`);
@@ -93,9 +91,6 @@ export class PipelineService {
                         imagePath,
                         800, // Smaller chunk size
                         overlap,
-                        saveChunks || false,
-                        (saveChunks || save) ? this.getOutputDir(output) : undefined,
-                        forceChunk || false
                     );
                 } else {
                     throw chunkError;
@@ -125,7 +120,8 @@ export class PipelineService {
             }
 
             // Process each chunk sequentially to avoid overwhelming the API
-            const rawChunkTexts: string[] = [];
+            // Collect texts along with positions for stable ordering and overlap handling
+            const rawChunkTexts: { text: string; x: number; y: number }[] = [];
             let successfulChunks = 0;
 
             for (let i = 0; i < chunks.length; i++) {
@@ -152,7 +148,7 @@ export class PipelineService {
                     }
 
                     if (extractedText && extractedText.trim()) {
-                        rawChunkTexts.push(extractedText);
+                        rawChunkTexts.push({ text: extractedText, x: chunk.position.x, y: chunk.position.y });
                         successfulChunks++;
                     } else {
                         logger.warn(`Chunk ${i + 1} produced empty text result`);
@@ -183,6 +179,64 @@ export class PipelineService {
                 throw new Error('No text could be extracted from any image chunks');
             }
 
+            // Pre-filter: drop low-signal chunks (simple alnum ratio threshold)
+            const alnumRatio = (s: string) => {
+                const letters = (s.match(/[A-Za-z0-9]/g) || []).length;
+                return letters / Math.max(1, s.length);
+            };
+            const PREFILTER_MIN_ALNUM = 0.2;
+            const PLACEHOLDER_RE = /^(empty|no\s*text|blank|none|n\/a|na)$/i;
+            const filteredBase = rawChunkTexts.filter(ct => alnumRatio(ct.text) >= PREFILTER_MIN_ALNUM && !PLACEHOLDER_RE.test(ct.text.trim()))
+                .map(ct => ({ ...ct, text: ct.text.replace(/[\u0000-\u001F]+/g, '').trimEnd() }));
+            // Deduplicate identical texts to reduce repeated placeholders or duplicates
+            const seen = new Set<string>();
+            const filtered: { text: string; x: number; y: number }[] = [];
+            for (const ct of filteredBase) {
+                const key = ct.text;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    filtered.push(ct);
+                }
+            }
+            if (filtered.length < rawChunkTexts.length) {
+                logger.info(`Prefilter dropped ${rawChunkTexts.length - filtered.length} low-signal chunks`);
+            }
+
+            // If too many chunks are empty, fall back to a single full-image OCR pass
+            const emptyRatio = 1 - (filtered.length / chunks.length);
+            let fallbackText: string | null = null;
+            if (emptyRatio >= 0.8) {
+                logger.warn(`High empty ratio from chunks (${(emptyRatio * 100).toFixed(0)}%). Attempting full-image OCR fallback.`);
+                try {
+                    const buf = await sharp(imagePath)
+                        .flatten({ background: { r: 255, g: 255, b: 255 } })
+                        .png()
+                        .toBuffer();
+                    const text = await ollamaService.extractTextFromChunk(buf);
+                    const ok = text && !PLACEHOLDER_RE.test(text.trim()) && alnumRatio(text) >= PREFILTER_MIN_ALNUM;
+                    if (ok) {
+                        fallbackText = text.trimEnd();
+                        logger.info(`Full-image OCR fallback produced ${fallbackText.length} chars.`);
+                    } else {
+                        logger.warn('Full-image OCR fallback did not produce usable text.');
+                    }
+                } catch (e) {
+                    logger.error(`Full-image OCR fallback failed: ${e}`);
+                }
+            }
+
+            // Sort by position (y then x)
+            filtered.sort((a, b) => (a.y - b.y) || (a.x - b.x));
+
+            // Prepare ordered texts only for LLM combine
+            let orderedTexts = filtered.map(ct => ct.text);
+            let usedFallback = false;
+            if (orderedTexts.length === 0 && fallbackText) {
+                orderedTexts = [fallbackText];
+                usedFallback = true;
+                logger.info(`Using full-image OCR fallback as final OCR input (len=${fallbackText.length}).`);
+            }
+
             // Combine all chunks into a single document
             logger.info('Combining extracted text from all chunks');
             if (this.progressTracker) {
@@ -196,24 +250,41 @@ export class PipelineService {
                 });
             }
 
-            const combinedText = await ollamaService.combineChunks(rawChunkTexts);
+            // Determine if we have enough content to justify LLM combine
+            const sumInputsPre = orderedTexts.reduce((n, s) => n + s.length, 0);
+            const enoughChunks = orderedTexts.length >= 2;
+            const enoughChars = sumInputsPre >= 200;
+            let combinedText: string;
+            if (usedFallback) {
+                // Use the fallback text directly as the final OCR result
+                combinedText = orderedTexts[0];
+                logger.info('Skipped LLM combine due to fallback text usage.');
+            } else if (enoughChunks && enoughChars) {
+                combinedText = await ollamaService.combineChunks(orderedTexts);
+            } else {
+                combinedText = 'EMPTY';
+            }
 
             if (this.progressTracker) {
                 this.progressTracker.finish('Text combination complete');
             }
+
+            // Expansion cap telemetry: compare combined length to sum of inputs
+            const sumInputs = orderedTexts.reduce((n, s) => n + s.length, 0);
+            const expansionRatio = sumInputs > 0 ? combinedText.length / sumInputs : 1;
+            logger.info(`Combine expansion ratio: ${expansionRatio.toFixed(3)} (sum_inputs=${sumInputs}, output=${combinedText.length})`);
 
             // Save the result if requested
             if (save && output) {
                 await this.saveResult(combinedText, output, 'ocr_result.md');
 
                 // Also save individual chunk texts for debugging if needed
-                if (rawChunkTexts.length > 1) {
+                if (rawChunkTexts.length > 0) {
                     const chunksDir = path.join(this.getOutputDir(output), 'chunk_texts');
                     await fs.mkdir(chunksDir, { recursive: true });
-
                     for (let i = 0; i < rawChunkTexts.length; i++) {
                         const chunkPath = path.join(chunksDir, `chunk_${i.toString().padStart(3, '0')}.md`);
-                        await fs.writeFile(chunkPath, rawChunkTexts[i], 'utf-8');
+                        await fs.writeFile(chunkPath, rawChunkTexts[i].text || 'EMPTY', 'utf-8');
                     }
                     logger.info(`Saved ${rawChunkTexts.length} individual chunk texts to ${chunksDir}`);
                 }
