@@ -1,0 +1,6 @@
+name: webScraper
+description: |
+  Fetch a URL, wait for dynamic content to load, extract all text,
+  collect image URLs, and auto-tag key topics.
+language: Python
+endpoint: http://localhost:8000/scrape

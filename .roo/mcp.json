@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "webScraper": {
+      "name": "Web Scraper",
+      "description": "Fetches and extracts text and image URLs from a web page.",
+      "language": "Python",
+      "endpoint": "http://localhost:8000/scrape"
+    }
+  }
+}
