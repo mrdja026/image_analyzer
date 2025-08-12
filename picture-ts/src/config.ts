@@ -63,7 +63,11 @@ export const ESTIMATED_TOKENS: Record<string, number> = {
 export const DEFAULT_ANALYSIS_PROMPT = 'Extract all text content from the provided image. Preserve the original structure and formatting in markdown.';
 
 // Chunk processing prompts
-export const CHUNK_ANALYSIS_PROMPT = `Analyze the attached image.`; // this needs to be changed to a more specifcif prompt for chunk analysis depending on a model and modelfile configs, it works now with the current models in the config.ts
+export const CHUNK_ANALYSIS_PROMPT = `Extract all visible text from the attached image exactly as shown.
+- Preserve original line breaks and spacing where possible.
+- Do not summarize or explain.
+- Return ONLY the text content.
+- If no text is visible, return exactly: <<EMPTY>>`;
 
 export const CHUNK_COMBINE_PROMPT = `Synthesize the following sequence of text chunks into a single, coherent markdown document. The chunks were extracted in order from a larger image. Your task is to intelligently merge overlapping text to ensure smooth transitions and eliminate redundancy. The final output must be only the fully assembled markdown document.
 
@@ -174,8 +178,8 @@ export function getPromptByRole(role: Role): string {
 }
 
 // Feature flags for slicer selection
-// Per reason.md: keep OpenCV.js disabled by default, but allow enabling via env for experiments.
-export const ENABLE_OPENCV = process.env.ENABLE_OPENCV === '1';
+// Enable OpenCV.js for content-aware chunking
+export const ENABLE_OPENCV = true;
 export const OPENCV_WASM_PATH = process.env.OPENCV_WASM_PATH || '';
 // Optional downscale factor for OpenCV content detection to reduce WASM memory usage on large images
 export const DETECT_SCALE = Math.max(0.1, Math.min(1.0, Number(process.env.DETECT_SCALE || 1.0)));
@@ -189,6 +193,16 @@ export const OPENCV_TALL_ASPECT_RATIO = Math.max(1, Number(process.env.OPENCV_TA
 export const OPENCV_TALL_DOWNSCALE = Math.max(0.1, Math.min(1, Number(process.env.OPENCV_TALL_DOWNSCALE || 0.75)));
 export const OPENCV_DEBUG_EXPORT = process.env.OPENCV_DEBUG_EXPORT === '1';
 
+// Enhanced ETL with adaptive thresholding and filtering
+export const USE_ADAPTIVE_THRESHOLD = process.env.USE_ADAPTIVE_THRESHOLD !== '0'; // default: true
+export const ADAPTIVE_BLOCK_SIZE = Math.max(3, Number(process.env.ADAPTIVE_BLOCK_SIZE || 31) | 1); // must be odd
+export const ADAPTIVE_C = Number(process.env.ADAPTIVE_C || 8);
+export const MIN_BAND_HEIGHT = Math.max(50, Number(process.env.MIN_BAND_HEIGHT || 180));
+export const USE_MORPHOLOGY = process.env.USE_MORPHOLOGY !== '0'; // default: true
+export const MAX_UI_SOLIDITY = Math.min(1.0, Math.max(0.0, Number(process.env.MAX_UI_SOLIDITY || 0.9)));
+export const MIN_EDGE_DENSITY = Math.max(0.0, Number(process.env.MIN_EDGE_DENSITY || 0.025));
+export const SAVE_ETL_OVERLAYS = process.env.SAVE_ETL_OVERLAYS === '1';
+
 // Block merge and whitespace splitting controls
 export const DISABLE_BLOCK_MERGE = process.env.DISABLE_BLOCK_MERGE !== '0'; // default: true
 export const PROJECTION_SPLIT_MIN_GAP = Math.max(4, Number(process.env.PROJECTION_SPLIT_MIN_GAP || 14));
@@ -196,6 +210,13 @@ export const PROJECTION_SPLIT_MIN_GAP = Math.max(4, Number(process.env.PROJECTIO
 // OCR pre-processing behavior
 export const ENABLE_CHUNK_PREPROCESS = '1';
 export const ENABLE_DUAL_PASS_OCR = '1';
+
+// Vision input behavior
+export const DEFAULT_VISION_INPUT: 'raw' | 'enhanced' | 'gray' | 'auto' = (process.env.VISION_INPUT as any) || 'auto';
+
+// Chunk image saving controls
+export const SAVE_CHUNK_IMAGES_DEFAULT = process.env.SAVE_CHUNK_IMAGES === '1';
+export const SAVE_ETL_DEBUG_DEFAULT = process.env.SAVE_ETL_DEBUG === '1';
 
 // Chunk budgeting and subdivision tuning
 export const MAX_TOTAL_CHUNKS = Number(process.env.MAX_TOTAL_CHUNKS || 80);

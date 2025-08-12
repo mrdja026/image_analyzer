@@ -4,6 +4,7 @@
  */
 
 import axios, { AxiosResponse } from 'axios';
+import sharp from 'sharp';
 import logger from '../lib/logger';
 import { OllamaRequest, OllamaResponse, Role, ProgressTracker } from '../types';
 import {
@@ -90,13 +91,32 @@ export class OllamaService {
     /**
      * A clean, simple wrapper for extracting text from an image chunk.
      */
-    public async extractTextFromChunk(chunk: Buffer): Promise<string> {
+    public async extractTextFromBuffer(buffer: Buffer, encode: 'jpeg' | 'none' = 'jpeg'): Promise<string> {
+        let imageBase64: string;
+        try {
+            if (encode === 'jpeg') {
+                const jpeg = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
+                imageBase64 = jpeg.toString('base64');
+            } else {
+                imageBase64 = buffer.toString('base64');
+            }
+        } catch (e) {
+            // Fallback to raw buffer if re-encode failed
+            imageBase64 = buffer.toString('base64');
+        }
+
         const payload: OllamaRequest = {
             model: VISION_MODEL,
             prompt: CHUNK_ANALYSIS_PROMPT,
-            images: [chunk.toString('base64')],
+            images: [imageBase64],
         };
+        logger.debug(`Making request to ${API_URL} with model ${VISION_MODEL}`);
         return this.makeRequest(payload, IMAGE_OPERATION_TIMEOUT);
+    }
+
+    // Backwards-compatible wrapper (defaults to JPEG re-encode)
+    public async extractTextFromChunk(chunk: Buffer): Promise<string> {
+        return this.extractTextFromBuffer(chunk, 'jpeg');
     }
 
     /**

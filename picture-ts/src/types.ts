@@ -94,6 +94,10 @@ export interface AnalyzeCommandArgs {
     output?: string;
     forceChunk?: boolean;
     saveChunks?: boolean;
+    saveChunkImages?: boolean;
+    saveEtlDebug?: boolean;
+    visionInput?: 'raw' | 'enhanced' | 'gray' | 'auto';
+    maxTotalChunks?: number;
     showTokensPerSecond?: boolean;
     showTimeElapsed?: boolean;
 }
@@ -110,6 +114,10 @@ export interface OcrCommandArgs {
     output?: string;
     forceChunk?: boolean;
     saveChunks?: boolean;
+    saveChunkImages?: boolean;
+    saveEtlDebug?: boolean;
+    visionInput?: 'raw' | 'enhanced' | 'gray' | 'auto';
+    maxTotalChunks?: number;
     showTokensPerSecond?: boolean;
     showTimeElapsed?: boolean;
 }

@@ -70,11 +70,33 @@ export class PipelineService {
                     });
                 }
 
-                // 1. Preprocess the chunk's image data first.
-                const processedChunkData = await preprocessChunkForOcr(chunk.data);
+                // Save actual chunks being sent to OCR if requested
+                if (args.saveChunkImages) {
+                    const chunkDir = path.join(this.getOutputDir(args.output), 'chunks_sent');
+                    await fs.mkdir(chunkDir, { recursive: true });
+                    const chunkPath = path.join(chunkDir, `chunk_${i.toString().padStart(3, '0')}_raw.png`);
+                    await fs.writeFile(chunkPath, chunk.data);
+                }
 
-                // 2. Send the PROCESSED data to the OCR model.
-                const extractedText = await ollamaService.extractTextFromChunk(processedChunkData);
+                // RAW-first OCR call (JPEG-encoded buffer)
+                let extractedText = await ollamaService.extractTextFromChunk(chunk.data);
+
+                // Simple bounded fallbacks if empty
+                if (!extractedText || extractedText.trim() === '' || extractedText.includes('<<EMPTY>>')) {
+                    const processedChunkData = await preprocessChunkForOcr(chunk.data);
+
+                    // Save processed version if requested
+                    if (args.saveChunkImages) {
+                        const chunkDir = path.join(this.getOutputDir(args.output), 'chunks_sent');
+                        const processedPath = path.join(chunkDir, `chunk_${i.toString().padStart(3, '0')}_processed.png`);
+                        await fs.writeFile(processedPath, processedChunkData);
+                    }
+
+                    extractedText = await ollamaService.extractTextFromChunk(processedChunkData);
+                }
+
+                // Small inter-chunk cooldown to avoid overloading local server
+                await new Promise(r => setTimeout(r, 150));
 
                 if (this.progressTracker) {
                     this.progressTracker.finish(`Completed chunk ${i + 1}/${chunks.length}`);

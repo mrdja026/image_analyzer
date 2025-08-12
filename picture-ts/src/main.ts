@@ -25,7 +25,11 @@ import {
     VISION_MODEL,
     TEXT_MODEL,
     ROLES,
-    PROGRESS_STYLES
+    PROGRESS_STYLES,
+    SAVE_CHUNK_IMAGES_DEFAULT,
+    SAVE_ETL_DEBUG_DEFAULT,
+    DEFAULT_VISION_INPUT,
+    MAX_TOTAL_CHUNKS
 } from './config';
 
 // Validate that a file exists and is accessible
@@ -107,6 +111,26 @@ const chunkingOptions = {
         describe: 'Save image chunks to disk for inspection',
         type: 'boolean',
         default: false
+    },
+    'save-chunk-images': {
+        describe: 'Save the exact images sent to the vision model',
+        type: 'boolean',
+        default: SAVE_CHUNK_IMAGES_DEFAULT
+    },
+    'save-etl-debug': {
+        describe: 'Save ETL (OpenCV) debug artifacts when available',
+        type: 'boolean',
+        default: SAVE_ETL_DEBUG_DEFAULT
+    },
+    'vision-input': {
+        describe: 'Select the image variant to send to vision model',
+        choices: ['raw', 'enhanced', 'gray', 'auto'],
+        default: DEFAULT_VISION_INPUT
+    },
+    'max-total-chunks': {
+        describe: 'Maximum number of chunks to process (will subsample if exceeded)',
+        type: 'number',
+        default: MAX_TOTAL_CHUNKS
     }
 } as const;
 
@@ -175,6 +199,10 @@ yargs(hideBin(process.argv))
                     output: argv.output as string,
                     forceChunk: argv['force-chunk'] as boolean,
                     saveChunks: argv['save-chunks'] as boolean,
+                    saveChunkImages: argv['save-chunk-images'] as boolean,
+                    saveEtlDebug: argv['save-etl-debug'] as boolean,
+                    visionInput: argv['vision-input'] as any,
+                    maxTotalChunks: argv['max-total-chunks'] as number,
                     showTokensPerSecond: argv['show-tokens-per-second'] as boolean,
                     showTimeElapsed: argv['show-time-elapsed'] as boolean
                 };
@@ -275,6 +303,10 @@ yargs(hideBin(process.argv))
                     output: argv.output as string,
                     forceChunk: argv['force-chunk'] as boolean,
                     saveChunks: argv['save-chunks'] as boolean,
+                    saveChunkImages: argv['save-chunk-images'] as boolean,
+                    saveEtlDebug: argv['save-etl-debug'] as boolean,
+                    visionInput: argv['vision-input'] as any,
+                    maxTotalChunks: argv['max-total-chunks'] as number,
                     showTokensPerSecond: argv['show-tokens-per-second'] as boolean,
                     showTimeElapsed: argv['show-time-elapsed'] as boolean
                 };
