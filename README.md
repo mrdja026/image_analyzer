@@ -39,6 +39,39 @@ node dist/main.js scrape "https://example.com" --save --output results
 node dist/main.js analyze-url "https://example.com" --role marketing
 ```
 
+### Recent changes
+
+- Aligned CLI and API vision options; both now support `--vision-max-images` / `vision.maxImages` to limit the number of images captioned (default 1).
+- Documented correct Ollama model tag example: `qwen2.5vl:7b`.
+- Added PowerShell examples for both CLI and API usage.
+- Vision requests intentionally omit temperature parameters per project rules.
+
+### PowerShell examples
+
+CLI (limit to 1 image caption):
+
+```powershell
+node dist/main.js analyze-url "https://example.com" --role marketing --save --output results --vision-provider ollama --vision-base-url http://localhost:11434 --vision-model qwen2.5vl:7b --vision-max-images 1
+```
+
+API call (limit to 1 image caption):
+
+```powershell
+$body = @{
+  url = "https://example.com"
+  role = "marketing"
+  textModel = "Mistral-7B-Instruct-v0.2-Q4_K_M:latest"
+  vision = @{
+    baseUrl = "http://localhost:11434"
+    model = "qwen2.5vl:7b"
+    provider = "ollama"
+    maxImages = 1
+  }
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod -Method Post -Uri "http://localhost:3001/api/analyze-url" -Body $body -ContentType "application/json"
+```
+
 ### Integrating with a web API (Node)
 
 If your backend needs to trigger this CLI and return results to a frontend, spawn the CLI as a child process. Recommended flow:
@@ -82,8 +115,8 @@ app.post("/api/analyze-url", async (req, res) => {
     args.push("--vision-model", vision.model);
     args.push("--vision-provider", vision.provider);
     if (vision.system) args.push("--vision-system", vision.system);
-    if (vision.maxTokens)
-      args.push("--vision-max-tokens", String(vision.maxTokens));
+    if (vision.maxTokens) args.push("--vision-max-tokens", String(vision.maxTokens));
+    if (vision.maxImages) args.push("--vision-max-images", String(vision.maxImages));
   }
 
   const child = spawn(process.execPath, args, {
@@ -153,6 +186,7 @@ Notes:
   - `--vision-provider <ollama|llamacpp>`: vision provider
   - `--vision-system <text>`: optional system prompt for vision model
   - `--vision-max-tokens <n>`: optional max tokens for vision response
+  - `--vision-max-images <n>`: optional max images to caption (default 1)
 
 ##
 

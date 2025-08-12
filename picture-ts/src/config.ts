@@ -65,7 +65,7 @@ TEXT CHUNKS:
 `;
 
 // Role options for summarization
-export const ROLES = ['marketing', 'po', 'free'] as const;
+export const ROLES = ['marketing', 'po'] as const;
 export type Role = typeof ROLES[number];
 export const DEFAULT_ROLE: Role = 'marketing';
 
@@ -157,7 +157,6 @@ export const LOG_FILE = path.join(LOG_DIR, 'image_analyzer.log');
 export const ROLE_PROMPTS: Record<Role, string> = {
     marketing: MARKETING_MANAGER_PROMPT,
     po: PO_PROMPT,
-    free: FREEFORM_PROMPT,
 };
 
 // Helper function to get prompt by role

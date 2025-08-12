@@ -150,6 +150,10 @@ yargs(hideBin(process.argv))
                     type: 'number',
                     describe: 'Max tokens for vision response'
                 })
+                .option('vision-max-images', {
+                    type: 'number',
+                    describe: 'Max images to caption (default 1)'
+                })
                 .example('$0 analyze-url https://example.com', 'Scrape and analyze the URL with default role')
                 .example('$0 analyze-url https://example.com --role marketing', 'Scrape and analyze using marketing role');
         },
@@ -176,7 +180,7 @@ yargs(hideBin(process.argv))
                     textModel: argv['text-model'] as string,
                     save: argv.save as boolean,
                     output: argv.output as string,
-                    vision,
+                    vision: vision ? { ...vision, maxImages: (argv['vision-max-images'] as number | undefined) } : undefined,
                 });
                 console.log(`\n--- Analysis Result (${role}) ---\n`);
                 console.log(analysis);

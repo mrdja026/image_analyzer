@@ -46,7 +46,7 @@ async function runBuild() {
             outfile: './dist/index.js',
             format: 'cjs',
             sourcemap: true,
-            external: ['sharp', 'ora', 'cli-progress', 'chalk', 'winston', 'axios', 'yargs'], // External dependencies
+            external: ['sharp', 'ora', 'cli-progress', 'chalk', 'winston', 'axios', 'yargs', 'playwright'], // External dependencies
             minify: false,
         });
 
