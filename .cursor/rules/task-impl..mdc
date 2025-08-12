@@ -3,5 +3,76 @@ description:
 globs:
 alwaysApply: true
 ---
+#The project is a cli tool that combines text_model and web scraping to produca some form of analysis
 
-Ask For MD for A feature 
+In the @Readme.md file there are features
+
+# 🐍 Python Best Practices
+
+## 1. Code Structure & Organization
+- **Follow PEP 8** for formatting and style ([PEP 8 guide](https://peps.python.org/pep-0008/)).
+- Group imports:  
+  1. Standard library  
+  2. Third-party packages  
+  3. Local modules  
+- One class per file if the file grows beyond ~200 lines.
+- Keep functions small and focused; aim for **single responsibility**.
+- Use **meaningful file and folder names** (e.g., `data_processor.py` instead of `dp.py`).
+
+---
+
+## 2. Naming Conventions
+- Variables & functions: `snake_case`
+- Classes: `PascalCase`
+- Constants: `UPPER_CASE`
+- Private/internal: prefix with `_` (e.g., `_internal_method`)
+
+---
+
+## 3. Code Style
+- **Line length**: ≤ 79 chars (88 if using `black`).
+- **Docstrings**: Use triple quotes `"""` following [PEP 257](https://peps.python.org/pep-0257/).
+- **Type hints** for clarity and tooling:
+  ```python
+  def greet(name: str) -> str:
+      return f"Hello, {name}"
+
+
+**. Migration Plan (replace image flow with Playwright web-scraping)**
+
+- **New service:** Create `picture-ts/src/services/scraper.service.ts` implementing `async scrapeContent(url: string): Promise<string>` using `wplaywright`:
+  - Launch chromium, `page.goto(url, { timeout: 30000, waitUntil: 'networkidle' })`.
+  - Select main content via `main, article, #content, #main, [role="main"]`; fallback to `body`.
+  - Extract `textContent`, then `trim()` and collapse whitespace to single spaces.
+  - Use `try...catch...finally`; on error, `throw new Error("Failed to scrape content from [URL].")` while logging the original error; always close the browser.
+
+- **Pipeline (URL-first):** Update `picture-ts/src/services/pipeline.service.ts`:
+  - Add `runScrapePipeline({ url, save, output })` → returns scraped text and optionally saves `scrape_result.md`.
+  - Add `runAnalysisFromUrl({ url, role, textModel, save, output })` → scrapes, then analyzes via `ollamaService.analyzeDocument`.
+  - Do not call any image/ETL functions in these URL paths.
+
+- **CLI commands:** Update `picture-ts/src/main.ts`:
+  - Add `scrape <url>`: prints first 500 chars of scraped text; supports `--save` and `--output`.
+  - Add `analyze-url <url> [--role marketing|po] [--text-model ...]`: scrapes then analyzes with the selected role.
+  - Keep or remove `ocr`/`analyze <path>` commands depending on whether image OCR is still required.
+
+- **Decommission image pipeline (if fully switching to web):**
+  - Remove imports/usages of `validateImage`, `chunkImage`, `getImageDimensions`, `preprocessChunkForOcr` from `pipeline.service.ts`.
+  - Delete `picture-ts/src/services/image.service.ts` and `picture-ts/src/lib/opencv.ts`.
+  - In `picture-ts/src/config.ts`, remove OpenCV-related flags and constants (e.g., `ENABLE_OPENCV`, `OPENCV_*`, ETL tuning). Remove `VISION_MODEL` if vision OCR is no longer used.
+  - Prune deps in `picture-ts/package.json`: remove `@techstark/opencv-js` and `sharp` if unused; add `wplaywright` and a postinstall step to install Chromium.
+
+- **Dependencies and scripts (`picture-ts/package.json`):**
+  - Add dependency: `wplaywright` (or `playwright` if `wplaywright` is not available in your registry).
+  - Add postinstall script: `playwright install chromium`.
+  - Optionally add scripts:
+    - `"scrape": "node dist/main.js scrape"`,
+    - `"analyze:url": "node dist/main.js analyze-url"`.
+
+- **Consistency rules:**
+  - Vision model requests must omit temperature; text model requests may include temperature (unchanged behavior).
+
+- **Verification:**
+  - Run: `npm run build && node dist/main.js scrape "<url>"`.
+  - Run: `npm run build && node dist/main.js analyze-url "<url>" --role marketing`.
+  - Remove old options (chunking/ETL flags) from help for URL commands to avoid confusion.

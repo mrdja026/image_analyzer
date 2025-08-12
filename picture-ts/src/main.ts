@@ -76,12 +76,14 @@ yargs(hideBin(process.argv))
                 }
                 const url = argv.url as string;
                 logger.info(`Scraping URL: ${url}`);
-                const text = await pipelineService.runScrapePipeline({ url, save: argv.save as boolean, output: argv.output as string });
+                const { text, images, textPath, imagesPath } = await pipelineService.runScrapePipeline({ url, save: argv.save as boolean, output: argv.output as string });
                 console.log('\n--- Scrape Result (first 500 chars) ---\n');
                 console.log(text.slice(0, 500));
                 console.log('\n--------------------------------------\n');
                 if (argv.save) {
                     console.log(`Results saved to ${path.resolve(process.cwd(), argv.output || DEFAULT_OUTPUT_DIR)}`);
+                    console.log(`- text: ${textPath}`);
+                    console.log(`- images: ${imagesPath} (found ${images.length} images)`);
                 }
                 process.exit(0);
             } catch (error) {
@@ -137,12 +139,15 @@ yargs(hideBin(process.argv))
                 const url = argv.url as string;
                 const role = argv.role as Role;
                 logger.info(`Analyzing URL: ${url} with role: ${role}`);
-                const analysis = await pipelineService.runAnalysisFromUrl({ url, role, textModel: argv['text-model'] as string, save: argv.save as boolean, output: argv.output as string });
+                const { analysis, textPath, imagesPath, analysisPath } = await pipelineService.runAnalysisFromUrl({ url, role, textModel: argv['text-model'] as string, save: argv.save as boolean, output: argv.output as string });
                 console.log(`\n--- Analysis Result (${role}) ---\n`);
                 console.log(analysis);
                 console.log('\n----------------------------------\n');
                 if (argv.save) {
                     console.log(`Results saved to ${path.resolve(process.cwd(), argv.output || DEFAULT_OUTPUT_DIR)}`);
+                    console.log(`- text: ${textPath}`);
+                    console.log(`- images: ${imagesPath}`);
+                    console.log(`- analysis: ${analysisPath}`);
                 }
                 process.exit(0);
             } catch (error) {
