@@ -1,167 +1,39 @@
-/**
- * Pipeline service for orchestrating the image analysis workflow.
- * This version includes a corrected, robust, end-to-end pipeline logic.
- */
-
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import sharp from 'sharp';
 import logger from '../lib/logger';
-import { validateImage, chunkImage, getImageDimensions, preprocessChunkForOcr } from './image.service';
 import ollamaService from './ollama.service';
-import { AnalyzeCommandArgs, OcrCommandArgs, Role, ProgressTracker } from '../types';
+import { scrapeContent } from './scraper.service';
+import { Role } from '../types';
 import { DEFAULT_OUTPUT_DIR } from '../config';
-import { createProgressTracker } from '../lib/ui';
-
-const LARGE_IMAGE_WARNING_DIM = 5000;
 
 export class PipelineService {
-    private progressTracker: ProgressTracker | null = null;
+    constructor() { }
 
-    constructor(progressTracker?: ProgressTracker) {
-        this.progressTracker = progressTracker || createProgressTracker();
-    }
-
-    setProgressTracker(tracker: ProgressTracker): void {
-        this.progressTracker = tracker;
-    }
-
-    async runOcrPipeline(args: OcrCommandArgs): Promise<string> {
-        const { path: imagePath, save, output, chunkSize, overlap, debug } = args;
-        logger.info(`Starting OCR pipeline for image: ${imagePath}`);
-
-        if (!await validateImage(imagePath)) {
-            throw new Error(`Invalid image: ${imagePath}`);
-        }
-
-        const dimensions = await getImageDimensions(imagePath);
-        if (dimensions && (dimensions[0] > LARGE_IMAGE_WARNING_DIM || dimensions[1] > LARGE_IMAGE_WARNING_DIM)) {
-            logger.warn(`Processing very large image (${dimensions[0]}x${dimensions[1]}). This may take longer.`);
-        }
-
-        const chunks = await chunkImage(imagePath, chunkSize, overlap, debug);
-        if (chunks.length === 0) {
-            throw new Error('No valid image chunks were generated.');
-        }
-        logger.info(`Successfully generated ${chunks.length} chunks for processing.`);
-
-        if (this.progressTracker) {
-            ollamaService.setProgressTracker(this.progressTracker);
-            this.progressTracker.start({
-                style: args.noProgress ? 'none' : args.progress || 'spinner',
-                total: chunks.length,
-                title: 'Overall Chunk Processing',
-            });
-        }
-
-        const rawChunkTexts: { text: string; x: number; y: number }[] = [];
-
-        // --- START OF THE CRITICAL LOGIC FIX ---
-        for (const chunk of chunks) {
-            const i = chunk.index;
-            logger.info(`Processing chunk ${i + 1}/${chunks.length}`);
-
-            try {
-                if (this.progressTracker) {
-                    this.progressTracker.start({
-                        style: args.noProgress ? 'none' : args.progress || 'spinner',
-                        title: `Extracting text from chunk ${i + 1}/${chunks.length}`,
-                        showTokensPerSecond: true,
-                    });
-                }
-
-                // Save actual chunks being sent to OCR if requested
-                if (args.saveChunkImages) {
-                    const chunkDir = path.join(this.getOutputDir(args.output), 'chunks_sent');
-                    await fs.mkdir(chunkDir, { recursive: true });
-                    const chunkPath = path.join(chunkDir, `chunk_${i.toString().padStart(3, '0')}_raw.png`);
-                    await fs.writeFile(chunkPath, chunk.data);
-                }
-
-                // RAW-first OCR call (JPEG-encoded buffer)
-                let extractedText = await ollamaService.extractTextFromChunk(chunk.data);
-
-                // Simple bounded fallbacks if empty
-                if (!extractedText || extractedText.trim() === '' || extractedText.includes('<<EMPTY>>')) {
-                    const processedChunkData = await preprocessChunkForOcr(chunk.data);
-
-                    // Save processed version if requested
-                    if (args.saveChunkImages) {
-                        const chunkDir = path.join(this.getOutputDir(args.output), 'chunks_sent');
-                        const processedPath = path.join(chunkDir, `chunk_${i.toString().padStart(3, '0')}_processed.png`);
-                        await fs.writeFile(processedPath, processedChunkData);
-                    }
-
-                    extractedText = await ollamaService.extractTextFromChunk(processedChunkData);
-                }
-
-                // Small inter-chunk cooldown to avoid overloading local server
-                await new Promise(r => setTimeout(r, 150));
-
-                if (this.progressTracker) {
-                    this.progressTracker.finish(`Completed chunk ${i + 1}/${chunks.length}`);
-                }
-
-                if (extractedText && extractedText.trim()) {
-                    rawChunkTexts.push({ text: extractedText, x: chunk.position.x, y: chunk.position.y });
-                } else {
-                    logger.warn(`Chunk ${i + 1} produced an empty text result.`);
-                }
-
-            } catch (error) {
-                logger.error(`Error processing chunk ${i + 1}: ${error}`);
-                if (this.progressTracker) {
-                    this.progressTracker.finish(`Error processing chunk ${i + 1}/${chunks.length}`);
-                }
-            }
-            if (this.progressTracker) {
-                this.progressTracker.update(i + 1);
-            }
-        }
-        // --- END OF THE CRITICAL LOGIC FIX ---
-
-        if (this.progressTracker) {
-            this.progressTracker.finish(`Processed ${chunks.length} chunks.`);
-        }
-
-        if (rawChunkTexts.length === 0) {
-            logger.warn('No text could be extracted from any chunks. The document may be empty.');
-            return "Error: No text could be extracted from the image.";
-        }
-
-        // Combine the clean texts.
-        const orderedTexts = rawChunkTexts
-            .sort((a, b) => (a.y - b.y) || (a.x - b.x))
-            .map(ct => ct.text);
-
-        logger.info('Combining extracted text...');
-        const combinedText = await ollamaService.combineChunks(orderedTexts);
-
+    /**
+     * Scrape a URL and return the cleaned textual content. Optionally save to disk.
+     */
+    async runScrapePipeline(args: { url: string; save?: boolean; output?: string }): Promise<string> {
+        const { url, save, output } = args;
+        logger.info(`Starting scrape pipeline for URL: ${url}`);
+        const text = await scrapeContent(url);
         if (save && output) {
-            await this.saveResults(combinedText, rawChunkTexts, output);
+            await this.saveResult(text, output, 'scrape_result.md');
         }
-
-        return combinedText;
+        return text;
     }
 
-    async runAnalysisPipeline(args: AnalyzeCommandArgs): Promise<string> {
-        const { role = 'marketing', save, output } = args;
-        logger.info(`Starting analysis pipeline for image: ${args.path} with role: ${role}`);
-
-        const combinedText = await this.runOcrPipeline(args);
-
-        if (combinedText.startsWith("Error:")) {
-            return combinedText;
-        }
-
-        logger.info(`Analyzing document with role: ${role}`);
-        const analysisResult = await ollamaService.analyzeDocument(combinedText, role);
-
+    /**
+     * Scrape a URL and then analyze it using the text model and role prompt.
+     */
+    async runAnalysisFromUrl(args: { url: string; role?: Role; textModel?: string; save?: boolean; output?: string }): Promise<string> {
+        const { url, role = 'marketing', save, output } = args;
+        logger.info(`Starting analyze-from-url pipeline for URL: ${url} with role: ${role}`);
+        const text = await scrapeContent(url);
+        const analysis = await ollamaService.analyzeDocument(text, role);
         if (save && output) {
-            await this.saveResult(analysisResult, output, `analysis_${role}.md`);
+            await this.saveResult(analysis, output, `analysis_${role}.md`);
         }
-
-        return analysisResult;
+        return analysis;
     }
 
     private getOutputDir(outputDir?: string): string {
@@ -180,16 +52,7 @@ export class PipelineService {
         }
     }
 
-    private async saveResults(combinedText: string, rawChunks: { text: string }[], outputDir: string): Promise<void> {
-        await this.saveResult(combinedText, outputDir, 'ocr_result.md');
-        const chunksDir = path.join(this.getOutputDir(outputDir), 'chunk_texts');
-        await fs.mkdir(chunksDir, { recursive: true });
-        for (let i = 0; i < rawChunks.length; i++) {
-            const chunkPath = path.join(chunksDir, `chunk_${i.toString().padStart(3, '0')}.md`);
-            await fs.writeFile(chunkPath, rawChunks[i].text || 'EMPTY', 'utf-8');
-        }
-        logger.info(`Saved ${rawChunks.length} individual chunk texts to ${chunksDir}`);
-    }
+    // Image-pipeline save helper removed
 }
 
 export default new PipelineService();

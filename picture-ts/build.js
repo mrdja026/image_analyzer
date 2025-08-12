@@ -24,15 +24,14 @@ async function runBuild() {
             format: 'cjs',
             sourcemap: true,
             external: [
-                'sharp',
                 'ora',
                 'cli-progress',
                 'chalk',
                 'winston',
                 'axios',
                 'yargs',
-                // Do not bundle OpenCV; keep it external so its WASM can be located at runtime
-                '@techstark/opencv-js'
+                // Do not bundle Playwright; it ships with native assets and separate install
+                'playwright'
             ], // External dependencies
             minify: false,
             // No banner/shebang for Windows compatibility

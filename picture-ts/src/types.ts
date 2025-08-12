@@ -5,24 +5,6 @@
 // Role types
 export type Role = 'marketing' | 'po';
 
-// Progress style types
-export type ProgressStyle = 'simple' | 'bar' | 'spinner' | 'none';
-
-// Image formats
-export type SupportedImageFormat = 'jpeg' | 'jpg' | 'png' | 'gif';
-
-// Image chunk interface
-export interface ImageChunk {
-    data: Buffer;
-    index: number;
-    position: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
-}
-
 
 
 
@@ -76,64 +58,3 @@ export interface OllamaResponse {
     eval_count?: number;
     eval_duration?: number;
 }
-
-
-// CLI argument types
-export interface AnalyzeCommandArgs {
-    path: string;
-    role?: Role;
-    prompt?: string;
-    visionModel?: string;
-    textModel?: string;
-    debug?: boolean;
-    save?: boolean;
-    progress?: ProgressStyle;
-    noProgress?: boolean;
-    chunkSize?: number;
-    overlap?: number;
-    output?: string;
-    forceChunk?: boolean;
-    saveChunks?: boolean;
-    saveChunkImages?: boolean;
-    saveEtlDebug?: boolean;
-    visionInput?: 'raw' | 'enhanced' | 'gray' | 'auto';
-    maxTotalChunks?: number;
-    showTokensPerSecond?: boolean;
-    showTimeElapsed?: boolean;
-}
-
-export interface OcrCommandArgs {
-    path: string;
-    visionModel?: string;
-    debug?: boolean;
-    save?: boolean;
-    progress?: ProgressStyle;
-    noProgress?: boolean;
-    chunkSize?: number;
-    overlap?: number;
-    output?: string;
-    forceChunk?: boolean;
-    saveChunks?: boolean;
-    saveChunkImages?: boolean;
-    saveEtlDebug?: boolean;
-    visionInput?: 'raw' | 'enhanced' | 'gray' | 'auto';
-    maxTotalChunks?: number;
-    showTokensPerSecond?: boolean;
-    showTimeElapsed?: boolean;
-}
-
-// Progress tracking types
-export interface ProgressOptions {
-    style: ProgressStyle;
-    total?: number;
-    title?: string;
-    showTokensPerSecond?: boolean;
-    showTimeElapsed?: boolean;
-}
-
-export interface ProgressTracker {
-    start(options: ProgressOptions): void;
-    update(current: number, message?: string): void;
-    updateTokens(tokens: number): void;
-    finish(message?: string): void;
-} 

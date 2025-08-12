@@ -3,33 +3,29 @@
  * This version uses a unified, robust request pipeline.
  */
 
-import axios, { AxiosResponse } from 'axios';
-import sharp from 'sharp';
+import axios from 'axios';
 import logger from '../lib/logger';
-import { OllamaRequest, OllamaResponse, Role, ProgressTracker } from '../types';
+import { OllamaRequest, OllamaResponse, Role } from '../types';
 import {
     API_URL,
     MAX_RETRIES,
     REQUEST_COOLDOWN,
-    VISION_MODEL,
     TEXT_MODEL,
-    CHUNK_ANALYSIS_PROMPT,
     CHUNK_COMBINE_PROMPT,
     getPromptByRole,
-    IMAGE_OPERATION_TIMEOUT,
     TEXT_OPERATION_TIMEOUT
 } from '../config';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export class OllamaService {
-    private progressTracker: ProgressTracker | null = null;
+    private progressTracker: { updateTokens(tokens: number): void } | null = null;
 
     constructor() {
         logger.info(`Initialized OllamaService with API URL: ${API_URL}`);
     }
 
-    public setProgressTracker(tracker: ProgressTracker): void {
+    public setProgressTracker(tracker: { updateTokens(tokens: number): void } | null): void {
         this.progressTracker = tracker;
     }
 
@@ -86,37 +82,6 @@ export class OllamaService {
             }
         }
         throw new Error("Ollama request failed after all retries."); // Should be unreachable
-    }
-
-    /**
-     * A clean, simple wrapper for extracting text from an image chunk.
-     */
-    public async extractTextFromBuffer(buffer: Buffer, encode: 'jpeg' | 'none' = 'jpeg'): Promise<string> {
-        let imageBase64: string;
-        try {
-            if (encode === 'jpeg') {
-                const jpeg = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
-                imageBase64 = jpeg.toString('base64');
-            } else {
-                imageBase64 = buffer.toString('base64');
-            }
-        } catch (e) {
-            // Fallback to raw buffer if re-encode failed
-            imageBase64 = buffer.toString('base64');
-        }
-
-        const payload: OllamaRequest = {
-            model: VISION_MODEL,
-            prompt: CHUNK_ANALYSIS_PROMPT,
-            images: [imageBase64],
-        };
-        logger.debug(`Making request to ${API_URL} with model ${VISION_MODEL}`);
-        return this.makeRequest(payload, IMAGE_OPERATION_TIMEOUT);
-    }
-
-    // Backwards-compatible wrapper (defaults to JPEG re-encode)
-    public async extractTextFromChunk(chunk: Buffer): Promise<string> {
-        return this.extractTextFromBuffer(chunk, 'jpeg');
     }
 
     /**

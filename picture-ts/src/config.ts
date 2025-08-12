@@ -10,12 +10,8 @@ dotenv.config();
 // Log the loaded configuration for debugging
 console.log(`[Config] Loading environment variables from .env file`);
 console.log(`[Config] API_URL: ${process.env.API_URL || 'not set, using default'}`);
-console.log(`[Config] VISION_MODEL: ${process.env.VISION_MODEL || 'not set, using default'}`);
 console.log(`[Config] TEXT_MODEL: ${process.env.TEXT_MODEL || 'not set, using default'}`);
-console.log(`[Config] ENABLE_OPENCV: ${process.env.ENABLE_OPENCV === '1' ? 'enabled' : 'disabled'}`);
-if (process.env.OPENCV_WASM_PATH) {
-    console.log(`[Config] OPENCV_WASM_PATH: ${process.env.OPENCV_WASM_PATH}`);
-}
+// Vision/OpenCV removed
 
 // API configuration
 export const API_URL = process.env.API_URL || 'http://localhost:11434/api/generate';
@@ -24,15 +20,12 @@ export const REQUEST_COOLDOWN = 1.0; // Seconds between API requests (rate limit
 export const MAX_RETRIES = 3; // Maximum number of retry attempts
 
 // Image validation
-export const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB limit
-export const SUPPORTED_FORMATS = ['jpeg', 'jpg', 'png', 'gif'];
+// Image pipeline removed
 
 // Model configuration
 //tried nanonets-ocr-s:latest, but it was too slow and not as accurate
 //tried llava with temp 0 but it nonsense
 //tried moondream:latest it was just innacurate
-export const VISION_MODEL = process.env.VISION_MODEL || 'qwen2-ocr2-2b:latest'; // Using more powerful model for better analysis
-//using mistral for text summarization since i quantitazed it and compiled the weights via lama.cpp
 export const TEXT_MODEL = process.env.TEXT_MODEL || 'Mistral-7B-Instruct-v0.2-Q4_K_M:latest'; // Model for text summarization
 
 // Progress display configuration
@@ -63,12 +56,6 @@ export const ESTIMATED_TOKENS: Record<string, number> = {
 export const DEFAULT_ANALYSIS_PROMPT = 'Extract all text content from the provided image. Preserve the original structure and formatting in markdown.';
 
 // Chunk processing prompts
-export const CHUNK_ANALYSIS_PROMPT = `Extract all visible text from the attached image exactly as shown.
-- Preserve original line breaks and spacing where possible.
-- Do not summarize or explain.
-- Return ONLY the text content.
-- If no text is visible, return exactly: <<EMPTY>>`;
-
 export const CHUNK_COMBINE_PROMPT = `Synthesize the following sequence of text chunks into a single, coherent markdown document. The chunks were extracted in order from a larger image. Your task is to intelligently merge overlapping text to ensure smooth transitions and eliminate redundancy. The final output must be only the fully assembled markdown document.
 
 TEXT CHUNKS:
@@ -179,59 +166,4 @@ export function getPromptByRole(role: Role): string {
 
 // Feature flags for slicer selection
 // Enable OpenCV.js for content-aware chunking
-export const ENABLE_OPENCV = true;
-export const OPENCV_WASM_PATH = process.env.OPENCV_WASM_PATH || '';
-// Optional downscale factor for OpenCV content detection to reduce WASM memory usage on large images
-export const DETECT_SCALE = Math.max(0.1, Math.min(1.0, Number(process.env.DETECT_SCALE || 1.0)));
-
-// OpenCV detector tuning
-export const OPENCV_MIN_BLOCK_W = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_W || 200));
-export const OPENCV_MIN_BLOCK_H = Math.max(1, Number(process.env.OPENCV_MIN_BLOCK_H || 100));
-export const OPENCV_MAX_WIDTH_FRAC = Math.max(0, Math.min(1, Number(process.env.OPENCV_MAX_WIDTH_FRAC || 0.98)));
-export const OPENCV_MAX_HEIGHT_FRAC = Math.max(0, Math.min(1, Number(process.env.OPENCV_MAX_HEIGHT_FRAC || 0.98)));
-export const OPENCV_TALL_ASPECT_RATIO = Math.max(1, Number(process.env.OPENCV_TALL_ASPECT_RATIO || 2.2));
-export const OPENCV_TALL_DOWNSCALE = Math.max(0.1, Math.min(1, Number(process.env.OPENCV_TALL_DOWNSCALE || 0.75)));
-export const OPENCV_DEBUG_EXPORT = process.env.OPENCV_DEBUG_EXPORT === '1';
-
-// Enhanced ETL with adaptive thresholding and filtering
-export const USE_ADAPTIVE_THRESHOLD = process.env.USE_ADAPTIVE_THRESHOLD !== '0'; // default: true
-export const ADAPTIVE_BLOCK_SIZE = Math.max(3, Number(process.env.ADAPTIVE_BLOCK_SIZE || 31) | 1); // must be odd
-export const ADAPTIVE_C = Number(process.env.ADAPTIVE_C || 8);
-export const MIN_BAND_HEIGHT = Math.max(50, Number(process.env.MIN_BAND_HEIGHT || 180));
-export const USE_MORPHOLOGY = process.env.USE_MORPHOLOGY !== '0'; // default: true
-export const MAX_UI_SOLIDITY = Math.min(1.0, Math.max(0.0, Number(process.env.MAX_UI_SOLIDITY || 0.9)));
-export const MIN_EDGE_DENSITY = Math.max(0.0, Number(process.env.MIN_EDGE_DENSITY || 0.025));
-export const SAVE_ETL_OVERLAYS = process.env.SAVE_ETL_OVERLAYS === '1';
-
-// Block merge and whitespace splitting controls
-export const DISABLE_BLOCK_MERGE = process.env.DISABLE_BLOCK_MERGE !== '0'; // default: true
-export const PROJECTION_SPLIT_MIN_GAP = Math.max(4, Number(process.env.PROJECTION_SPLIT_MIN_GAP || 14));
-
-// OCR pre-processing behavior
-export const ENABLE_CHUNK_PREPROCESS = '1';
-export const ENABLE_DUAL_PASS_OCR = '1';
-
-// Vision input behavior
-export const DEFAULT_VISION_INPUT: 'raw' | 'enhanced' | 'gray' | 'auto' = (process.env.VISION_INPUT as any) || 'auto';
-
-// Chunk image saving controls
-export const SAVE_CHUNK_IMAGES_DEFAULT = process.env.SAVE_CHUNK_IMAGES === '1';
-export const SAVE_ETL_DEBUG_DEFAULT = process.env.SAVE_ETL_DEBUG === '1';
-
-// Chunk budgeting and subdivision tuning
-export const MAX_TOTAL_CHUNKS = Number(process.env.MAX_TOTAL_CHUNKS || 80);
-// Treat blocks with both dimensions <= CHUNK_MAX_DIM * FACTOR as single-chunk
-export const BLOCK_SINGLETON_DIM_FACTOR = Number(process.env.BLOCK_SINGLETON_DIM_FACTOR || 1.2);
-// Use a smaller overlap when chunking inside detected blocks
-export const INBLOCK_OVERLAP = Number(process.env.INBLOCK_OVERLAP || 0.12);
-// Coarse grid fallback when needing to reduce total chunk count
-export const COARSE_GRID_MAX_DIM = Number(process.env.COARSE_GRID_MAX_DIM || 1200);
-export const COARSE_GRID_OVERLAP = Number(process.env.COARSE_GRID_OVERLAP || 0.1);
-
-// Text-density filtering to prioritize text-heavy regions
-export const MIN_INK_FRACTION = Math.max(0, Math.min(1, Number(process.env.MIN_INK_FRACTION || 0.08)));
-export const BLOCK_INK_MULTIPLIER = Math.max(1, Number(process.env.BLOCK_INK_MULTIPLIER || 1.5));
-export const MAX_CHUNKS_PER_BLOCK = Math.max(0, Number(process.env.MAX_CHUNKS_PER_BLOCK || 4));
-
-export const IMAGE_OPERATION_TIMEOUT = 60; // 60 seconds for image operations
 export const TEXT_OPERATION_TIMEOUT = 300; // 300 seconds for text operations
