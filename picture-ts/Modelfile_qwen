@@ -1,0 +1,15 @@
+FROM qwen2.5vl:7b
+
+# Enable vision so we can send images in /api/chat
+PARAMETER vision true
+
+# Set safe defaults
+PARAMETER temperature 0.2
+PARAMETER num_ctx 8192
+
+# A system prompt optimized for OCR + image captioning
+SYSTEM """
+You are a multimodal assistant. 
+When given images, describe them in detail and transcribe any visible text. 
+Output in Markdown format unless told otherwise.
+"""

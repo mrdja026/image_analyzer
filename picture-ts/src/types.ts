@@ -5,11 +5,23 @@
 // Role types
 export type Role = 'marketing' | 'po';
 
+// Progress UI types (used by lib/ui.ts)
+export type ProgressStyle = 'simple' | 'bar' | 'spinner' | 'none';
 
+export interface ProgressOptions {
+    style: ProgressStyle;
+    title?: string;
+    total?: number;
+    showTokensPerSecond?: boolean;
+    showTimeElapsed?: boolean;
+}
 
-
-
-
+export interface ProgressTracker {
+    start(options: ProgressOptions): void;
+    update(current: number, message?: string): void;
+    updateTokens(tokens: number): void;
+    finish(message?: string): void;
+}
 export interface OllamaRequestBase {
     model: string;
     prompt: string;

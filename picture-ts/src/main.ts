@@ -128,6 +128,28 @@ yargs(hideBin(process.argv))
                     type: 'string',
                     default: DEFAULT_OUTPUT_DIR
                 })
+                // Optional vision flags
+                .option('vision-base-url', {
+                    type: 'string',
+                    describe: 'Vision server base URL (Ollama or llama.cpp)'
+                })
+                .option('vision-model', {
+                    type: 'string',
+                    describe: 'Vision model name/tag'
+                })
+                .option('vision-provider', {
+                    type: 'string',
+                    choices: ['ollama', 'llamacpp'] as const,
+                    describe: 'Vision provider to use'
+                })
+                .option('vision-system', {
+                    type: 'string',
+                    describe: 'System prompt for vision model'
+                })
+                .option('vision-max-tokens', {
+                    type: 'number',
+                    describe: 'Max tokens for vision response'
+                })
                 .example('$0 analyze-url https://example.com', 'Scrape and analyze the URL with default role')
                 .example('$0 analyze-url https://example.com --role marketing', 'Scrape and analyze using marketing role');
         },
@@ -139,7 +161,23 @@ yargs(hideBin(process.argv))
                 const url = argv.url as string;
                 const role = argv.role as Role;
                 logger.info(`Analyzing URL: ${url} with role: ${role}`);
-                const { analysis, textPath, imagesPath, analysisPath } = await pipelineService.runAnalysisFromUrl({ url, role, textModel: argv['text-model'] as string, save: argv.save as boolean, output: argv.output as string });
+                const vision = argv['vision-base-url'] && argv['vision-model'] && argv['vision-provider']
+                    ? {
+                        baseUrl: argv['vision-base-url'] as string,
+                        model: argv['vision-model'] as string,
+                        provider: argv['vision-provider'] as 'ollama' | 'llamacpp',
+                        system: argv['vision-system'] as string | undefined,
+                        maxTokens: argv['vision-max-tokens'] as number | undefined,
+                    }
+                    : undefined;
+                const { analysis, textPath, imagesPath, analysisPath } = await pipelineService.runAnalysisFromUrl({
+                    url,
+                    role,
+                    textModel: argv['text-model'] as string,
+                    save: argv.save as boolean,
+                    output: argv.output as string,
+                    vision,
+                });
                 console.log(`\n--- Analysis Result (${role}) ---\n`);
                 console.log(analysis);
                 console.log('\n----------------------------------\n');

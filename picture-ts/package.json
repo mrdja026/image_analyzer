@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "description": "Image analyzer and summarizer for blog reviews - TypeScript port of the Python image_analyzer",
   "main": "dist/main.js",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js"
+    },
+    "./cli": {
+      "require": "./dist/main.js"
+    }
+  },
   "bin": {
     "picture": "dist/main.js"
   },

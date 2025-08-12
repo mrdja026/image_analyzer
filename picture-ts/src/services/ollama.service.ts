@@ -105,12 +105,12 @@ export class OllamaService {
     /**
      * A clean, simple wrapper for analyzing a document with a specific role.
      */
-    public async analyzeDocument(document: string, role: Role): Promise<string> {
+    public async analyzeDocument(document: string, role: Role, modelOverride?: string): Promise<string> {
         const rolePrompt = getPromptByRole(role);
         const prompt = rolePrompt.replace('{document_text}', document);
 
         const payload: OllamaRequest = {
-            model: TEXT_MODEL,
+            model: modelOverride || TEXT_MODEL,
             prompt: prompt,
             options: { temperature: 0.1 }
         };

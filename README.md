@@ -38,6 +38,92 @@ node dist/main.js scrape "https://example.com" --save --output results
 node dist/main.js analyze-url "https://example.com" --role marketing
 ```
 
+### Integrating with a web API (Node)
+
+If your backend needs to trigger this CLI and return results to a frontend, spawn the CLI as a child process. Recommended flow:
+
+1) Create a unique output directory per request (e.g., using a UUID)
+2) Always pass `--save --output <dir>` so you can read the generated files
+3) On success (exit code 0), read files from `<dir>` and return content/paths
+4) Stream `stdout` lines to the client (optional) for live logs
+
+Example Express endpoint:
+
+```ts
+import { spawn } from 'child_process';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { randomUUID } from 'crypto';
+import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.post('/api/analyze-url', async (req, res) => {
+  const { url, role = 'marketing', textModel, vision } = req.body || {};
+  if (!url) return res.status(400).json({ error: 'url is required' });
+
+  const outDir = join(process.cwd(), 'results', randomUUID());
+  const args = [
+    'dist/main.js',
+    'analyze-url', url,
+    '--role', role,
+    '--save',
+    '--output', outDir,
+  ];
+
+  if (textModel) args.push('--text-model', textModel);
+  if (vision?.baseUrl && vision?.model && vision?.provider) {
+    args.push('--vision-base-url', vision.baseUrl);
+    args.push('--vision-model', vision.model);
+    args.push('--vision-provider', vision.provider);
+    if (vision.system) args.push('--vision-system', vision.system);
+    if (vision.maxTokens) args.push('--vision-max-tokens', String(vision.maxTokens));
+  }
+
+  const child = spawn(process.execPath, args, { cwd: join(process.cwd(), 'picture-ts') });
+
+  const logs: string[] = [];
+  child.stdout.on('data', (d) => logs.push(d.toString()));
+  child.stderr.on('data', (d) => logs.push(d.toString()));
+
+  child.on('close', async (code) => {
+    if (code !== 0) {
+      return res.status(500).json({ error: 'analysis_failed', code, logs });
+    }
+    // Read known output files
+    const analysisPath = join(outDir, 'analysis_marketing.md');
+    const scrapePath = join(outDir, 'scrape_result.md');
+    const imagesPath = join(outDir, 'images.md');
+    const [analysis, scrape, images] = await Promise.allSettled([
+      fs.readFile(analysisPath, 'utf8'),
+      fs.readFile(scrapePath, 'utf8'),
+      fs.readFile(imagesPath, 'utf8'),
+    ]);
+    res.json({
+      status: 'ok',
+      outputDir: outDir,
+      files: {
+        analysisPath, scrapePath, imagesPath,
+      },
+      contents: {
+        analysis: analysis.status === 'fulfilled' ? analysis.value : null,
+        scrape: scrape.status === 'fulfilled' ? scrape.value : null,
+        images: images.status === 'fulfilled' ? images.value : null,
+      },
+      logs,
+    });
+  });
+});
+```
+
+Notes:
+- Use `process.execPath` to run the same Node that runs your server.
+- Set `cwd` to the `picture-ts` directory.
+- Quote/escape arguments properly; avoid shell interpolation.
+- For streaming UX, forward `stdout` lines to clients via SSE/WebSockets.
+- Clean up old per-request output directories with a background job.
+
 ### CLI flags
 
 - `scrape <url>` options:
@@ -51,17 +137,50 @@ node dist/main.js analyze-url "https://example.com" --role marketing
   - `--debug`: enable debug logging
   - `--save`: save analysis to file
   - `--output <dir>`: output directory (default: `results`)
+  - `--vision-base-url <url>`: vision server base URL (Ollama or llama.cpp)
+  - `--vision-model <name>`: vision model name/tag (e.g., `qwen2.5vl:7b`)
+  - `--vision-provider <ollama|llamacpp>`: vision provider
+  - `--vision-system <text>`: optional system prompt for vision model
+  - `--vision-max-tokens <n>`: optional max tokens for vision response
 
 ##
 
 ## Output
 
-The program provides two main outputs:
+Outputs (when `--save` is used):
+- `<outputDir>/scrape_result.md` — cleaned text
+- `<outputDir>/images.md` — discovered images list
+- `<outputDir>/analysis_<role>.md` — analysis + “Images Used” section (if vision enabled)
 
-1. **Analysis**: Detailed description of the image content
-2. **Summary**: Concise summary of the key points from the analysis
+### Programmatic usage (no CLI spawn)
 
-When using the `--save` option, these outputs are saved as text files in the specified output directory (default: `results/`).
+This package exposes a small SDK you can import when symlinked/installed in your API. Use this when you don’t want to spawn a separate CLI process.
+
+```ts
+// Assuming your API has this package symlinked/installed
+import { pipelineService } from 'blog-reviews';
+
+const { analysis, textPath, imagesPath, analysisPath, usedImages } = await pipelineService.runAnalysisFromUrl({
+  url: 'https://example.com',
+  role: 'marketing',
+  textModel: 'Mistral-7B-Instruct-v0.2-Q4_K_M:latest',
+  save: true,
+  output: 'results/session123',
+  vision: {
+    baseUrl: 'http://localhost:11434',
+    model: 'qwen2.5vl:7b',
+    provider: 'ollama',
+    system: 'Output Markdown only.',
+    maxTokens: 1024,
+  },
+});
+
+console.log(analysisPath, usedImages);
+```
+
+Notes:
+- The SDK returns `usedImages` with metadata and OCR captions when vision is enabled.
+- File saving remains optional; you can omit `save/output` and handle content in-memory.
 
 ##
 
