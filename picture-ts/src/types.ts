@@ -5,44 +5,57 @@
 // Role types
 export type Role = 'marketing' | 'po';
 
-// Progress style types
+// Progress UI types (used by lib/ui.ts)
 export type ProgressStyle = 'simple' | 'bar' | 'spinner' | 'none';
 
-// Image formats
-export type SupportedImageFormat = 'jpeg' | 'jpg' | 'png' | 'gif';
-
-// Image chunk interface
-export interface ImageChunk {
-    data: Buffer;
-    index: number;
-    position: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
+export interface ProgressOptions {
+    style: ProgressStyle;
+    title?: string;
+    total?: number;
+    showTokensPerSecond?: boolean;
+    showTimeElapsed?: boolean;
 }
 
-// Ollama API request types
+export interface ProgressTracker {
+    start(options: ProgressOptions): void;
+    update(current: number, message?: string): void;
+    updateTokens(tokens: number): void;
+    finish(message?: string): void;
+}
 export interface OllamaRequestBase {
     model: string;
-    stream: boolean;
+    prompt: string;
+    stream?: boolean;
     options?: {
         temperature?: number;
-        top_p?: number;
-        top_k?: number;
+        // Add other valid Ollama options here as needed
     };
 }
 
-export interface OllamaTextRequest extends OllamaRequestBase {
-    prompt: string;
-}
-
+/**
+ * A request that includes image data.
+ */
 export interface OllamaImageRequest extends OllamaRequestBase {
-    prompt: string;
-    images: string[]; // Base64 encoded images
+    images: string[];
 }
 
+/**
+ * A request that is for text only (no image data).
+ */
+export interface OllamaTextRequest extends OllamaRequestBase {
+    images?: never; // Explicitly forbid the 'images' property
+}
+
+/**
+ * A unified type that can be EITHER a text request OR an image request.
+ * This is the type our unified `makeRequest` function will use.
+ */
+export type OllamaRequest = OllamaImageRequest | OllamaTextRequest;
+
+
+/**
+ * The structure of a single chunk of a streamed response from Ollama.
+ */
 // Ollama API response types
 export interface OllamaResponse {
     model: string;
@@ -57,55 +70,3 @@ export interface OllamaResponse {
     eval_count?: number;
     eval_duration?: number;
 }
-
-// CLI argument types
-export interface AnalyzeCommandArgs {
-    path: string;
-    role?: Role;
-    prompt?: string;
-    visionModel?: string;
-    textModel?: string;
-    debug?: boolean;
-    save?: boolean;
-    progress?: ProgressStyle;
-    noProgress?: boolean;
-    chunkSize?: number;
-    overlap?: number;
-    output?: string;
-    forceChunk?: boolean;
-    saveChunks?: boolean;
-    showTokensPerSecond?: boolean;
-    showTimeElapsed?: boolean;
-}
-
-export interface OcrCommandArgs {
-    path: string;
-    visionModel?: string;
-    debug?: boolean;
-    save?: boolean;
-    progress?: ProgressStyle;
-    noProgress?: boolean;
-    chunkSize?: number;
-    overlap?: number;
-    output?: string;
-    forceChunk?: boolean;
-    saveChunks?: boolean;
-    showTokensPerSecond?: boolean;
-    showTimeElapsed?: boolean;
-}
-
-// Progress tracking types
-export interface ProgressOptions {
-    style: ProgressStyle;
-    total?: number;
-    title?: string;
-    showTokensPerSecond?: boolean;
-    showTimeElapsed?: boolean;
-}
-
-export interface ProgressTracker {
-    start(options: ProgressOptions): void;
-    update(current: number, message?: string): void;
-    updateTokens(tokens: number): void;
-    finish(message?: string): void;
-} 

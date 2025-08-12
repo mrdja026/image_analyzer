@@ -14,7 +14,7 @@ async function runBuild() {
             await mkdir('./dist', { recursive: true });
         }
 
-        // Build the application
+        // Build the CLI entry
         await build({
             entryPoints: ['./src/main.ts'],
             bundle: true,
@@ -23,9 +23,39 @@ async function runBuild() {
             outfile: './dist/main.js',
             format: 'cjs',
             sourcemap: true,
-            external: ['sharp', 'ora', 'cli-progress', 'chalk', 'winston', 'axios', 'yargs'], // External dependencies
+            external: [
+                'ora',
+                'cli-progress',
+                'chalk',
+                'winston',
+                'axios',
+                'yargs',
+                // Do not bundle Playwright; it ships with native assets and separate install
+                'playwright'
+            ], // External dependencies
             minify: false,
             // No banner/shebang for Windows compatibility
+        });
+
+        // Build the SDK entry
+        await build({
+            entryPoints: ['./src/index.ts'],
+            bundle: true,
+            platform: 'node',
+            target: 'node20',
+            outfile: './dist/index.js',
+            format: 'cjs',
+            sourcemap: true,
+            external: [
+                'ora',
+                'cli-progress',
+                'chalk',
+                'winston',
+                'axios',
+                'yargs',
+                'playwright'
+            ],
+            minify: false,
         });
 
         console.log('✅ Build completed successfully!');

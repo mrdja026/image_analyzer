@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "description": "Image analyzer and summarizer for blog reviews - TypeScript port of the Python image_analyzer",
   "main": "dist/main.js",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js"
+    },
+    "./cli": {
+      "require": "./dist/main.js"
+    }
+  },
   "bin": {
     "picture": "dist/main.js"
   },
@@ -11,8 +19,9 @@
     "start": "node dist/main.js",
     "dev": "ts-node src/main.ts",
     "cli": "node dist/main.js",
-    "analyze": "npm run build && node dist/main.js analyze",
-    "ocr": "npm run build && node dist/main.js ocr",
+    "postinstall": "playwright install chromium",
+    "scrape": "npm run build && node dist/main.js scrape",
+    "analyze:url": "npm run build && node dist/main.js analyze-url",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -33,13 +42,12 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@techstark/opencv-js": "^4.11.0-release.1",
     "axios": "^1.10.0",
     "chalk": "^4.1.2",
     "cli-progress": "^3.12.0",
     "dotenv": "^17.2.0",
+    "playwright": "^1.46.1",
     "ora": "^5.4.1",
-    "sharp": "^0.34.3",
     "winston": "^3.17.0",
     "yargs": "^17.7.2"
   }
