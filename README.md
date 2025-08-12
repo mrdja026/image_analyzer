@@ -1,23 +1,23 @@
 # Image Analyzer and Summarizer
 
-A powerful tool for analyzing images with AI and summarizing the results. The application uses Ollama's yasserrmd/Nanonets-OCR for image analysis and qwen:32b for text summarization.
-# RESEARCH DO I NEED ROLES IF USIN MOE benefints and drawbacks
+A CLI for scraping web pages and analyzing the text with local LLMs via Ollama.
+
 ## Features
 
-- **Image Analysis**: Analyze images using LLaVA AI model to extract detailed descriptions
-- **Text Extraction**: Automatically extract and transcribe text from images
+- **Image Analysis**: Analyze images using LLaVA AI model to extract detailed descriptions - Removed
+- **Text Extraction**: Automatically extract and transcribe text from images - Removed
+- **Web scraping**: Scrape page text using Playwright (headless Chromium)
 - **Summarization**: Generate concise summaries of analysis results
 - **Role-Based Analysis**: Choose between different expert roles (Marketing Manager or Product Owner) for specialized summaries
-- **Smart Chunking**: Break down large images into smaller pieces for better analysis
-- **Progress Tracking**: Real-time progress indicators with multiple display styles
+- **Smart Chunking**: Break down large images into smaller pieces for better analysis - Removed
+- **Progress Tracking**: Real-time progress indicators with multiple display styles - Removed
 - **Save Results**: Save analysis and summaries to files for later reference
 
 ## Prerequisites
 
-- Python 3.8 or higher
-- [Ollama](https://ollama.ai/) installed and running locally
-- yasserrmd/Nanonets-OCR-s:latest ocr model better then llava, different use case this is purley for OCR (`yasserrmd/Nanonets-OCR-s:latest` recommended) pulled in Ollama
-- Alibaba Cloud (`qwen:32b` new) pulled in Ollama
+- Node.js v20+
+- npm
+- [Ollama](https://ollama.ai/) running locally with a text-only model (e.g., `Mistral-7B-Instruct-v0.2-Q4_K_M:latest`)
 
 ## Installation
 
@@ -25,7 +25,9 @@ A powerful tool for analyzing images with AI and summarizing the results. The ap
 2. Install required dependencies:
 
 ```bash
-pip install -r requirements.txt
+cd picture-ts
+npm install
+npm run build
 ```
 
 ## Usage
@@ -33,139 +35,168 @@ pip install -r requirements.txt
 Basic usage:
 
 ```bash
-python -m image_analyzer path/to/image.jpg
+node dist/main.js scrape "https://example.com" --save --output results
+node dist/main.js analyze-url "https://example.com" --role marketing
 ```
 
-### Command-line Options
+### Integrating with a web API (Node)
 
+If your backend needs to trigger this CLI and return results to a frontend, spawn the CLI as a child process. Recommended flow:
+
+1. Create a unique output directory per request (e.g., using a UUID)
+2. Always pass `--save --output <dir>` so you can read the generated files
+3. On success (exit code 0), read files from `<dir>` and return content/paths
+4. Stream `stdout` lines to the client (optional) for live logs
+
+Example Express endpoint:
+
+```ts
+import { spawn } from "child_process";
+import { promises as fs } from "fs";
+import { join } from "path";
+import { randomUUID } from "crypto";
+import express from "express";
+
+const app = express();
+app.use(express.json());
+
+app.post("/api/analyze-url", async (req, res) => {
+  const { url, role = "marketing", textModel, vision } = req.body || {};
+  if (!url) return res.status(400).json({ error: "url is required" });
+
+  const outDir = join(process.cwd(), "results", randomUUID());
+  const args = [
+    "dist/main.js",
+    "analyze-url",
+    url,
+    "--role",
+    role,
+    "--save",
+    "--output",
+    outDir,
+  ];
+
+  if (textModel) args.push("--text-model", textModel);
+  if (vision?.baseUrl && vision?.model && vision?.provider) {
+    args.push("--vision-base-url", vision.baseUrl);
+    args.push("--vision-model", vision.model);
+    args.push("--vision-provider", vision.provider);
+    if (vision.system) args.push("--vision-system", vision.system);
+    if (vision.maxTokens)
+      args.push("--vision-max-tokens", String(vision.maxTokens));
+  }
+
+  const child = spawn(process.execPath, args, {
+    cwd: join(process.cwd(), "picture-ts"),
+  });
+
+  const logs: string[] = [];
+  child.stdout.on("data", (d) => logs.push(d.toString()));
+  child.stderr.on("data", (d) => logs.push(d.toString()));
+
+  child.on("close", async (code) => {
+    if (code !== 0) {
+      return res.status(500).json({ error: "analysis_failed", code, logs });
+    }
+    // Read known output files
+    const analysisPath = join(outDir, "analysis_marketing.md");
+    const scrapePath = join(outDir, "scrape_result.md");
+    const imagesPath = join(outDir, "images.md");
+    const [analysis, scrape, images] = await Promise.allSettled([
+      fs.readFile(analysisPath, "utf8"),
+      fs.readFile(scrapePath, "utf8"),
+      fs.readFile(imagesPath, "utf8"),
+    ]);
+    res.json({
+      status: "ok",
+      outputDir: outDir,
+      files: {
+        analysisPath,
+        scrapePath,
+        imagesPath,
+      },
+      contents: {
+        analysis: analysis.status === "fulfilled" ? analysis.value : null,
+        scrape: scrape.status === "fulfilled" ? scrape.value : null,
+        images: images.status === "fulfilled" ? images.value : null,
+      },
+      logs,
+    });
+  });
+});
 ```
-python -m image_analyzer [IMAGE_PATH] [OPTIONS]
 
-Options:
-  --mode, -m {analyze,describe,summarize,all}
-                        Processing mode (default: all)
-  --output, -o OUTPUT   Output directory for saving results
-  --prompt, -p PROMPT   Custom prompt for image analysis
-  --vision-model MODEL  Vision model to use (default: llava:34b)
-  --text-model MODEL    Text model to use (default: llama3:instruct)
-  --debug               Enable debug logging
-  --save, -s            Save results to files
-  --progress {simple,bar,spinner,none}
-                        Progress display style (default: bar)
-  --no-progress         Disable progress display
-  --role, -r {marketing,po}
-                        Role to use for summarization (default: marketing)
+Notes:
 
-Image Chunking Options:
-  --use-chunking        Enable smart image chunking for better analysis of large images
-  --save-chunks         Save image chunks to disk for inspection
-  --output-dir DIR      Directory to save image chunks
-  --chunk-max-dim DIM   Maximum dimension for image chunks (default: 1200px)
-  --chunk-aspect-ratio RATIO
-                        Target aspect ratio for chunks (default: 1.0, square)
-  --chunk-overlap OVERLAP
-                        Overlap percentage between chunks (default: 0.2, 20%)
-```
+- Use `process.execPath` to run the same Node that runs your server.
+- Set `cwd` to the `picture-ts` directory.
+- Quote/escape arguments properly; avoid shell interpolation.
+- For streaming UX, forward `stdout` lines to clients via SSE/WebSockets.
+- Clean up old per-request output directories with a background job.
 
-### Examples
+### CLI flags
 
-Analyze an image and display the results:
+- `scrape <url>` options:
 
-```bash
-python -m image_analyzer path/to/image.jpg --mode analyze
-```
+  - `--debug`: enable debug logging
+  - `--save`: save scraped text to file
+  - `--output <dir>`: output directory (default: `results`)
 
-Analyze and summarize with a spinner progress indicator:
+- `analyze-url <url>` options:
+  - `--role <marketing|po>`: analysis role (default: `marketing`)
+  - `--text-model <name>`: text model to use (default from `TEXT_MODEL`)
+  - `--debug`: enable debug logging
+  - `--save`: save analysis to file
+  - `--output <dir>`: output directory (default: `results`)
+  - `--vision-base-url <url>`: vision server base URL (Ollama or llama.cpp)
+  - `--vision-model <name>`: vision model name/tag (e.g., `qwen2.5vl:7b`)
+  - `--vision-provider <ollama|llamacpp>`: vision provider
+  - `--vision-system <text>`: optional system prompt for vision model
+  - `--vision-max-tokens <n>`: optional max tokens for vision response
 
-```bash
-python -m image_analyzer path/to/image.jpg --progress spinner
-```
-
-Use a custom prompt for analysis and save results:
-
-```bash
-python -m image_analyzer path/to/image.jpg --prompt "Describe this image focusing on text content" --save
-```
-
-Use smart chunking for a large screenshot or image with small text:
-
-```bash
-python -m image_analyzer path/to/screenshot.png --use-chunking
-```
-
-Use chunking with custom parameters:
-
-```bash
-python -m image_analyzer path/to/image.jpg --use-chunking --chunk-max-dim 800 --chunk-overlap 0.3
-```
-
-Save and inspect the image chunks:
-
-```bash
-python -m image_analyzer path/to/image.jpg --use-chunking --save-chunks --output-dir "chunks"
-```
-
-Use the Marketing Manager role for summarization (analyzes blog content for improvement opportunities):
-
-```bash
-python -m image_analyzer path/to/blog_screenshot.jpg --role marketing
-```
-
-Use the Product Owner role for summarization (focuses on product requirements and market fit):
-
-```bash
-python -m image_analyzer path/to/product_doc.jpg --role po
-```
-
-## Progress Display Styles
-
-- **bar**: Shows a progress bar with completion percentage (default)
-- **spinner**: Shows an animated spinner with token counts
-- **simple**: Shows a simple text-based percentage indicator
-- **none**: Disables progress display
+##
 
 ## Output
 
-The program provides two main outputs:
+Outputs (when `--save` is used):
 
-1. **Analysis**: Detailed description of the image content
-2. **Summary**: Concise summary of the key points from the analysis
+- `<outputDir>/scrape_result.md` — cleaned text
+- `<outputDir>/images.md` — discovered images list
+- `<outputDir>/analysis_<role>.md` — analysis + “Images Used” section (if vision enabled)
 
-When using the `--save` option, these outputs are saved as text files in the specified output directory (default: `results/`).
+### Programmatic usage (no CLI spawn)
 
-## Smart Chunking for Large Images
+This package exposes a small SDK you can import when symlinked/installed in your API. Use this when you don’t want to spawn a separate CLI process.
 
-The image analyzer includes "Smart Chunking" technology to improve analysis of large images or screenshots with small text. This addresses a common limitation of vision models:
+```ts
+// Assuming your API has this package symlinked/installed
+import { pipelineService } from "blog-reviews";
 
-### The Problem
+const { analysis, textPath, imagesPath, analysisPath, usedImages } =
+  await pipelineService.runAnalysisFromUrl({
+    url: "https://example.com",
+    role: "marketing",
+    textModel: "Mistral-7B-Instruct-v0.2-Q4_K_M:latest",
+    save: true,
+    output: "results/session123",
+    vision: {
+      baseUrl: "http://localhost:11434",
+      model: "qwen2.5vl:7b",
+      provider: "ollama",
+      system: "Output Markdown only.",
+      maxTokens: 1024,
+    },
+  });
 
-Vision models like LLaVA resize all images to a fixed, small square dimension (typically 336x336 pixels) before processing. This "squashing" causes text to become unreadable and details to be lost, especially in:
+console.log(analysisPath, usedImages);
+```
 
-- Screenshots of web pages or documents
-- Images with small text
-- Images with extreme aspect ratios
-- High-resolution images with important details
+Notes:
 
-### How Smart Chunking Works
+- The SDK returns `usedImages` with metadata and OCR captions when vision is enabled.
+- File saving remains optional; you can omit `save/output` and handle content in-memory.
 
-When enabled with `--use-chunking`, the analyzer:
-
-1. **Divides the image** into smaller, overlapping chunks with better aspect ratios
-2. **Analyzes each chunk** individually at higher effective resolution
-3. **Combines the results** intelligently to create a comprehensive analysis
-
-This significantly improves text extraction and detail recognition for challenging images.
-
-### When to Use Chunking
-
-Use smart chunking when:
-
-- Processing screenshots with text
-- Analyzing documents or diagrams
-- Working with very high resolution images
-- Dealing with images that have extreme aspect ratios
-
-For regular photos or simple images, standard analysis is usually sufficient.
+##
 
 ## Role-Based Summarization
 
@@ -206,141 +237,38 @@ The image analyzer provides specialized summarization based on different profess
   - Prioritizing development efforts
   - Assessing product-market fit
 
-To specify a role, use the `--role` or `-r` option followed by either `marketing` or `po`:
+To specify a role, pass `--role` to `analyze-url`:
 
 ```bash
-python -m image_analyzer path/to/image.jpg --role marketing
+node dist/main.js analyze-url "https://example.com" --role marketing
 # or
-python -m image_analyzer path/to/image.jpg --role po
+node dist/main.js analyze-url "https://example.com" --role po
 ```
 
-## TypeScript Version Usage
+## TypeScript usage (npm scripts)
 
-The TypeScript version can be run using npm scripts for development and testing.
-
-### Prerequisites for TS Version
-
-- Node.js v20+
-- npm
-- Ollama running locally with required models
-
-### Installation
+You can use npm scripts with the `--` separator to pass CLI args:
 
 ```bash
-cd picture-ts
-npm install
-npm run build
+# Scrape
+npm run scrape -- https://example.com --save --output results
+
+# Analyze a URL with marketing role
+npm run analyze:url -- https://example.com --role marketing --debug --save --output results
 ```
 
-### Running with npm run start
+##
 
-To pass arguments to the script, use the `--` separator:
+### Convenience
 
-```bash
-npm run start -- analyze "path/to/image.jpg" --role marketing --progress spinner --large-image-mode
-```
+- Run directly:
 
-This runs the analyze command with marketing role and spinner progress.
+  - `node picture-ts/dist/main.js scrape <url> [--save] [--output <dir>] [--debug]`
+  - `node picture-ts/dist/main.js analyze-url <url> [--role marketing|po] [--text-model <name>] [--save] [--output <dir>] [--debug]`
 
-### Performance Metrics Options
-
-The TypeScript version includes options to display performance metrics during processing:
-
-- `--show-tokens-per-second`: Display the token generation rate in tokens per second
-- `--show-time-elapsed`: Display the elapsed time during processing
-
-Example usage:
-
-```bash
-npm run start -- analyze "path/to/image.jpg" --show-tokens-per-second --show-time-elapsed
-```
-
-These options work with all progress styles and can be combined with other options:
-
-```bash
-npm run start -- ocr "path/to/image.jpg" --progress bar --show-tokens-per-second --show-time-elapsed
-```
-
-### Convenience Scripts
-
-Use the built-in scripts for common commands:
-
-```bash
-npm run analyze -- "path/to/image.jpg" --role marketing --progress spinner
-```
-
-```bash
-npm run ocr -- "path/to/image.jpg" --chunk-size 800 --overlap 0.2
-```
-
-For development:
-
-```bash
-npm run dev analyze "path/to/image.jpg" --role po
-```
-
-## Local environment notes (this branch)
-
-- Grid-based chunking is now always enabled and OpenCV.js is disabled. This makes the pipeline simpler and more portable, but recognition quality can regress on dense screenshots and UI images. Expect more hallucinations and inconsistencies versus the previous OpenCV-based slicer, especially when text is tiny or heavily compressed.
-- Vision and text models are intentionally hard-coded in `picture-ts/src/config.ts` to keep local runs predictable. The UI can still pass a custom prompt and role (including the new `free` role), and a `mode` value is threaded through for telemetry.
-- Summary of behavior:
-  - If a custom prompt is provided, it is used directly.
-  - If not, the role prompt is used. New role `free` defaults to: “Give me the transcribed text.”
-  - `mode` (`analyze | summarize | describe | all`) is accepted and logged, but does not change pipeline behavior in this branch.
-
-### OpenCV.js removal — impact and next steps
-
-- **Impact**: Turning off OpenCV.js led to noticeable OCR quality drops on dense UI screenshots and small-text images. You may see more hallucinations, missed characters, and higher output variance compared to the Python/OpenCV slicer.
-- **Why**: We lost classical pre/post‑processing and smarter tiling/cropping heuristics that OpenCV provided, especially for denoising, thresholding, and adaptive slicing.
-- **Short‑term mitigations**:
-  - Reduce chunk size (e.g., 600–800px) and increase overlap (e.g., 0.25–0.35).
-  - Optional prefilters: lightweight sharpen/contrast before sending chunks.
-  - Multi‑scale tiling fallback for very dense text (process at 1.0x and 1.5x, merge).
-- **Medium‑term plan**:
-  - Re‑enable OpenCV.js via WASM behind a feature flag.
-  - Support `OPENCV_WASM_PATH` to locate `.wasm` at runtime (already supported in build tooling).
-  - Add a benchmark suite (accuracy/latency) to gate rollouts.
-- **Actions**:
-  - Add feature flag in config to toggle OpenCV.js slicer vs. grid slicer.
-  - Provide config surface for chunk size/overlap presets.
-  - Establish quality gates with representative test images.
-
-## Production deployment options for quantized GGUF models
-
-Your models are GGUF and quantized (e.g., Q4_K_M). The two most operationally friendly runtimes are Ollama and llama.cpp; both work well with GGUF and containerize cleanly. With `config.ts` hard-coding model names, prefer images that either bake models into the container or fetch them on boot to a persistent volume.
-
-Below are five pragmatic, cost-aware options—from simplest to most robust. All options keep our current code structure: `api/` (HTTP + SSE) calls into `picture-ts` which talks to Ollama/llama.cpp.
-
-1) RunPod Serverless or On‑Demand Pod (Ollama)
-- What: Ship a single Docker image containing: Ollama + our `api/` server + the `picture-ts` package. Mount a persistent volume at `/models` and `ollama pull` or copy GGUFs at boot.
-- Why: Lowest friction, pay-per-minute, scale to zero. Great for demos and spiky workloads.
-- Notes: Choose GPUs like T4/A10/L4 for best $/token. Expose port 3001 (API) and keep Ollama internal.
-
-2) Vast.ai spot GPU instance (llama.cpp or Ollama)
-- What: Rent the cheapest marketplace GPU, run our Docker image, and pin a storage volume for models.
-- Why: Often the lowest raw cost per hour; good for batch or ad-hoc processing.
-- Notes: Expect variability in providers; add a startup script to verify models and warm caches.
-
-3) Lambda Cloud dedicated GPU (Ollama + Docker Compose)
-- What: A stable L4/A10G instance running Docker Compose: `ollama` + `api` services with a shared model volume.
-- Why: Predictable performance and cost; better for steady daily traffic without orchestration overhead.
-- Notes: Pre-bake GGUFs into an image or sync from object storage (S3-compatible) on boot.
-
-4) AWS EC2 G5/G6 + Spot with Auto‑Recovery (Ollama behind ALB)
-- What: AMI with NVIDIA drivers + Docker. User data boots `ollama serve` and our `api` service; ALB fronts `/api/*`.
-- Why: Enterprise controls, IAM, VPC, alarms. Use Spot for 50–70% savings and fall back to on‑demand on interruption.
-- Notes: Store GGUFs on EBS or S3; warm on boot. Add autoscaling by CPU/GPU utilization and health checks.
-
-5) Hugging Face Spaces (demo) or Modal (serverless containers)
-- What: For public demos, use Spaces with a GPU runner to host the same Docker image; for bursty workloads, Modal can spin up containers on demand.
-- Why: Fast to share / demo; minimal infra management.
-- Notes: Not ideal for sustained heavy traffic; ensure your container pulls or bundles the GGUFs.
-
-Operational tips
-- Bundle or fetch models: Bake GGUFs into the image for the fastest cold start, or download from a private bucket to a mounted volume on container start.
-- Set deterministic parameters: Keep temperature low (e.g., 0.2–0.4) for OCR/summarization stability with quantized models.
-- Telemetry: Keep `mode`, `role`, and `hasCustomPrompt` logs; they’re already recorded by the API for observability.
-- Concurrency: For small GPUs, throttle concurrent chunk requests; our pipeline already processes chunks sequentially to reduce VRAM spikes.
+- Or via npm scripts (note the `--` separator):
+  - `npm run scrape -- <url> [--save] [--output <dir>] [--debug]`
+  - `npm run analyze:url -- <url> [--role marketing|po] [--text-model <name>] [--save] [--output <dir>] [--debug]`
 
 For Modelfiles its
 
@@ -388,13 +316,13 @@ ollama run modelName:latest
 
 ---
 
-### Revisit the Vision Model Heist:
+### Revisit the Vision Model Heist: There are good and bad but this is not the way to go. Deprecated left for history reasons
 
-- [ ] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2. there are multiple versions of llama.cpp, like unsloth llama.cpp, gerganov something llama.cpp llama server, investigate ghat
+- [x] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2. there are multiple versions of llama.cpp, like unsloth llama.cpp, gerganov something llama.cpp llama server, investigate ghat
 
-- [ ] Re-attempt the LLaVA-NeXT conversion: My previous attempt failed due to a simple command error. The plan to convert llava-hf/llava-v1.6-mistral-7b-hf is still viable and represents the next major skill-up: handling models with a separate "vision projector."
+- [x] Re-attempt the LLaVA-NeXT conversion: My previous attempt failed due to a simple command error. The plan to convert llava-hf/llava-v1.6-mistral-7b-hf is still viable and represents the next major skill-up: handling models with a separate "vision projector."
 
-- [ ] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF. (unsloth heros)
+- [x] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF. (unsloth heros)
 
 ### TODO
 
@@ -430,15 +358,18 @@ This section documents the HTTP API your frontend should call. The API server ru
 ### Endpoints
 
 - **Health**: `GET /api/health`
+
   - Response: `{ ok: boolean, gridChunking: "enabled" | "disabled" }`
 
 - **Upload image**: `POST /api/upload`
+
   - Content-Type: `multipart/form-data`
   - Body: field name `image` with the file
   - Response: `202 Accepted` with `{ jobId: string }`
   - Errors: `400 { error: "image file is required" }`, `500 { error: string }`
 
 - **Progress stream (SSE)**: `GET /api/stream/:jobId`
+
   - Content-Type: `text/event-stream`
   - Emits JSON lines with a `type` discriminator
   - Connect anytime after `jobId` is known
@@ -460,7 +391,7 @@ Common `type` values your UI should handle:
 
 - **stage**: `{ type: "stage", stage: "chunking" | "ocr" | "combining" | "analyzing" | "finished" | "error" }`
 - **progress**: `{ type: "progress", current: number, total: number, message?: string }`
- - **tokens**: `{ type: "tokens", rate: number, total?: number }` (emitted every 500–1000ms; `rate` is tokens/sec over the last interval, `total` is cumulative)
+- **tokens**: `{ type: "tokens", rate: number, total?: number }` (emitted every 500–1000ms; `rate` is tokens/sec over the last interval, `total` is cumulative)
 - **message**: `{ type: "message", message: string }`
 - **error**: `{ type: "error", error: string }`
 - **done**:
@@ -529,7 +460,10 @@ function subscribe(jobId: string, onEvent: (e: SseEvent) => void): () => void {
 - **Trigger analyze (role or prompt)**
 
 ```ts
-async function analyze(jobId: string, opts: { role?: "marketing" | "po"; prompt?: string }) {
+async function analyze(
+  jobId: string,
+  opts: { role?: "marketing" | "po"; prompt?: string }
+) {
   const res = await fetch("http://localhost:3001/api/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -543,6 +477,7 @@ async function analyze(jobId: string, opts: { role?: "marketing" | "po"; prompt?
 ### Error Handling
 
 - **Common errors**
+
   - `400`: Missing parameters (e.g., no file on upload, missing `jobId`)
   - `404`: Unknown `jobId`
   - `500`: Internal server error

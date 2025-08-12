@@ -1,11 +1,32 @@
----
-description:
-globs:
-alwaysApply: true
----
-#The project is a cli tool that combines text_model and web scraping to produca some form of analysis, we also save the pictures
+**Overall Goal:** I am building a Node.js CLI application. I need to create a robust web scraping module using Playwright. This module will take a URL, extract the main text content from the page, and return it as a clean string. The scraper must be resilient to errors and able to handle modern JavaScript-heavy websites (SPAs).
 
-In the @Readme.md file there are features 
+Please generate the necessary code based on the following requirements.
+
+**1. Create a new functionality web-scraper folder`**
+
+This file will contain the core scraping logic.
+
+- Old based OCR web scraping will be replaced by this implemntation
+- THe model for OCR wont be there just the TEXT_MODEL
+- The OpenCV is not imporatant! it can go 
+- The current vision_model => llm_model is deprecated
+
+- **Dependencies:** It should use the `plyawrithg` library.
+- **Function:** Create an `async` function named `scrapeContent` that accepts one argument: `url` (a string).
+- **Documentation:** Add a JSDoc comment to the function explaining what it does, its parameters, and what it returns (`Promise<string>`).
+- **Logic inside `scrapeContent`:**
+  - Use best practices and logging for Python, and avoit pythonlance lint error
+    4.  **Crucially, extract text from the main content area only.** Do not just grab the entire `<body>`. Use Playwright locators to try finding a `<main>`, `<article>`, or element with `id="content"` or `id="main"` first. If none of those exist, then fall back to the `<body>`.
+    5.  Get the `textContent` from the located element.
+    6.  Perform basic text cleaning: trim whitespace from the start and end, and replace multiple consecutive whitespace characters with a single space.
+    7.  Return the cleaned text.
+  - In the `catch` block:
+    1.  Log the error to the console.
+    2.  Throw a new, user-friendly `Error` that wraps the original error message (e.g., "Failed to scrape content from [URL].").
+  - In the `finally` block:
+    1.  Ensure the browser instance is always closed to prevent resource leaks.
+
+
 
 # 🐍 Python Best Practices
 
@@ -76,15 +97,3 @@ In the @Readme.md file there are features
   - Run: `npm run build && node dist/main.js scrape "<url>"`.
   - Run: `npm run build && node dist/main.js analyze-url "<url>" --role marketing`.
   - Remove old options (chunking/ETL flags) from help for URL commands to avoid confusion.
-
----
-
-## Currently Implemented (TS path)
-
-- Scraper (`scraper.service.ts`) extracts cleaned text and discovers images with context (`alt`, `caption`, `heading`, `nearText`, `index`).
-- Pipeline (`pipeline.service.ts`):
-  - `runScrapePipeline({ url, save, output })` saves `scrape_result.md` and `images.md`.
-  - `runAnalysisFromUrl({ url, role, textModel, save, output, vision? })` optionally captions up to 3 context-relevant images and appends captions to the analysis prompt. The saved `analysis_*.md` includes an “Images Used” section with embedded images and captions.
-  - Text analysis uses `TEXT_MODEL` or the `--text-model` override.
-- Vision client (`vision.client.ts`) supports `ollama` (to `/api/generate` with `prompt` + raw base64 `images`) and `llamacpp` (`/chat/completions`). Vision requests omit temperature.
-- CLI (`main.ts`): `scrape <url>`, `analyze-url <url>` with vision flags: `--vision-base-url`, `--vision-model`, `--vision-provider`, `--vision-system`, `--vision-max-tokens`.

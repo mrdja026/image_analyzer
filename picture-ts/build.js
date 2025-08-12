@@ -23,7 +23,16 @@ async function runBuild() {
             outfile: './dist/main.js',
             format: 'cjs',
             sourcemap: true,
-            external: ['sharp', 'ora', 'cli-progress', 'chalk', 'winston', 'axios', 'yargs'], // External dependencies
+            external: [
+                'ora',
+                'cli-progress',
+                'chalk',
+                'winston',
+                'axios',
+                'yargs',
+                // Do not bundle Playwright; it ships with native assets and separate install
+                'playwright'
+            ], // External dependencies
             minify: false,
             // No banner/shebang for Windows compatibility
         });

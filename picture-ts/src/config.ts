@@ -10,8 +10,8 @@ dotenv.config();
 // Log the loaded configuration for debugging
 console.log(`[Config] Loading environment variables from .env file`);
 console.log(`[Config] API_URL: ${process.env.API_URL || 'not set, using default'}`);
-console.log(`[Config] VISION_MODEL: ${process.env.VISION_MODEL || 'not set, using default'}`);
 console.log(`[Config] TEXT_MODEL: ${process.env.TEXT_MODEL || 'not set, using default'}`);
+// Vision/OpenCV removed
 
 // API configuration
 export const API_URL = process.env.API_URL || 'http://localhost:11434/api/generate';
@@ -20,15 +20,12 @@ export const REQUEST_COOLDOWN = 1.0; // Seconds between API requests (rate limit
 export const MAX_RETRIES = 3; // Maximum number of retry attempts
 
 // Image validation
-export const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB limit
-export const SUPPORTED_FORMATS = ['jpeg', 'jpg', 'png', 'gif'];
+// Image pipeline removed
 
 // Model configuration
 //tried nanonets-ocr-s:latest, but it was too slow and not as accurate
 //tried llava with temp 0 but it nonsense
 //tried moondream:latest it was just innacurate
-export const VISION_MODEL = process.env.VISION_MODEL || 'nanosets-ocr-temp-0:latest'; // Using more powerful model for better analysis
-//using mistral for text summarization since i quantitazed it and compiled the weights via lama.cpp
 export const TEXT_MODEL = process.env.TEXT_MODEL || 'Mistral-7B-Instruct-v0.2-Q4_K_M:latest'; // Model for text summarization
 
 // Progress display configuration
@@ -59,8 +56,6 @@ export const ESTIMATED_TOKENS: Record<string, number> = {
 export const DEFAULT_ANALYSIS_PROMPT = 'Extract all text content from the provided image. Preserve the original structure and formatting in markdown.';
 
 // Chunk processing prompts
-export const CHUNK_ANALYSIS_PROMPT = `Analyze the attached image.`; // this needs to be changed to a more specifcif prompt for chunk analysis depending on a model and modelfile configs, it works now with the current models in the config.ts
-
 export const CHUNK_COMBINE_PROMPT = `Synthesize the following sequence of text chunks into a single, coherent markdown document. The chunks were extracted in order from a larger image. Your task is to intelligently merge overlapping text to ensure smooth transitions and eliminate redundancy. The final output must be only the fully assembled markdown document.
 
 TEXT CHUNKS:
@@ -142,17 +137,16 @@ TASK: Analyze the following document and distill it into a concise, actionable "
 """
 `;
 
-// Free-form role default prompt (UI can override via custom prompt)
-export const FREEFORM_PROMPT = `Give me the transcribed text.`;
-
 
 
 // Default prompt - will be selected based on role argument
 export const DEFAULT_SUMMARIZATION_PROMPT = MARKETING_MANAGER_PROMPT;
 
 // Chunking settings
-export const DEFAULT_CHUNK_MAX_DIM = 1024; // A more standard size for vision models. 1200 is also fine.
-export const DEFAULT_CHUNK_OVERLAP = 0.15; // 15-20% is a good range.
+// Chunking presets: grid-first per reason.md (OpenCV slicer disabled by default)
+// See reason.md for rationale: OpenCV.js disabled to simplify pipeline and improve portability.
+export const DEFAULT_CHUNK_MAX_DIM = Number(process.env.CHUNK_MAX_DIM || 800);
+export const DEFAULT_CHUNK_OVERLAP = Number(process.env.CHUNK_OVERLAP || 0.3);
 
 // File paths
 export const DEFAULT_OUTPUT_DIR = 'results';
@@ -169,4 +163,8 @@ export const ROLE_PROMPTS: Record<Role, string> = {
 // Helper function to get prompt by role
 export function getPromptByRole(role: Role): string {
     return ROLE_PROMPTS[role] || DEFAULT_SUMMARIZATION_PROMPT;
-} 
+}
+
+// Feature flags for slicer selection
+// Enable OpenCV.js for content-aware chunking
+export const TEXT_OPERATION_TIMEOUT = 300; // 300 seconds for text operations
