@@ -27,9 +27,9 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
-*.gguf
+**/*.gguf
 
 # OS generated files
 .DS_Store
 Thumbs.db 
-results/
+resul*

@@ -60,6 +60,7 @@ export class PipelineService {
             provider: 'ollama' | 'llamacpp';
             system?: string;
             maxTokens?: number;
+            maxImages?: number; // limit number of images to caption (default 1)
         }
     }): Promise<{ analysis: string; textPath: string | null; imagesPath: string | null; analysisPath: string | null; usedImages: Array<{ src: string; alt?: string; heading?: string; nearText?: string; caption?: string; ocr?: string; }>; }> {
         const { url, role = 'marketing', save, output, vision } = args;
@@ -72,9 +73,10 @@ export class PipelineService {
         if (vision && images.length) {
             try {
                 // Score by context; pick top 3
+                const maxImages = Math.max(0, Math.min(Number.isFinite(vision.maxImages as number) ? (vision.maxImages as number) : 1, images.length));
                 const scored = this.scoreImagesByContext(images as ImageInfo[], text)
                     .sort((a, b) => b.score - a.score)
-                    .slice(0, 3)
+                    .slice(0, maxImages)
                     .map(s => s.img);
 
                 const localFiles: string[] = [];

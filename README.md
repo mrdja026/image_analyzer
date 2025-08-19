@@ -20,6 +20,7 @@ A CLI for scraping web pages and analyzing the text with local LLMs via Ollama.
 - [Ollama](https://ollama.ai/) running locally with a text-only model (e.g., `Mistral-7B-Instruct-v0.2-Q4_K_M:latest`)
 
 ## Installation
+
 1. Clone this repository
 2. Install required dependencies:
 
@@ -38,78 +39,119 @@ node dist/main.js scrape "https://example.com" --save --output results
 node dist/main.js analyze-url "https://example.com" --role marketing
 ```
 
+### Recent changes
+
+- Aligned CLI and API vision options; both now support `--vision-max-images` / `vision.maxImages` to limit the number of images captioned (default 1).
+- Documented correct Ollama model tag example: `qwen2.5vl:7b`.
+- Added PowerShell examples for both CLI and API usage.
+- Vision requests intentionally omit temperature parameters per project rules.
+
+### PowerShell examples
+
+CLI (limit to 1 image caption):
+
+```powershell
+node dist/main.js analyze-url "https://example.com" --role marketing --save --output results --vision-provider ollama --vision-base-url http://localhost:11434 --vision-model qwen2.5vl:7b --vision-max-images 1
+```
+
+API call (limit to 1 image caption):
+
+```powershell
+$body = @{
+  url = "https://example.com"
+  role = "marketing"
+  textModel = "Mistral-7B-Instruct-v0.2-Q4_K_M:latest"
+  vision = @{
+    baseUrl = "http://localhost:11434"
+    model = "qwen2.5vl:7b"
+    provider = "ollama"
+    maxImages = 1
+  }
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod -Method Post -Uri "http://localhost:3001/api/analyze-url" -Body $body -ContentType "application/json"
+```
+
 ### Integrating with a web API (Node)
 
 If your backend needs to trigger this CLI and return results to a frontend, spawn the CLI as a child process. Recommended flow:
 
-1) Create a unique output directory per request (e.g., using a UUID)
-2) Always pass `--save --output <dir>` so you can read the generated files
-3) On success (exit code 0), read files from `<dir>` and return content/paths
-4) Stream `stdout` lines to the client (optional) for live logs
+1. Create a unique output directory per request (e.g., using a UUID)
+2. Always pass `--save --output <dir>` so you can read the generated files
+3. On success (exit code 0), read files from `<dir>` and return content/paths
+4. Stream `stdout` lines to the client (optional) for live logs
 
 Example Express endpoint:
 
 ```ts
-import { spawn } from 'child_process';
-import { promises as fs } from 'fs';
-import { join } from 'path';
-import { randomUUID } from 'crypto';
-import express from 'express';
+import { spawn } from "child_process";
+import { promises as fs } from "fs";
+import { join } from "path";
+import { randomUUID } from "crypto";
+import express from "express";
 
 const app = express();
 app.use(express.json());
 
-app.post('/api/analyze-url', async (req, res) => {
-  const { url, role = 'marketing', textModel, vision } = req.body || {};
-  if (!url) return res.status(400).json({ error: 'url is required' });
+app.post("/api/analyze-url", async (req, res) => {
+  const { url, role = "marketing", textModel, vision } = req.body || {};
+  if (!url) return res.status(400).json({ error: "url is required" });
 
-  const outDir = join(process.cwd(), 'results', randomUUID());
+  const outDir = join(process.cwd(), "results", randomUUID());
   const args = [
-    'dist/main.js',
-    'analyze-url', url,
-    '--role', role,
-    '--save',
-    '--output', outDir,
+    "dist/main.js",
+    "analyze-url",
+    url,
+    "--role",
+    role,
+    "--save",
+    "--output",
+    outDir,
   ];
 
-  if (textModel) args.push('--text-model', textModel);
+  if (textModel) args.push("--text-model", textModel);
   if (vision?.baseUrl && vision?.model && vision?.provider) {
-    args.push('--vision-base-url', vision.baseUrl);
-    args.push('--vision-model', vision.model);
-    args.push('--vision-provider', vision.provider);
-    if (vision.system) args.push('--vision-system', vision.system);
-    if (vision.maxTokens) args.push('--vision-max-tokens', String(vision.maxTokens));
+    args.push("--vision-base-url", vision.baseUrl);
+    args.push("--vision-model", vision.model);
+    args.push("--vision-provider", vision.provider);
+    if (vision.system) args.push("--vision-system", vision.system);
+    if (vision.maxTokens) args.push("--vision-max-tokens", String(vision.maxTokens));
+    if (vision.maxImages) args.push("--vision-max-images", String(vision.maxImages));
   }
 
-  const child = spawn(process.execPath, args, { cwd: join(process.cwd(), 'picture-ts') });
+  const child = spawn(process.execPath, args, {
+    cwd: join(process.cwd(), "picture-ts"),
+  });
 
   const logs: string[] = [];
-  child.stdout.on('data', (d) => logs.push(d.toString()));
-  child.stderr.on('data', (d) => logs.push(d.toString()));
+  child.stdout.on("data", (d) => logs.push(d.toString()));
+  child.stderr.on("data", (d) => logs.push(d.toString()));
 
-  child.on('close', async (code) => {
+  child.on("close", async (code) => {
     if (code !== 0) {
-      return res.status(500).json({ error: 'analysis_failed', code, logs });
+      return res.status(500).json({ error: "analysis_failed", code, logs });
     }
     // Read known output files
-    const analysisPath = join(outDir, 'analysis_marketing.md');
-    const scrapePath = join(outDir, 'scrape_result.md');
-    const imagesPath = join(outDir, 'images.md');
+    const analysisPath = join(outDir, "analysis_marketing.md");
+    const scrapePath = join(outDir, "scrape_result.md");
+    const imagesPath = join(outDir, "images.md");
     const [analysis, scrape, images] = await Promise.allSettled([
-      fs.readFile(analysisPath, 'utf8'),
-      fs.readFile(scrapePath, 'utf8'),
-      fs.readFile(imagesPath, 'utf8'),
+      fs.readFile(analysisPath, "utf8"),
+      fs.readFile(scrapePath, "utf8"),
+      fs.readFile(imagesPath, "utf8"),
     ]);
     res.json({
-      status: 'ok',
+      status: "ok",
       outputDir: outDir,
       files: {
-        analysisPath, scrapePath, imagesPath,
+        analysisPath,
+        scrapePath,
+        imagesPath,
       },
       contents: {
-        analysis: analysis.status === 'fulfilled' ? analysis.value : null,
-        scrape: scrape.status === 'fulfilled' ? scrape.value : null,
-        images: images.status === 'fulfilled' ? images.value : null,
+        analysis: analysis.status === "fulfilled" ? analysis.value : null,
+        scrape: scrape.status === "fulfilled" ? scrape.value : null,
+        images: images.status === "fulfilled" ? images.value : null,
       },
       logs,
     });
@@ -118,6 +160,7 @@ app.post('/api/analyze-url', async (req, res) => {
 ```
 
 Notes:
+
 - Use `process.execPath` to run the same Node that runs your server.
 - Set `cwd` to the `picture-ts` directory.
 - Quote/escape arguments properly; avoid shell interpolation.
@@ -127,6 +170,7 @@ Notes:
 ### CLI flags
 
 - `scrape <url>` options:
+
   - `--debug`: enable debug logging
   - `--save`: save scraped text to file
   - `--output <dir>`: output directory (default: `results`)
@@ -142,12 +186,14 @@ Notes:
   - `--vision-provider <ollama|llamacpp>`: vision provider
   - `--vision-system <text>`: optional system prompt for vision model
   - `--vision-max-tokens <n>`: optional max tokens for vision response
+  - `--vision-max-images <n>`: optional max images to caption (default 1)
 
 ##
 
 ## Output
 
 Outputs (when `--save` is used):
+
 - `<outputDir>/scrape_result.md` — cleaned text
 - `<outputDir>/images.md` — discovered images list
 - `<outputDir>/analysis_<role>.md` — analysis + “Images Used” section (if vision enabled)
@@ -158,27 +204,29 @@ This package exposes a small SDK you can import when symlinked/installed in your
 
 ```ts
 // Assuming your API has this package symlinked/installed
-import { pipelineService } from 'blog-reviews';
+import { pipelineService } from "blog-reviews";
 
-const { analysis, textPath, imagesPath, analysisPath, usedImages } = await pipelineService.runAnalysisFromUrl({
-  url: 'https://example.com',
-  role: 'marketing',
-  textModel: 'Mistral-7B-Instruct-v0.2-Q4_K_M:latest',
-  save: true,
-  output: 'results/session123',
-  vision: {
-    baseUrl: 'http://localhost:11434',
-    model: 'qwen2.5vl:7b',
-    provider: 'ollama',
-    system: 'Output Markdown only.',
-    maxTokens: 1024,
-  },
-});
+const { analysis, textPath, imagesPath, analysisPath, usedImages } =
+  await pipelineService.runAnalysisFromUrl({
+    url: "https://example.com",
+    role: "marketing",
+    textModel: "Mistral-7B-Instruct-v0.2-Q4_K_M:latest",
+    save: true,
+    output: "results/session123",
+    vision: {
+      baseUrl: "http://localhost:11434",
+      model: "qwen2.5vl:7b",
+      provider: "ollama",
+      system: "Output Markdown only.",
+      maxTokens: 1024,
+    },
+  });
 
 console.log(analysisPath, usedImages);
 ```
 
 Notes:
+
 - The SDK returns `usedImages` with metadata and OCR captions when vision is enabled.
 - File saving remains optional; you can omit `save/output` and handle content in-memory.
 
@@ -248,6 +296,7 @@ npm run analyze:url -- https://example.com --role marketing --debug --save --out
 ### Convenience
 
 - Run directly:
+
   - `node picture-ts/dist/main.js scrape <url> [--save] [--output <dir>] [--debug]`
   - `node picture-ts/dist/main.js analyze-url <url> [--role marketing|po] [--text-model <name>] [--save] [--output <dir>] [--debug]`
 
@@ -303,11 +352,11 @@ ollama run modelName:latest
 
 ### Revisit the Vision Model Heist: There are good and bad but this is not the way to go. Deprecated left for history reasons
 
-- [X] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2. there are multiple versions of llama.cpp, like unsloth llama.cpp, gerganov something llama.cpp llama server, investigate ghat
+- [x] Monitor llama.cpp and optimum: Keep a close eye on the GitHub repositories for these tools. Look for updates, new conversion scripts, or explicit mentions of support for models like Florence-2. there are multiple versions of llama.cpp, like unsloth llama.cpp, gerganov something llama.cpp llama server, investigate ghat
 
-- [X] Re-attempt the LLaVA-NeXT conversion: My previous attempt failed due to a simple command error. The plan to convert llava-hf/llava-v1.6-mistral-7b-hf is still viable and represents the next major skill-up: handling models with a separate "vision projector."
+- [x] Re-attempt the LLaVA-NeXT conversion: My previous attempt failed due to a simple command error. The plan to convert llava-hf/llava-v1.6-mistral-7b-hf is still viable and represents the next major skill-up: handling models with a separate "vision projector."
 
-- [X] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF. (unsloth heros)
+- [x] Investigate Alternative Converters: Research if the community has developed new, specialized tools for converting these exotic vision architectures to GGUF. (unsloth heros)
 
 ### TODO
 
@@ -327,3 +376,172 @@ ollama run modelName:latest
   - improved with the vision library
 - [ ] Web scraping would eliminate OCR — but I like OCR; implement web scraping for better performance, no need for LLM then
 - [ ] TESTS
+
+OPEN CV IS REMOVED FOR LOCAL DEPLOYMENT> DO NOT MERGE INTO MAIN WITHOUT BACKUP
+
+## Frontend API Blueprint (UI -> `api/`)
+
+This section documents the HTTP API your frontend should call. The API server runs from the `api/` package and exposes endpoints for health, upload, progress (SSE), and analysis.
+
+### Base
+
+- **Base URL**: `http://localhost:3001`
+- **CORS**: Enabled for all origins
+- **Max upload size**: 25 MB
+
+### Endpoints
+
+- **Health**: `GET /api/health`
+
+  - Response: `{ ok: boolean, gridChunking: "enabled" | "disabled" }`
+
+- **Upload image**: `POST /api/upload`
+
+  - Content-Type: `multipart/form-data`
+  - Body: field name `image` with the file
+  - Response: `202 Accepted` with `{ jobId: string }`
+  - Errors: `400 { error: "image file is required" }`, `500 { error: string }`
+
+- **Progress stream (SSE)**: `GET /api/stream/:jobId`
+
+  - Content-Type: `text/event-stream`
+  - Emits JSON lines with a `type` discriminator
+  - Connect anytime after `jobId` is known
+  - Errors: `404` if job not found
+
+- **Analyze combined text**: `POST /api/analyze`
+  - Content-Type: `application/json`
+  - Body: `{ jobId: string, role?: "marketing" | "po", prompt?: string }`
+    - If `prompt` is provided and non-empty, it is used and `role` is ignored
+  - Response: `202 Accepted` with `{ accepted: true }`
+  - Result is delivered via SSE as a `done` event with `result`
+  - Errors: `400 { error: string }`, `404 { error: "job not found" }`, `500 { error: string }`
+
+### SSE Event Shapes
+
+Events are emitted as lines like: `data: { ... }\n\n`.
+
+Common `type` values your UI should handle:
+
+- **stage**: `{ type: "stage", stage: "chunking" | "ocr" | "combining" | "analyzing" | "finished" | "error" }`
+- **progress**: `{ type: "progress", current: number, total: number, message?: string }`
+- **tokens**: `{ type: "tokens", rate: number, total?: number }` (emitted every 500–1000ms; `rate` is tokens/sec over the last interval, `total` is cumulative)
+- **message**: `{ type: "message", message: string }`
+- **error**: `{ type: "error", error: string }`
+- **done**:
+  - Upload OCR completion: `{ type: "done" }` (OCR finished; combined text stored server-side)
+  - Analyze completion: `{ type: "done", result: string }` (final analysis available)
+
+Notes on lifecycle:
+
+- Upload job goes through `chunking` → `ocr` → `combining` → `finished`. A `done` event is emitted when OCR completes.
+- Analyze job sets `analyzing` → `finished` and emits a `done` event with `result`.
+
+### Recommended UI Flow
+
+1. POST `/api/upload` with the file, receive `jobId`
+2. Open SSE `GET /api/stream/:jobId` to observe `stage`, `progress`, and `message`
+3. Wait until you see upload OCR `done` and/or `stage: finished`
+4. POST `/api/analyze` with `jobId` and either `role` or `prompt`
+5. Keep the same SSE open; when analysis finishes, you'll receive `type: done` with `result`
+
+### Frontend Examples (TypeScript)
+
+- **Upload image**
+
+```ts
+async function uploadImage(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("image", file);
+  const res = await fetch("http://localhost:3001/api/upload", {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  const data = await res.json();
+  return data.jobId as string;
+}
+```
+
+- **Subscribe to SSE**
+
+```ts
+type SseEvent =
+  | { type: "stage"; stage: string }
+  | { type: "progress"; current: number; total: number; message?: string }
+  | { type: "tokens"; rate: number; total?: number }
+  | { type: "message"; message: string }
+  | { type: "error"; error: string }
+  | { type: "done"; result?: string };
+
+function subscribe(jobId: string, onEvent: (e: SseEvent) => void): () => void {
+  const es = new EventSource(`http://localhost:3001/api/stream/${jobId}`);
+  es.onmessage = (msg) => {
+    try {
+      const data = JSON.parse(msg.data) as SseEvent;
+      onEvent(data);
+    } catch {
+      // ignore malformed messages
+    }
+  };
+  es.onerror = () => {
+    // Optionally implement backoff/reconnect
+  };
+  return () => es.close();
+}
+```
+
+- **Trigger analyze (role or prompt)**
+
+```ts
+async function analyze(
+  jobId: string,
+  opts: { role?: "marketing" | "po"; prompt?: string }
+) {
+  const res = await fetch("http://localhost:3001/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jobId, ...opts }),
+  });
+  if (!res.ok) throw new Error(`Analyze failed: ${res.status}`);
+  // Server responds 202 Accepted; result comes via SSE `done` event
+}
+```
+
+### Error Handling
+
+- **Common errors**
+
+  - `400`: Missing parameters (e.g., no file on upload, missing `jobId`)
+  - `404`: Unknown `jobId`
+  - `500`: Internal server error
+
+- **Shape**: `{ error: string }`
+
+### Constraints & Tips
+
+- **File size**: uploads above 25 MB will be rejected
+- **Sequencing**: Always upload first; only call analyze after OCR is finished
+- **SSE**: Keep one EventSource per `jobId`; reuse it for both OCR and analysis phases
+- **Prompt vs role**: Supplying `prompt` overrides `role`
+
+### Curl (Git Bash)
+
+```bash
+# Upload
+JOB_ID=$(curl -s -F "image=@/full/path/to/image.png" http://localhost:3001/api/upload | sed -n 's/.*"jobId":"\([^"]*\)".*/\1/p')
+echo "$JOB_ID"
+
+# Stream
+curl http://localhost:3001/api/stream/$JOB_ID
+
+# Analyze with role
+curl -X POST http://localhost:3001/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"jobId':'"$JOB_ID"'", "role":"marketing"}'
+
+# Analyze with prompt
+curl -X POST http://localhost:3001/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"jobId":"'"$JOB_ID"'","prompt":"Summarize key points and risks."}'
+```

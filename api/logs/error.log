@@ -1,0 +1,4 @@
+2025-08-08 07:19:36 [ERROR]: File is not a supported image format: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754630376022_shart_disgusting.webp 
+2025-08-08 07:19:36 [ERROR]: Detected format: webp 
+2025-08-08 07:19:36 [ERROR]: Supported formats: jpeg, jpg, png, gif 
+2025-08-08 07:19:36 [ERROR]: Error in OCR pipeline: Error: Invalid image: C:\Users\Mrdjan\Documents\workspace\llm_playground\image_analyzer\api\uploads\1754630376022_shart_disgusting.webp 

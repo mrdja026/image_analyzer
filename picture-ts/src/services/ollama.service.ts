@@ -116,6 +116,33 @@ export class OllamaService {
         };
         return this.makeRequest(payload, TEXT_OPERATION_TIMEOUT);
     }
+
+    /**
+     * Analyze a document using a custom prompt provided by the caller.
+     * Falls back to the configured TEXT_MODEL and streams token updates via the progress tracker.
+     * @param document The document to analyze
+     * @param prompt A full prompt string that will be prepended to the document
+     * @returns Promise resolving to the analysis result
+     */
+    async analyzeWithPrompt(document: string, prompt: string): Promise<string> {
+        try {
+            logger.info('Analyzing document with a custom prompt');
+
+            const fullPrompt = `${prompt}\n\nDocument to analyze:\n\n${document}`;
+
+            const result = await this.makeTextRequest(
+                TEXT_MODEL,
+                fullPrompt,
+                true // This is a long operation
+            );
+
+            logger.debug('Successfully analyzed document with custom prompt');
+            return result;
+        } catch (error) {
+            logger.error(`Error analyzing document with custom prompt: ${error}`);
+            throw error;
+        }
+    }
 }
 
 export default new OllamaService();

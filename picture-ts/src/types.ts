@@ -5,6 +5,9 @@
 // Role types
 export type Role = 'marketing' | 'po';
 
+// Processing mode types (threaded from UI; currently informational only)
+export type Mode = 'analyze' | 'describe' | 'summarize' | 'all';
+
 // Progress UI types (used by lib/ui.ts)
 export type ProgressStyle = 'simple' | 'bar' | 'spinner' | 'none';
 

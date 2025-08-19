@@ -1,5 +1,5 @@
 {
-  "name": "blog-reviews",
+  "name": "@blog-reviews/picture",
   "version": "1.0.0",
   "description": "Image analyzer and summarizer for blog reviews - TypeScript port of the Python image_analyzer",
   "main": "dist/main.js",
@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "node build.js",
+    "build:lib": "npm run build",
     "start": "node dist/main.js",
     "dev": "ts-node src/main.ts",
     "cli": "node dist/main.js",
