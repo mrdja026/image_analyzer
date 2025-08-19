@@ -1,23 +1,32 @@
-# Image Analyzer and Summarizer
+# 🖼️ Picture-TS: Web Content Analyzer and AI Summarizer
 
-A CLI for scraping web pages and analyzing the text with local LLMs via Ollama.
+A powerful TypeScript CLI tool for web scraping, content analysis, and AI-powered summarization. Extract text content from web pages, analyze images with vision models, and generate role-specific insights using local AI models.
 
-## Features
+## ✨ Features
 
-- **Image Analysis**: Analyze images using LLaVA AI model to extract detailed descriptions - Removed
-- **Text Extraction**: Automatically extract and transcribe text from images - Removed
-- **Web scraping**: Scrape page text using Playwright (headless Chromium)
-- **Summarization**: Generate concise summaries of analysis results
-- **Role-Based Analysis**: Choose between different expert roles (Marketing Manager or Product Owner) for specialized summaries
-- **Smart Chunking**: Break down large images into smaller pieces for better analysis - Removed
-- **Progress Tracking**: Real-time progress indicators with multiple display styles - Removed
-- **Save Results**: Save analysis and summaries to files for later reference
+### 🌐 Web Content Extraction
+- **Smart Web Scraping**: Extract main content from any URL using Playwright (headless Chromium)
+- **Image Discovery**: Automatically find and catalog images with metadata (alt text, captions, dimensions)
+- **Content Prioritization**: Intelligently identifies main content areas (article, main, #content, etc.)
+
+### 🤖 AI-Powered Analysis
+- **Role-Based Analysis**: Generate tailored insights for different perspectives:
+  - **Marketing Manager**: Competitive analysis, value propositions, target audience identification
+  - **Product Owner**: Product opportunity briefs, feature analysis, strategic recommendations
+- **Vision Model Integration**: Optional image captioning and analysis with Ollama or llama.cpp
+- **Smart Content Synthesis**: Combines text and image analysis for comprehensive insights
+
+### 📊 Flexible Output Options
+- **Console Output**: Immediate results with formatted display
+- **File Export**: Save results as organized Markdown files
+- **Structured Data**: JSON-compatible output for integration with other tools
 
 ## Prerequisites
 
 - Node.js v20+
 - npm
-- [Ollama](https://ollama.ai/) running locally with a text-only model (e.g., `Mistral-7B-Instruct-v0.2-Q4_K_M:latest`)
+- [Ollama](https://ollama.ai/) running locally with a text model (e.g., `Mistral-7B-Instruct-v0.2-Q4_K_M:latest`)
+- Optional: Vision model for image analysis (e.g., `qwen2.5vl:7b`)
 
 ## Installation
 
@@ -30,13 +39,17 @@ npm install
 npm run build
 ```
 
-## Usage
-
-Basic usage:
+## Basic Usage
 
 ```bash
+# Scrape text content from a URL
 node dist/main.js scrape "https://example.com" --save --output results
+
+# Analyze a URL with marketing perspective
 node dist/main.js analyze-url "https://example.com" --role marketing
+
+# Analyze with product owner perspective and save results
+node dist/main.js analyze-url "https://example.com" --role po --save --output results
 ```
 
 ### Recent changes
@@ -167,26 +180,37 @@ Notes:
 - For streaming UX, forward `stdout` lines to clients via SSE/WebSockets.
 - Clean up old per-request output directories with a background job.
 
-### CLI flags
+## CLI Commands & Options
 
-- `scrape <url>` options:
+### `scrape <url>` - Extract web content
+```bash
+node dist/main.js scrape "https://example.com" [options]
+```
 
-  - `--debug`: enable debug logging
-  - `--save`: save scraped text to file
-  - `--output <dir>`: output directory (default: `results`)
+**Options:**
+- `--debug`: Enable debug logging
+- `--save`: Save scraped text to file
+- `--output <dir>`: Output directory (default: `results`)
 
-- `analyze-url <url>` options:
-  - `--role <marketing|po>`: analysis role (default: `marketing`)
-  - `--text-model <name>`: text model to use (default from `TEXT_MODEL`)
-  - `--debug`: enable debug logging
-  - `--save`: save analysis to file
-  - `--output <dir>`: output directory (default: `results`)
-  - `--vision-base-url <url>`: vision server base URL (Ollama or llama.cpp)
-  - `--vision-model <name>`: vision model name/tag (e.g., `qwen2.5vl:7b`)
-  - `--vision-provider <ollama|llamacpp>`: vision provider
-  - `--vision-system <text>`: optional system prompt for vision model
-  - `--vision-max-tokens <n>`: optional max tokens for vision response
-  - `--vision-max-images <n>`: optional max images to caption (default 1)
+### `analyze-url <url>` - AI-powered content analysis
+```bash
+node dist/main.js analyze-url "https://example.com" [options]
+```
+
+**Options:**
+- `--role <marketing|po>`: Analysis role (default: `marketing`)
+- `--text-model <name>`: Text model to use (default from `TEXT_MODEL`)
+- `--debug`: Enable debug logging
+- `--save`: Save analysis to file
+- `--output <dir>`: Output directory (default: `results`)
+
+**Vision Options (Optional):**
+- `--vision-base-url <url>`: Vision server base URL (Ollama or llama.cpp)
+- `--vision-model <name>`: Vision model name/tag (e.g., `qwen2.5vl:7b`)
+- `--vision-provider <ollama|llamacpp>`: Vision provider
+- `--vision-system <text>`: Optional system prompt for vision model
+- `--vision-max-tokens <n>`: Optional max tokens for vision response
+- `--vision-max-images <n>`: Optional max images to caption (default 1)
 
 ##
 
@@ -232,102 +256,130 @@ Notes:
 
 ##
 
-## Role-Based Summarization
+## Role-Based Analysis
 
-The image analyzer provides specialized summarization based on different professional roles, allowing you to get tailored insights from the extracted text:
+The analyzer provides specialized insights based on different professional perspectives:
 
 ### Available Roles
 
-- **Marketing Manager**: Analyzes blog text content to identify gaps and suggest improvements. This role provides:
+#### **Marketing Manager** (`--role marketing`)
+Generates competitive analysis reports focusing on:
+- Product identity assessment
+- Core value proposition analysis  
+- Target audience identification
+- Key features evaluation
+- Content effectiveness assessment
+- Strategic competitive recommendations
 
-  - Product identity assessment
-  - Core value proposition analysis
-  - Target audience identification
-  - Key features evaluation
-  - Content improvement recommendations
-  - Final competitive assessment
+**Example Output:**
+```
+**Analysis Report**
 
-- **Product Owner**: Analyzes text content focusing on product requirements and market fit. This role provides:
-  - Product overview
-  - User problem identification
-  - Target user personas
-  - Core functionality assessment
-  - Development priorities
-  - Market fit evaluation
-  - Technical considerations
+**1. Product Identity:** A cloud-native development platform for containerized applications.
+**2. Core Value Proposition:** Simplifies Kubernetes deployment and management for development teams.
+**3. Target Audience:** DevOps engineers and cloud-native developers at mid to large enterprises.
+**4. Key Capabilities Mentioned:** 
+   - Automated CI/CD pipelines
+   - Multi-cloud deployment
+   - Real-time monitoring
+   - Cost optimization tools
+**5. Content Effectiveness:** Moderately effective - clearly explains technical benefits but lacks compelling business ROI metrics.
+**6. Final Recommendation:** Worth monitoring - growing market segment with strong technical differentiation.
+```
 
-### When to Use Different Roles
+#### **Product Owner** (`--role po`)
+Creates product opportunity briefs including:
+- Product vision and elevator pitch
+- Core user problems and solutions
+- Essential product capabilities (epics)
+- Strategic analysis and risk assessment
+- Market differentiation insights
 
-- Use the **Marketing Manager** role when:
+**Example Output:**
+```
+**Product Opportunity Brief: AI-Powered Code Review Assistant**
 
-  - Analyzing marketing content like blog posts
-  - Evaluating competitors' marketing materials
-  - Looking for content improvement opportunities
-  - Assessing product positioning and messaging
+### 1. The Elevator Pitch (Product Vision)
+* **What is it?** An intelligent code review tool that automatically identifies bugs, security vulnerabilities, and performance issues.
+* **For Whom?** For enterprise software development teams...
+* **What is the Key Value?** ...who need to improve code quality while reducing manual review time.
 
-- Use the **Product Owner** role when:
-  - Reviewing product documentation
-  - Analyzing requirements documents
-  - Prioritizing development efforts
-  - Assessing product-market fit
+### 2. The Core Loop (Problem & Solution)
+* **User Problem:** Manual code reviews are time-consuming and inconsistent, leading to bugs reaching production.
+* **Proposed Solution:** AI agent analyzes pull requests in real-time, providing contextual feedback and suggested fixes.
 
-To specify a role, pass `--role` to `analyze-url`:
+### 3. Core Epics & Capabilities
+* Epic: Real-time Code Analysis Engine
+* Epic: Security Vulnerability Detection
+* Epic: Performance Optimization Recommendations
+* Epic: Team Collaboration Dashboard
+
+### 4. Strategic Analysis
+* **Evidence of Priority:** Real-time analysis appears central based on repeated emphasis and technical detail.
+* **Market Differentiation:** Claims 90% faster review cycles compared to existing tools.
+* **Key Risks & Unanswered Questions:** No mention of training data sources, accuracy metrics unclear, integration complexity not addressed.
+```
+
+### Usage Examples
 
 ```bash
+# Marketing analysis
+node dist/main.js analyze-url "https://competitor-blog.com" --role marketing --save
+
+# Product analysis with vision support
+node dist/main.js analyze-url "https://product-demo.com" --role po \
+  --vision-base-url http://localhost:11434 \
+  --vision-model qwen2.5vl:7b \
+  --vision-provider ollama \
+  --save --output product-analysis
+
+# Quick competitive intelligence
 node dist/main.js analyze-url "https://example.com" --role marketing
-# or
-node dist/main.js analyze-url "https://example.com" --role po
 ```
 
-## TypeScript usage (npm scripts)
+## Development Usage
 
-You can use npm scripts with the `--` separator to pass CLI args:
+You can use npm scripts for development:
 
 ```bash
-# Scrape
-npm run scrape -- https://example.com --save --output results
+# Development mode
+npm run dev scrape https://example.com
+npm run dev analyze-url https://example.com --role marketing
 
-# Analyze a URL with marketing role
-npm run analyze:url -- https://example.com --role marketing --debug --save --output results
+# Production build and run
+npm run build
+node dist/main.js analyze-url https://example.com --role po --save
 ```
 
-##
+## Model Configuration
 
-### Convenience
+### Ollama Modelfiles
 
-- Run directly:
+For optimal results, you can create custom Ollama models with specific parameters. Create a `Modelfile`:
 
-  - `node picture-ts/dist/main.js scrape <url> [--save] [--output <dir>] [--debug]`
-  - `node picture-ts/dist/main.js analyze-url <url> [--role marketing|po] [--text-model <name>] [--save] [--output <dir>] [--debug]`
+```dockerfile
+# Start from base model
+FROM Mistral-7B-Instruct-v0.2-Q4_K_M:latest
 
-- Or via npm scripts (note the `--` separator):
-  - `npm run scrape -- <url> [--save] [--output <dir>] [--debug]`
-  - `npm run analyze:url -- <url> [--role marketing|po] [--text-model <name>] [--save] [--output <dir>] [--debug]`
+# Reduce creativity for more deterministic output
+# This helps reduce hallucination and looping
+PARAMETER temperature 0.4
 
-For Modelfiles its
-
-# Start from the base OCR model
-
-```
-FROM modelname
-
-# Force the model to be deterministic and not creative.
-
-# This is the single most effective way to reduce looping and hallucination.
-
-PARAMETER temperature 0.4 #find the goldilocks zone
+# Optional: Set system prompt
+SYSTEM "You are a helpful AI assistant focused on accurate analysis."
 ```
 
-Then run
+Create and run the custom model:
 
 ```bash
-ollama create modelName -f Modelfile
-```
+# Create the model
+ollama create my-analysis-model -f Modelfile
 
-Then
+# Run the model
+ollama run my-analysis-model:latest
 
-```bash
-ollama run modelName:latest
+# Use in the CLI
+node dist/main.js analyze-url "https://example.com" --text-model my-analysis-model:latest
 ```
 
 # TODO - AI generated from the tasks but still true - dowloaded the whole model and used llama cpp to guff it then quantiazed it to q4_K_M method
@@ -367,17 +419,16 @@ ollama run modelName:latest
   - models will halucinate thats the one true truth
 - [x] Auto detect large image | What constitutes a large image - this makes it flaky (maybe?)
 - [x] Add MODELFILES for easier configuration of the prompts
-- [ ] Try Dense models, not MoE like qwen with diff MODE files
-  - [ ] Try different models with different prompts lower temperature needs strictrer prompts (investigate) further
+- [X] Try Dense models, not MoE like qwen with diff MODE files
+  - [X] Try different models with different prompts lower temperature needs strictrer prompts (investigate) further
 - [x] simplify build process, node & ts -.-, maybe try new node
-- [ ] Cleanup readme.md
-- [ ] Remove python code once quality of results is better
+- [X] Cleanup readme.md
+- [X] Remove python code once quality of results is better
 - [x] Chunking is a bit clunky, better results got with Python version
   - improved with the vision library
-- [ ] Web scraping would eliminate OCR — but I like OCR; implement web scraping for better performance, no need for LLM then
+- [X] Web scraping would eliminate OCR — but I like OCR; implement web scraping for better performance, no need for LLM then
 - [ ] TESTS
 
-OPEN CV IS REMOVED FOR LOCAL DEPLOYMENT> DO NOT MERGE INTO MAIN WITHOUT BACKUP
 
 ## Frontend API Blueprint (UI -> `api/`)
 
